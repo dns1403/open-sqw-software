@@ -13,9 +13,10 @@ from sqw.core import (
 from .errors import RequestProblem, client_error, validation_issue
 from .schemas import (
     Frame, GraphRequest, GraphResponse, ScatteringRequest,
-    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest, StationaryRequest,
+    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest, StationaryRequest, StatisticsRequest,
 )
 from .stationary_cache import stationary_model
+from .statistics_cache import statistics_model
 
 app = FastAPI(title="Scattering Quantum Walk Lab", version="0.1.0")
 
@@ -395,3 +396,43 @@ def stationary(request: StationaryRequest):
         return json_arrays(result)
     except (ValueError, TypeError, KeyError) as error:
         return client_error(error)
+
+
+@app.post('/api/statistics')
+def statistics(request: StatisticsRequest):
+    try:
+        edge, walk, initial = experiment(request)
+        vertex = request.mode == 'vertex'
+        d = walk.dimension if vertex else edge.graph.dimension
+        if d * (request.samples + request.burn_in) > 5_000_000:
+            raise RequestProblem('statistics_budget', 'Requested trajectory exceeds the local statistics work budget.')
+        if request.observable.kind in ('quantum','coherence_real','coherence_imag') and d > 64:
+            raise RequestProblem('statistics_observable_budget', 'Dense Hermitian observable inspection is limited to dimension 64.')
+        engine = statistics_model(edge, walk if vertex else None, support_atol=request.support_atol)
+        chain = engine.stationary.chain
+        if request.stationary_class >= len(chain.closed_classes):
+            raise RequestProblem('stationary_class', 'Selected recurrent class does not exist.')
+        spec = request.observable.model_dump()
+        if spec['matrix'] is not None: spec['matrix'] = decode_complex(spec['matrix'])
+        try:
+            f = engine.observable(**spec)
+        except (ValueError, TypeError, IndexError) as error:
+            raise RequestProblem('statistics_observable', str(error)) from error
+        result = engine.analyze(initial, f)
+        path = engine.sample(initial, f, request.samples, seed=request.trajectory_seed,
+            burn_in=request.burn_in, start=request.initialization, class_index=request.stationary_class,
+            confidence=request.confidence, max_points=1001)
+        return json_arrays({
+            'model': 'vertex' if vertex else 'edge', 'orientation': engine.stationary.orientation,
+            'start_step': engine.stationary.start_step, 'irreducible': chain.irreducible,
+            'atom_labels': list(edge.graph.vertices) if vertex else list(edge.graph.directed_edges),
+            'observable': {'kind': request.observable.kind, 'values': f},
+            'analysis': result, 'uncertainty': [c.poisson.uncertainty(request.samples, confidence=request.confidence) for c in result.classes],
+            'trajectory': path,
+            'support': {'source': engine.stationary.support_source, 'policy': chain.support_policy,
+                'tolerance': chain.support_atol, 'discarded_entries': chain.discarded_entries,
+                'discarded_max_row_mass': chain.discarded_max_row_mass,
+                'matrix_change_max_row_l1': chain.matrix_change_max_row_l1},
+        })
+    except (ValueError, TypeError, KeyError) as error:
+        return client_error(error if isinstance(error, RequestProblem) else RequestProblem('statistics_analysis', str(error)))

@@ -19,6 +19,7 @@ from .markov_analysis import MarkovAnalysis
 from .stationary import StationaryAnalysis
 from .markov_statistics import PoissonSolver, PoissonSolution
 from .classwise_statistics import ClasswiseStatistics
+from .trajectory_statistics import TrajectoryStatistics
 
 __all__ = [
     "ATOL", "GraphModel", "ScatteringWalk", "scattering_matrix", "validate_scattering",
@@ -32,4 +33,5 @@ __all__ = [
     "MarkovAnalysis", "StationaryAnalysis",
     "PoissonSolver", "PoissonSolution",
     "ClasswiseStatistics",
+    "TrajectoryStatistics",
 ]

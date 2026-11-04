@@ -7,6 +7,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from numbers import Integral
 from statistics import NormalDist
+from threading import RLock
 
 import numpy as np
 from scipy.sparse import bmat, csr_matrix, diags
@@ -129,8 +130,15 @@ class PoissonSolver:
         self._unstable = self._pivot < 1e-12 or (self._condition is not None and self._condition > 1e12)
         if self._condition is not None and not np.isfinite(self._condition): self._condition = None
         self._cache = OrderedDict()
+        self._lock = RLock()
 
     def solve(self, observable):
+        # Cached API instances can be shared by concurrent requests. Keep
+        # both SuperLU solves and LRU mutations inside the same lock.
+        with self._lock:
+            return self._solve(observable)
+
+    def _solve(self, observable):
         f = real_observable(observable, self.chain.dimension)
         key = f.tobytes()
         if key in self._cache:

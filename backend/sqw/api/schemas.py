@@ -109,3 +109,25 @@ class StationaryRequest(SimulationRequest):
     support_atol: FiniteFloat = Field(default=1e-14, ge=0, le=1e-6)
     include_density: bool = Field(default=False, strict=True)
     stationary_class: int | None = Field(default=None, ge=0, strict=True)
+
+
+class ObservableSpec(StrictModel):
+    kind: Literal['label_indicator', 'outcome_indicator', 'vertex_probability',
+                  'coherence_real', 'coherence_imag', 'quantum', 'label_values'] = 'label_indicator'
+    index: int = Field(default=0, ge=0, strict=True)
+    second: int = Field(default=1, ge=0, strict=True)
+    vertex: VertexLabel | None = None
+    matrix: ComplexMatrix | None = None
+    values: list[FiniteFloat] | None = None
+
+
+class StatisticsRequest(SimulationRequest):
+    mode: Literal['open', 'trajectory', 'vertex'] = 'trajectory'
+    observable: ObservableSpec = Field(default_factory=ObservableSpec)
+    samples: int = Field(default=2000, ge=1, le=100_000, strict=True)
+    burn_in: int = Field(default=0, ge=0, le=10_000, strict=True)
+    trajectory_seed: int = Field(default=42, ge=0, le=2**32-1, strict=True)
+    initialization: Literal['experiment', 'stationary_class'] = 'experiment'
+    stationary_class: int = Field(default=0, ge=0, strict=True)
+    confidence: FiniteFloat = Field(default=.95, gt=0, lt=1)
+    support_atol: FiniteFloat = Field(default=1e-14, ge=0, le=1e-6)

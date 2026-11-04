@@ -20,8 +20,12 @@ def _structural_model(vertices, edges, coins, omega, support_atol):
     return StationaryAnalysis(walk, support_atol=support_atol)
 
 
-def stationary_model(edge, vertex=None, *, support_atol=1e-14):
+def structural_stationary_model(edge, vertex=None, *, support_atol=1e-14):
     coins = tuple(np.asarray(edge.scattering[x], dtype=np.complex128).tobytes() for x in edge.graph.vertices)
     omega = None if vertex is None else tuple(np.asarray(vertex.omega[x], dtype=np.complex128).tobytes() for x in edge.graph.vertices)
-    base = _structural_model(edge.graph.vertices, edge.graph.edges, coins, omega, support_atol)
+    return _structural_model(edge.graph.vertices, edge.graph.edges, coins, omega, support_atol)
+
+
+def stationary_model(edge, vertex=None, *, support_atol=1e-14):
+    base = structural_stationary_model(edge, vertex, support_atol=support_atol)
     return base if vertex is None else base.with_beta(vertex.beta)
