@@ -17,6 +17,7 @@ from .vertex_markov import VertexReduction, OptimizedVertexTrajectory, vertex_el
 from .ensembles import run_ensemble, EnsembleResult, EnsembleFrame
 from .markov_analysis import MarkovAnalysis
 from .stationary import StationaryAnalysis
+from .markov_statistics import PoissonSolver, PoissonSolution
 
 __all__ = [
     "ATOL", "GraphModel", "ScatteringWalk", "scattering_matrix", "validate_scattering",
@@ -28,4 +29,5 @@ __all__ = [
     "VertexReduction", "OptimizedVertexTrajectory", "ReferenceVertexTrajectory", "vertex_eligibility",
     "run_ensemble", "EnsembleResult", "EnsembleFrame",
     "MarkovAnalysis", "StationaryAnalysis",
+    "PoissonSolver", "PoissonSolution",
 ]

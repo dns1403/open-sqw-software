@@ -25,6 +25,9 @@
 - Add meaningful mathematical regression tests when changing the core. Update theory/architecture docs when semantics change.
 - New mathematical results belong in `docs/mathematical_results.md`, with hypotheses, provenance, proof status, and validation requirements.
 - Keep the application local by default. No database, authentication, or cloud dependency is needed.
+- Inspect branch, status, history and Git configuration at the start of each implementation phase. Preserve unrelated changes and existing history; follow the existing branch workflow.
+- Commit each logically complete milestone locally after inspecting its diff and running relevant tests. Stage only task-related files; exclude environments, caches, temporary files and large generated benchmark artifacts. Report commit hashes and messages.
+- Never force-push, hard-reset or rewrite history. Do not push to any remote without explicit user authorization. If pre-existing changes obstruct an atomic commit, preserve them and explain the conflict.
 
 ## Internationalization
 - English is the default and fallback. Only an explicit stored language choice overrides it; do not infer the language from browser settings.
