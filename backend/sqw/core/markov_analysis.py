@@ -253,15 +253,18 @@ class MarkovAnalysis:
         q = self._initial(initial)
         weights = checked_probabilities(np.asarray(q @ self._absorption).ravel(), atol=1e-9)
         stationary = checked_probabilities(np.asarray(weights @ self._stationary_basis).ravel())
-        # Reachability, not a probability cutoff, determines which periodic
-        # classes matter for an arbitrary initial law on this support graph.
+        periods = tuple(c.period for c in self.reachable_closed_classes(q))
+        return InitialAsymptotics(weights, stationary, all(p == 1 for p in periods), periods)
+
+    def reachable_closed_classes(self, initial):
+        """Graph reachability, without thresholding small absorption weights."""
+        q = self._initial(initial)
         reached = set(int(x) for x in np.flatnonzero(q > 0)); todo = list(reached)
         while todo:
             x = todo.pop()
             for y in self._support.indices[self._support.indptr[x]:self._support.indptr[x+1]]:
                 if int(y) not in reached: reached.add(int(y)); todo.append(int(y))
-        periods = tuple(c.period for c in self.closed_classes if c.states[0] in reached)
-        return InitialAsymptotics(weights, stationary, all(p == 1 for p in periods), periods)
+        return tuple(c for c in self.closed_classes if c.states[0] in reached)
 
     def evolve(self, initial, steps, *, start_step=0, use_analysis_matrix=False):
         """Include q_start and average q_start,...,q_n; raw curves by default.

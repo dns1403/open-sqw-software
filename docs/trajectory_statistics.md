@@ -37,3 +37,20 @@ nonfinite results or failed residual checks are rejected. This is a numerical
 diagnostic, not a forward-error certificate. Statistics belong to the analysis
 support matrix; dropping a genuine rare transition can invalidate their use
 for the original physical walk.
+
+## Reducible chains and transient mass
+
+`ClasswiseStatistics` reuses the stationary SCCs and absorption functions.
+Each closed block gets a Poisson solver, its stationary law and period; all
+classwise solutions are retained, including unreachable classes for inspection.
+For input q_start, weights are a_j=q_start@h_j, including all transient mass.
+Combinatorial reachability, not rounded weights, decides which classes matter.
+
+A single path selects a class J, with empirical limit mu_J and conditional
+CLT variance sigma_J². The deterministic sum a_j mu_j is the expectation of
+that random limit. Its between-class variance sum a_j(mu_j-E mu_J)² persists
+as N grows and must not be divided by N. Only a single reachable class enables
+the global scalar CLT fields. Multiple classes always report conditional laws,
+even if their means happen to coincide: unequal variances can still give a
+non-Gaussian mixture. No approximate numerical equality merges these laws.
+Finite transient contributions are distinct from within-class CLT noise.

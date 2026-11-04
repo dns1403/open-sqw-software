@@ -18,6 +18,7 @@ from .ensembles import run_ensemble, EnsembleResult, EnsembleFrame
 from .markov_analysis import MarkovAnalysis
 from .stationary import StationaryAnalysis
 from .markov_statistics import PoissonSolver, PoissonSolution
+from .classwise_statistics import ClasswiseStatistics
 
 __all__ = [
     "ATOL", "GraphModel", "ScatteringWalk", "scattering_matrix", "validate_scattering",
@@ -30,4 +31,5 @@ __all__ = [
     "run_ensemble", "EnsembleResult", "EnsembleFrame",
     "MarkovAnalysis", "StationaryAnalysis",
     "PoissonSolver", "PoissonSolution",
+    "ClasswiseStatistics",
 ]
