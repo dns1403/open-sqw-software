@@ -10,6 +10,8 @@ import enResearch from './locales/en/research.json';
 import deResearch from './locales/de/research.json';
 import enStationary from './locales/en/stationary.json';
 import deStationary from './locales/de/stationary.json';
+import enStatistics from './locales/en/statistics.json';
+import deStatistics from './locales/de/statistics.json';
 
 export const LANGUAGE_STORAGE_KEY = 'sqw.language';
 export const supportedLanguages = [
@@ -18,8 +20,8 @@ export const supportedLanguages = [
 ] as const;
 export type SupportedLanguage = typeof supportedLanguages[number]['code'];
 export const resources = {
-  en: { app: enApp, components: enComponents, errors: enErrors, research: enResearch, stationary: enStationary },
-  de: { app: deApp, components: deComponents, errors: deErrors, research: deResearch, stationary: deStationary },
+  en: { app: enApp, components: enComponents, errors: enErrors, research: enResearch, stationary: enStationary, statistics: enStatistics },
+  de: { app: deApp, components: deComponents, errors: deErrors, research: deResearch, stationary: deStationary, statistics: deStatistics },
 };
 
 /** Language selection is explicit: browser/system preferences are never used. */
@@ -46,7 +48,7 @@ void i18n.use(initReactI18next).init({
   lng: getInitialLanguage(),
   fallbackLng: 'en',
   supportedLngs: supportedLanguages.map(({ code }) => code),
-  ns: ['app', 'components', 'errors', 'research', 'stationary'],
+  ns: ['app', 'components', 'errors', 'research', 'stationary', 'statistics'],
   defaultNS: 'app',
   initAsync: false,
   interpolation: { escapeValue: false },

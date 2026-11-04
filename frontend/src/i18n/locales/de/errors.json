@@ -54,7 +54,8 @@
     "analysis_steps": "Markov-Übergänge",
     "support_atol": "Trägerschwelle",
     "include_density": "Dichterekonstruktion",
-    "stationary_class": "Rekurrente Klasse"
+    "stationary_class": "Rekurrente Klasse",
+    "observable": "Observable", "index": "Basisindex", "second": "Zweiter Basisindex", "matrix": "Observablenmatrix", "values": "Observablenwerte", "samples": "Beobachtungszahl", "burn_in": "Aufwärmbeobachtungen", "trajectory_seed": "Trajektorien-Seed", "initialization": "Trajektorieninitialisierung", "confidence": "Konfidenzniveau"
   },
   "initial_state": "Der Anfangszustand benötigt die richtige Dimension, endliche Einträge und Normierung auf eins. Dichtematrizen müssen hermitesch und positiv semidefinit sein.",
   "vertex_parameters": "Normierte Randvektoren in der gespeicherten Nachbarreihenfolge und für jeden Knoten eine endliche reelle Phase angeben.",
@@ -64,5 +65,9 @@
   "analysis_budget": "Die dichte Zustands- und Übergangsanalyse unterstützt Dimensionen bis 64. Einen kleineren Graphen oder die Python-API verwenden.",
   "stationary_budget": "Diese Analyse überschreitet 250000 Zustands-Zeit-Einträge. Verkleinern Sie den Graphen oder reduzieren Sie die Anzahl der Markov-Übergänge.",
   "stationary_class": "Wählen Sie eine rekurrente Klasse der aktuellen Analyse.",
-  "stationary_tolerance": "Geben Sie eine endliche Trägerschwelle zwischen 0 und 1e-6 ein."
+  "stationary_tolerance": "Geben Sie eine endliche Trägerschwelle zwischen 0 und 1e-6 ein.",
+  "statistics_budget": "Diese Trajektorie überschreitet das Statistik-Rechenbudget. Reduzieren Sie Graphgröße, Beobachtungen oder Aufwärmphase.",
+  "statistics_observable_budget": "Dichte hermitesche Observablen unterstützen höchstens Dimension 64. Wählen Sie eine Label- oder Knotenobservable oder einen kleineren Graphen.",
+  "statistics_observable": "Prüfen Sie die Observable: gültige Labels, verschiedene Kohärenzindizes, endliche reelle Werte oder eine endliche hermitesche Matrix passender Dimension sind erforderlich.",
+  "statistics_analysis": "Die statistische Analyse hat die numerische Validierung nicht bestanden. Prüfen Sie Observablenskalierung und Support-Diagnostik; die Python-API liefert detaillierte numerische Diagnosen."
 }

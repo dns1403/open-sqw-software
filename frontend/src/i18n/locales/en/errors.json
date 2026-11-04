@@ -54,7 +54,8 @@
     "analysis_steps": "Reduced transitions",
     "support_atol": "Support cutoff",
     "include_density": "Density reconstruction",
-    "stationary_class": "Recurrent class"
+    "stationary_class": "Recurrent class",
+    "observable": "Observable", "index": "Basis index", "second": "Second basis index", "matrix": "Observable matrix", "values": "Observable values", "samples": "Observation count", "burn_in": "Warm-up count", "trajectory_seed": "Trajectory seed", "initialization": "Trajectory initialization", "confidence": "Confidence level"
   },
   "initial_state": "The initial state must have the correct dimension, finite entries and unit normalization. Density matrices must be Hermitian and positive semidefinite.",
   "vertex_parameters": "Provide normalized boundary vectors in the stored neighbor order and a finite real phase for every vertex.",
@@ -64,5 +65,9 @@
   "analysis_budget": "Dense state and transition inspection supports dimensions up to 64. Use a smaller graph or the Python API.",
   "stationary_budget": "This analysis exceeds 250000 state-time entries. Reduce the graph size or number of reduced transitions.",
   "stationary_class": "Select a recurrent class from the current analysis.",
-  "stationary_tolerance": "Enter a finite support cutoff between 0 and 1e-6."
+  "stationary_tolerance": "Enter a finite support cutoff between 0 and 1e-6.",
+  "statistics_budget": "This trajectory exceeds the statistics work budget. Reduce graph size, observations or warm-up.",
+  "statistics_observable_budget": "Dense Hermitian observables support dimensions up to 64. Select a label or vertex observable, or use a smaller graph.",
+  "statistics_observable": "Check the observable: valid labels, distinct coherence indices, finite real values, or a finite Hermitian matrix of the correct dimension are required.",
+  "statistics_analysis": "Statistical analysis failed numerical validation. Check the observable scale and support diagnostics; inspect the Python API for detailed numerical diagnostics."
 }

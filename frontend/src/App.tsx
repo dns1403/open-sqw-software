@@ -8,6 +8,7 @@ import MatrixEditor, { presets } from './MatrixEditor';
 import ProbabilityPlot from './ProbabilityPlot';
 import ResearchPanels, { VertexControls } from './ResearchPanels';
 import StationaryPanel from './StationaryPanel';
+import StatisticsPanel from './StatisticsPanel';
 import type { Frame, GraphData, GraphKind, Matrix, Mode, Preset, Simulation, SimulationRequest, Strategy, VertexParameters } from './types';
 
 const graphKinds: GraphKind[] = ['path', 'cycle', 'complete', 'star'];
@@ -206,7 +207,7 @@ export default function App() {
       {mode === 'vertex' && graph && <VertexControls key={`${kind}/${size}`} graph={graph} parameters={vertexParameters} busy={locked} onApply={(params) => { setVertexParameters(params); reset(); }} />}
       {(mode === 'trajectory' || mode === 'vertex' || mode === 'open') && graph && frame && <ResearchPanels
         graph={graph} experiment={payload(steps)} cursor={cursor} frame={frame} />}
-      {mode !== 'unitary' && graph && <StationaryPanel experiment={payload(steps)} />}
+      {mode !== 'unitary' && graph && <><nav className="research-navigation" aria-label={t('statistics:navigation')}><a href="#trajectory-statistics">{t('statistics:title')} ↓</a></nav><StationaryPanel experiment={payload(steps)} /><StatisticsPanel experiment={payload(steps)} graph={graph} /></>}
       <footer className="workspace-footer"><span>|xy⟩ ≡ y → x <span>·</span> {t('footer.graphClass')}</span><span>{t('footer.distinction')}</span></footer>
     </main>
   </div>;
