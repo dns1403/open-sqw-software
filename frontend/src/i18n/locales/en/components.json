@@ -1,0 +1,40 @@
+{
+  "presets": {
+    "dft": "Fourier (DFT)",
+    "grover": "Grover",
+    "identity": "Identity",
+    "hadamard": "Hadamard · d = 2",
+    "random": "Random unitary"
+  },
+  "graph": {
+    "accessibleDescription": "Interactive graph. Select a vertex by clicking it or using the vertex selector.",
+    "center": "Center",
+    "centerTooltip": "Center graph",
+    "interactionHelp": "Drag to arrange · Scroll to zoom"
+  },
+  "matrix": {
+    "presetLabel": "Preset for selected vertex",
+    "presetPlaceholder": "Preset for this vertex …",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "complexEntries": "Complex entries as [real part, imaginary part]",
+    "apply": "Validate & apply matrix",
+    "accessibleDescription": "Scattering matrix at vertex {{vertex}}",
+    "neighbors": "Neighbors: [{{neighbors}}]",
+    "orderingHelp": "Rows: outgoing neighbor z. Columns: incoming neighbor y. Display values are rounded; calculations use full precision.",
+    "errors": {
+      "json": "Enter valid JSON using [real part, imaginary part] pairs. Numeric entries use a decimal point in both languages.",
+      "shape": "Expected {{degree}} × {{degree}} entries, each a finite [real part, imaginary part] pair.",
+      "apply": "The matrix could not be applied. Check the entries and try again."
+    }
+  },
+  "plot": {
+    "timeAxisCaption": "Horizontal axis: time step t",
+    "timeStep": "Time step t",
+    "probability": "Probability P",
+    "zoomTip": "Double-click to zoom back out",
+    "legendTip": "Double-click on legend to isolate one trace",
+    "distributionAccessibleDescription": "Probability distribution",
+    "historyAccessibleDescription": "Vertex probabilities over time"
+  }
+}

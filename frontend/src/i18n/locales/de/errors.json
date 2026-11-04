@@ -1,0 +1,35 @@
+{
+  "unexpected": "Ein unerwarteter Fehler ist aufgetreten. Bitte erneut versuchen.",
+  "network": "Das Backend ist nicht erreichbar. FastAPI auf Port 8000 starten und erneut versuchen.",
+  "invalid_response": "Der Server hat eine ungültige Antwort geliefert. Bitte erneut versuchen.",
+  "request_failed": "Die Anfrage ist fehlgeschlagen (HTTP {{status}}). Bitte erneut versuchen.",
+  "invalid_experiment": "Das Experiment ist ungültig. Graph, Scatteringmatrizen und Anfangszustand prüfen.",
+  "cycle_size": "Ein einfacher Kreis benötigt mindestens 3 Knoten.",
+  "edge_limit": "Die interaktive API unterstützt höchstens {{limit}} gerichtete Kanten. Die Knotenzahl reduzieren oder den Python-Kern verwenden.",
+  "matrix_vertices": "Für jeden Knoten genau eine Scatteringmatrix angeben und die Knotenbezeichnungen als Schlüssel verwenden.",
+  "matrix_shape": "Die Matrix am Knoten {{vertex}} muss rechteckige Zeilen aus Paaren [Realteil, Imaginärteil] enthalten.",
+  "matrix_dimension": "Die Scatteringmatrix am Knoten {{vertex}} muss die Dimension {{degree}} × {{degree}} haben.",
+  "matrix_not_unitary": "Die Scatteringmatrix am Knoten {{vertex}} muss unitär sein: S†S = I innerhalb einer Toleranz von 1e-10.",
+  "hadamard_degree": "Hadamard-Scattering erfordert Grad 2; der gewählte Knoten hat Grad {{degree}}.",
+  "density_budget": "Diese dichte Referenzsimulation ist zu groß für die interaktive API. Die Knotenzahl oder Schrittzahl reduzieren oder den Python-Kern verwenden.",
+  "invalid_edge": "Die gerichtete Kante |{{target}},{{source}}⟩ ({{source}} → {{target}}) gehört nicht zu diesem Graphen.",
+  "validation": {
+    "issue": "{{field}}: {{reason}}",
+    "integer": "Eine ganze Zahl eingeben; Dezimalzahlen, Zeichenketten und boolesche Werte sind nicht zulässig.",
+    "finite_number": "Eine endliche Zahl eingeben.",
+    "minimum": "Der Wert muss mindestens {{minimum}} betragen.",
+    "maximum": "Der Wert darf höchstens {{maximum}} betragen.",
+    "required": "Dieser Wert ist erforderlich.",
+    "unexpected_field": "Dieses Feld wird nicht unterstützt.",
+    "unsupported_value": "Einen der unterstützten Werte auswählen.",
+    "invalid_json": "Die Anfrage muss gültiges JSON enthalten.",
+    "invalid_structure": "Die Daten haben eine ungültige Struktur oder Anzahl von Einträgen.",
+    "invalid": "Der Wert ist ungültig."
+  },
+  "fields": {
+    "request": "Anfrage", "graph": "Graph", "kind": "Typ", "size": "Knotenzahl",
+    "preset": "Scattering-Voreinstellung", "seed": "Zufallsseed", "degree": "Grad",
+    "scattering": "Scatteringmatrizen", "mode": "Walk-Modus", "initial": "Anfangszustand",
+    "edge": "Gerichtete Kante", "steps": "Schrittzahl"
+  }
+}

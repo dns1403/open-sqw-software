@@ -1,0 +1,35 @@
+{
+  "unexpected": "An unexpected error occurred. Please try again.",
+  "network": "The backend is unavailable. Start FastAPI on port 8000 and try again.",
+  "invalid_response": "The server returned an invalid response. Please try again.",
+  "request_failed": "The request failed (HTTP {{status}}). Please try again.",
+  "invalid_experiment": "The experiment is invalid. Check the graph, scattering matrices and initial state.",
+  "cycle_size": "A simple cycle requires at least 3 vertices.",
+  "edge_limit": "The interactive API supports at most {{limit}} directed edges. Reduce the graph size or use the Python core.",
+  "matrix_vertices": "Provide exactly one scattering matrix for every vertex, using the vertex labels as keys.",
+  "matrix_shape": "The matrix at vertex {{vertex}} must contain rectangular rows of [real, imaginary] pairs.",
+  "matrix_dimension": "The scattering matrix at vertex {{vertex}} must have dimensions {{degree}} × {{degree}}.",
+  "matrix_not_unitary": "The scattering matrix at vertex {{vertex}} must be unitary: S†S = I within a tolerance of 1e-10.",
+  "hadamard_degree": "Hadamard scattering requires degree 2; the selected vertex has degree {{degree}}.",
+  "density_budget": "This dense reference simulation is too large for the interactive API. Reduce the graph size or number of steps, or use the Python core.",
+  "invalid_edge": "The directed edge |{{target}},{{source}}⟩ ({{source}} → {{target}}) does not belong to this graph.",
+  "validation": {
+    "issue": "{{field}}: {{reason}}",
+    "integer": "Enter an integer; decimal numbers, strings and booleans are not accepted.",
+    "finite_number": "Enter a finite number.",
+    "minimum": "The value must be at least {{minimum}}.",
+    "maximum": "The value must be at most {{maximum}}.",
+    "required": "This value is required.",
+    "unexpected_field": "This field is not supported.",
+    "unsupported_value": "Select one of the supported values.",
+    "invalid_json": "The request must contain valid JSON.",
+    "invalid_structure": "The data has an invalid structure or number of entries.",
+    "invalid": "The value is invalid."
+  },
+  "fields": {
+    "request": "Request", "graph": "Graph", "kind": "Type", "size": "Number of vertices",
+    "preset": "Scattering preset", "seed": "Random seed", "degree": "Degree",
+    "scattering": "Scattering matrices", "mode": "Walk mode", "initial": "Initial state",
+    "edge": "Directed edge", "steps": "Number of steps"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "presets": {
+    "dft": "Fourier (DFT)",
+    "grover": "Grover",
+    "identity": "Identität",
+    "hadamard": "Hadamard · d = 2",
+    "random": "Zufällig unitär"
+  },
+  "graph": {
+    "accessibleDescription": "Interaktiver Graph. Knoten anklicken oder über die Knotenauswahl wählen.",
+    "center": "Zentrieren",
+    "centerTooltip": "Graph zentrieren",
+    "interactionHelp": "Ziehen zum Anordnen · Scrollen zum Zoomen"
+  },
+  "matrix": {
+    "presetLabel": "Preset für gewählten Knoten",
+    "presetPlaceholder": "Preset für diesen Knoten …",
+    "edit": "Bearbeiten",
+    "cancel": "Abbrechen",
+    "complexEntries": "Komplexe Einträge als [Realteil, Imaginärteil]",
+    "apply": "Matrix prüfen & übernehmen",
+    "accessibleDescription": "Scatteringmatrix am Knoten {{vertex}}",
+    "neighbors": "Nachbarn: [{{neighbors}}]",
+    "orderingHelp": "Zeilen: ausgehender Nachbar z. Spalten: eingehender Nachbar y. Anzeigen gerundet; Berechnung mit voller Präzision.",
+    "errors": {
+      "json": "Gültiges JSON mit Paaren [Realteil, Imaginärteil] eingeben. Zahlen verwenden in beiden Sprachen einen Dezimalpunkt.",
+      "shape": "Erwartet: {{degree}} × {{degree}} Einträge, jeweils ein endliches Paar [Realteil, Imaginärteil].",
+      "apply": "Die Matrix konnte nicht übernommen werden. Einträge prüfen und erneut versuchen."
+    }
+  },
+  "plot": {
+    "timeAxisCaption": "Horizontale Achse: Zeitschritt t",
+    "timeStep": "Zeitschritt t",
+    "probability": "Wahrscheinlichkeit P",
+    "zoomTip": "Doppelklicken, um wieder herauszuzoomen",
+    "legendTip": "In der Legende doppelklicken, um eine einzelne Kurve anzuzeigen",
+    "distributionAccessibleDescription": "Wahrscheinlichkeitsverteilung",
+    "historyAccessibleDescription": "Zeitliche Entwicklung der Knotenwahrscheinlichkeiten"
+  }
+}
