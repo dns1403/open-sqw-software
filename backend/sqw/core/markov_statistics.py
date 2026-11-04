@@ -145,14 +145,15 @@ class PoissonSolver:
             self._cache.move_to_end(key)
             return self._cache[key]
         pi, t = self._pi, self._t
-        # Shift first: retain small variations around a large constant offset.
-        offset = f-f[0]
-        shifted_mean = float(pi @ offset)
-        mu = float(f[0]+shifted_mean)
-        g = offset-shifted_mean
-        g -= pi @ g  # centering roundoff, never changing the input observable
-        with np.errstate(over='raise', invalid='raise', divide='raise'):
+        with np.errstate(over='raise', under='ignore', invalid='raise', divide='raise'):
             try:
+                # Shift first: retain small variations around a large constant
+                # offset. Unrepresentable scales must not look like sigma²=0.
+                offset = f-f[0]
+                shifted_mean = float(pi @ offset)
+                mu = float(f[0]+shifted_mean)
+                g = offset-shifted_mean
+                g -= pi @ g  # centering roundoff, never changing input f
                 h = self._lu.solve(np.r_[g/self._scale, 0.])[:-1]
                 h -= pi @ h
                 defect = self._laplacian @ h-g
@@ -170,15 +171,20 @@ class PoissonSolver:
                     probabilities = t.data[start:end]
                     values = h[t.indices[start:end]]
                     shifts = values-values[np.argmax(probabilities)]
-                    conditional[i] = probabilities @ (shifts-probabilities @ shifts)**2
+                    with np.errstate(under='raise'):
+                        conditional[i] = probabilities @ (shifts-probabilities @ shifts)**2
                 variance = float(pi @ conditional)
-                iid = float(pi @ g**2)
+                with np.errstate(under='raise'):
+                    iid = float(pi @ g**2)
+                # BLAS dot products may not propagate NumPy's underflow flag.
+                if (variance == 0 and np.any(conditional > 0)) or (iid == 0 and np.any(g != 0)):
+                    raise FloatingPointError('Variance underflow')
                 identity = float(pi @ (g*(2*h-g)))
                 identity_error = abs(identity-variance) / max(variance, iid, float(pi @ abs(2*g*h)), np.finfo(float).tiny)
                 if not np.isfinite(variance) or variance < 0 or identity_error > 1e-8:
                     raise ValueError('Asymptotic variance failed its numerical identity check.')
             except FloatingPointError as error:
-                raise ValueError('Poisson calculation overflowed; rescale the observable or inspect conditioning.') from error
+                raise ValueError('Poisson calculation exceeded floating-point range; rescale the observable or inspect conditioning.') from error
         result = PoissonSolution(tuple(f), tuple(pi), mu, tuple(g), tuple(h), self.chain.closed_classes[0].period,
             iid, variance, float(np.sqrt(variance)), variance == 0., residual, relative, centered_error,
             float(np.max(abs(pi @ t-pi))), self._condition, self._pivot, self._unstable, float(identity_error))

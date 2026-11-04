@@ -99,3 +99,9 @@ def test_invalid_assumptions_and_interval_arguments():
         with pytest.raises(ValueError): result.uncertainty(n)
     for confidence in (0,1,np.nan):
         with pytest.raises(ValueError): result.uncertainty(10,confidence=confidence)
+
+
+@pytest.mark.parametrize('f', [[1e-200,0],[1e200,0],[1e308,-1e308]])
+def test_unrepresentable_variance_scales_are_rejected_not_reported_as_zero(f):
+    with pytest.raises(ValueError,match='floating-point range'):
+        PoissonSolver([[.5,.5],[.5,.5]]).solve(f)
