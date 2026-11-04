@@ -4,6 +4,97 @@ Environment: Windows, Python 3.12.14, Node.js 24.22.1. Resolved Python
 dependencies are recorded in `requirements-tested.txt`; frontend dependencies
 are recorded in `frontend/pnpm-lock.yaml`.
 
+## Phase 3: stationary distributions and long-time analysis
+
+The pre-change baseline was executed, not assumed: **242 Python tests**,
+**30 frontend tests**, and the TypeScript/Vite production build passed.
+Final checks after Phase 3:
+
+- `python -m pytest -q`: **301 passed**, **4.63 seconds**, one existing
+  Starlette/httpx deprecation warning. All 42 corrected independent handoff
+  checks, including T34, still pass. No existing assertions or tolerances
+  were weakened; the independent oracle is unchanged.
+- `pnpm test`: **36 passed** in five files, **4.15 seconds**. Six new interface
+  tests cover result-driven interpretation, physical time/actual plotted data,
+  class-specific density requests, cursor retention, English/German switching
+  without requests, localized errors, support validation, horizon invalidation
+  and stale-work cancellation. Resource completeness includes `stationary`.
+- `pnpm build`: **passed**, 83 modules, **3.35 seconds**. The existing 1,129.65 kB
+  Plotly chunk warning remains; no new dependencies were required.
+- `git diff --check`: passed. The four original Material files retain their
+  SHA-256 hashes from `mathematical_audit.md`; no original research file changed.
+
+New mathematical coverage consists of 21 reusable Markov tests, 25 SQW
+stationary tests and 13 API tests. Cases include Identity/Hadamard/Swap path3,
+aperiodic triangles, generalized Grover with its two-vertex periodic exception,
+DFT structural zeros, exact X-04 port order, complex omega/beta, multiple
+closed classes with periods 1/2/3, deterministic cycles through length 7,
+coupled transient blocks and fractional absorption. Tiny genuine 1e-24 exit
+rates validate the off-diagonal balance and embedded-jump solves. Threshold
+tests show that dropping a genuine 1e-16 rate can change the infinite-time
+answer. A 500-absorbing-state test checks sparse family/H storage; adapter
+tests prohibit calling dense transition builders.
+
+API tests cover original M/P orientation, t=2/t=1 starts, quantum-channel
+residuals, exact X-04 class weights, cached structure across initial/horizon/
+beta changes, invalidation on coin changes, input/work limits and the sparse
+90-state matrix presentation. This does not constitute a load benchmark.
+
+Executed `python examples/stationary_analysis.py` compares reduced means with
+independent channel applications through 120 additional transitions. Maximum
+matrix-entry discrepancies by example:
+
+| Example | Mean/Kraus error | Stationary channel residual |
+| --- | --- | --- |
+| Edge path3 Identity | 0 | 0 |
+| Edge path3 Hadamard | 4.72e-15 | 5.56e-17 |
+| Edge path3 Swap/Grover | 0 | 0 |
+| Edge triangle DFT | 3.39e-15 | 8.33e-17 |
+| Vertex X-04 | 2.69e-14 | 2.23e-16 |
+| Vertex complex omega/beta | 4.11e-16 | 6.21e-17 |
+
+X-04 has closed classes {0,1}, {3,4}, transient state 2, periods 1/1 and
+absorption weights (1,0) from delta_2, giving (2/3,1/3,0,0,0). This is the
+specified neighbor order, explicitly converted into the repository's ascending
+port basis. Small numerical errors are measured evidence, not error bounds
+for other models. See [the guide](stationary_analysis.md) for all examples.
+
+Real-browser verification used local FastAPI and Vite:
+
+- Edge path3 Identity: two closed period-two classes, nonunique stationarity,
+  correct t=2 start, distinct oscillating ordinary and converging Cesàro curves.
+  Class-2 density has trace 1, purity .5 and zero channel residual. Selecting
+  class 2 and t=3 survived the English-to-German switch with the same density.
+- Exact X-04 was entered through the existing matrix editor, with basis input
+  vertex 2. The UI displayed both closed classes, transient 2, weights (1,0)
+  and stationary labels (.666667,.333333,0,0,0). Selecting state 2 showed the
+  outgoing .5/.5 transitions and the discarded 1.875e-33 artifact separately.
+  Stationary density had purity .777778 and channel residual 2.22e-16.
+- The actual Cytoscape state graph and Plotly ordinary/Cesàro charts were
+  visually inspected. Mobile 390-by-844 checks in both languages reported
+  content width=scroll width=375 px, with scrolling tables and no horizontal
+  page overflow. The temporary viewport override was reset.
+- Browser console: no warnings or errors during these checks. Saved evidence:
+  [X-04 graph and weights](screenshots/stationary-x04-en.png) and
+  [German periodic/Cesàro curves](screenshots/stationary-de.png).
+
+Files added: `core/markov_analysis.py`, `core/structural_support.py`,
+`core/stationary.py`, `api/stationary_cache.py` under `backend/sqw/`;
+`tests/test_markov_analysis.py`, `tests/test_stationary.py`,
+`tests/test_stationary_api.py`; `examples/stationary_analysis.py`;
+`frontend/src/{StationaryPanel,StationaryPlot,ReducedMarkovGraph}.tsx`,
+`frontend/src/__tests__/stationary.test.tsx`, both `stationary.json` locales;
+`docs/stationary_analysis.md` and the two screenshots above.
+Modified: core exports and Edge/Vertex support accessors; API schemas/routes;
+App integration, shared density table export, types, API error mapping, i18n
+registration/error resources and styles; README, AGENTS, architecture, theory,
+mathematical-results mapping, roadmap and this validation record.
+
+No full quantum superoperator, spectral-gap bound, infinite-graph extension
+or approximate duplicate-projector merge was introduced. Numerical support
+uncertainty, sparse-solve fill-in and the existing dense Vertex constructor
+remain limitations. The runtime cache is bounded and is not experiment storage.
+
 ## Exact Markov engines and mathematical integration
 
 Final checks after this implementation pass:

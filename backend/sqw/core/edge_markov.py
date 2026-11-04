@@ -10,12 +10,14 @@ from numbers import Integral
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+from scipy.sparse import csr_matrix
 
 from .graph import GraphModel
 from .states import (
     ComplexArray, checked_probabilities, complex_array, validate_state, validate_steps,
 )
 from .walk import ScatteringWalk
+from .structural_support import edge_support
 
 
 def frozen_array(value):
@@ -104,6 +106,19 @@ class EdgeReduction:
         for x in self.graph.vertices:
             matrix[np.ix_(self.outgoing[x], self.incoming[x])] = self.local_probabilities[x]
         return matrix
+
+    @property
+    def sparse_M(self):
+        """Sparse column-stochastic M, assembled from local blocks only."""
+        rows, cols, data = [], [], []
+        for x, block in self.local_probabilities.items():
+            r, c = np.nonzero(block)
+            rows.extend(self.outgoing[x][r]); cols.extend(self.incoming[x][c]); data.extend(block[r, c])
+        return csr_matrix((data, (rows, cols)), shape=(self.dimension, self.dimension))
+
+    @property
+    def analytic_support(self):
+        return edge_support(self.graph, self.scattering)
 
     def transitions(self, atom_id):
         """Next atom IDs and their probabilities, in stored neighbor order."""

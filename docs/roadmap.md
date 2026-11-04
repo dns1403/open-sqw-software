@@ -12,21 +12,23 @@
   histories, reproducible benchmarks and independent regression oracles.
 - Explicit API strategies, English/German controls, playback, ensemble heatmaps
   and quantum/Markov inspection. Existing graph/matrix editing is preserved.
+- Finite stationary families, SCCs/closed classes/transients, gcd periods and
+  cyclic subclasses; full absorption weights including transient initial mass.
+- E-06/E-07, V-04/V-05 and NEW-04 adapters with phase-sensitive barycenters,
+  ordinary/Cesàro laws, TV curves and explicit numerical support policies.
+- Cached structure independent of initial state/beta; bilingual Long-Time
+  Dynamics graphs, sparse/full matrix inspection and exact X-04 regression.
 
-## Next: stationary classes, periods and absorption
+## Next: class-specific Poisson equations and uncertainty
 
-Implement this before claiming asymptotic distributions (E-06/E-07, V-04/V-05,
-NEW-04). Use positive-transition support to identify strongly connected and
-closed recurrent classes. Compute each class's period by cycle-length gcd and
-its stationary law with normalization/residual checks. Determine transient
-absorption probabilities from `(I-Q)H=R`, including mass initially outside the
-closed classes (AUD-01). Preserve column M versus row P orientation explicitly.
-
-Reconstruct stationary quantum densities and label laws separately; detect
-identical vertex projectors only with a justified equality criterion. Distinguish
-ordinary convergence, subsequential periodic limits, Cesaro limits and empirical
-occupation measures. Validate reducible identity coins, period-two paths and
-the DFT five-vertex path with transient mass before adding UI claims.
+Use the implemented class/absorption structure to select a recurrent class,
+center observables and solve normalized Poisson equations (E-09/E-10, R-08).
+State stationarity/ergodicity and periodicity assumptions before adding CLT or
+confidence-interval claims. Validate asymptotic variance against independent
+ensembles, and distinguish single-path uncertainty from ensemble sampling.
+Sparse Vertex construction and experiment import/export are useful parallel
+engineering priorities. Support-sensitivity analysis should precede numerical
+claims for nearly reducible chains.
 
 ## Subsequent priorities and dependencies
 
@@ -54,5 +56,5 @@ the DFT five-vertex path with transient mass before adding UI claims.
    E-17 Poissonization remains conditional on its stated assumptions.
 
 Full proof statements and qualifications stay in the immutable `Material/`
-handoff. The current pass does not implement a general stationary solver,
-spectral/RKHS UI, multigraph model or cloud deployment.
+handoff. General finite stationary analysis is implemented. Full spectral/RKHS
+UI, multigraph models and cloud deployment remain outside the present scope.

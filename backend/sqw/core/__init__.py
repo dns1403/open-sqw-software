@@ -15,6 +15,8 @@ from .edge_markov import (
 )
 from .vertex_markov import VertexReduction, OptimizedVertexTrajectory, vertex_eligibility
 from .ensembles import run_ensemble, EnsembleResult, EnsembleFrame
+from .markov_analysis import MarkovAnalysis
+from .stationary import StationaryAnalysis
 
 __all__ = [
     "ATOL", "GraphModel", "ScatteringWalk", "scattering_matrix", "validate_scattering",
@@ -25,4 +27,5 @@ __all__ = [
     "OptimizedEdgeTrajectory", "CompactEdgeTrajectory", "edge_eligibility",
     "VertexReduction", "OptimizedVertexTrajectory", "ReferenceVertexTrajectory", "vertex_eligibility",
     "run_ensemble", "EnsembleResult", "EnsembleFrame",
+    "MarkovAnalysis", "StationaryAnalysis",
 ]

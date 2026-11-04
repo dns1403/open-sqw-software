@@ -50,12 +50,19 @@
     "vertex": "Vertex",
     "vector": "Vector",
     "density": "Density",
-    "vertex_dynamics": "Vertex dynamics"
+    "vertex_dynamics": "Vertex dynamics",
+    "analysis_steps": "Reduced transitions",
+    "support_atol": "Support cutoff",
+    "include_density": "Density reconstruction",
+    "stationary_class": "Recurrent class"
   },
   "initial_state": "The initial state must have the correct dimension, finite entries and unit normalization. Density matrices must be Hermitian and positive semidefinite.",
   "vertex_parameters": "Provide normalized boundary vectors in the stored neighbor order and a finite real phase for every vertex.",
   "ensemble_budget": "This ensemble exceeds the interactive work budget. Reduce trajectories or steps, or select the optimized strategy.",
   "ensemble_histories": "The number of selected histories cannot exceed the number of trajectories.",
   "atom_id": "Select an atom in the current model basis.",
-  "analysis_budget": "Dense state and transition inspection supports dimensions up to 64. Use a smaller graph or the Python API."
+  "analysis_budget": "Dense state and transition inspection supports dimensions up to 64. Use a smaller graph or the Python API.",
+  "stationary_budget": "This analysis exceeds 250000 state-time entries. Reduce the graph size or number of reduced transitions.",
+  "stationary_class": "Select a recurrent class from the current analysis.",
+  "stationary_tolerance": "Enter a finite support cutoff between 0 and 1e-6."
 }

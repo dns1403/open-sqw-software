@@ -101,3 +101,11 @@ class EnsembleRequest(SimulationRequest):
 class AnalysisRequest(SimulationRequest):
     mode: Literal["open", "trajectory", "vertex"] = "trajectory"
     atom_id: int = Field(default=0, ge=0, strict=True)
+
+
+class StationaryRequest(SimulationRequest):
+    mode: Literal["open", "trajectory", "vertex"] = "trajectory"
+    analysis_steps: int = Field(default=200, ge=0, le=5000, strict=True)
+    support_atol: FiniteFloat = Field(default=1e-14, ge=0, le=1e-6)
+    include_density: bool = Field(default=False, strict=True)
+    stationary_class: int | None = Field(default=None, ge=0, strict=True)

@@ -182,10 +182,30 @@ kets, transition probabilities, explicit M/P orientation and the current density
 Conditional paths also expose the state after measurement before scattering.
 Language switching preserves these results, parameter drafts and playback.
 
+The **Long-Time Dynamics** panel analyzes communicating and closed classes,
+transients, gcd periods, the complete stationary family and initial-state
+absorption mixtures. Its separate graph uses directed-edge atoms in Edge mode
+and preparation labels in Vertex mode. Inspect outgoing probabilities, the
+original M/P matrix, ordinary and Cesàro curves, TV distances and a selected
+stationary quantum density. Changing language retains results and selections.
+Numerical support cutoffs are explicit: omitting a genuine tiny rate can change
+an infinite-time answer. See [the stationary-analysis guide](docs/stationary_analysis.md).
+
+```python
+from sqw.core import StationaryAnalysis
+
+analysis = StationaryAnalysis(walk)  # or InducedVertexWalk / either reduction
+print([(c.states, c.period) for c in analysis.chain.closed_classes])
+print(analysis.mixture(psi0).class_weights)
+rho_stationary = analysis.stationary_density(psi0)
+frames = list(analysis.evolve(psi0, 200))  # t=2..202 for Edge; t=1..201 for Vertex
+```
+
 Run the reproducible example with:
 
 ```powershell
 .\.venv\Scripts\python.exe examples/edge_walk.py
+.\.venv\Scripts\python.exe examples/stationary_analysis.py
 ```
 
 ## Tests and build
@@ -195,6 +215,17 @@ Run the reproducible example with:
 cd frontend
 pnpm test
 pnpm build
+```
+
+In this workspace, if `pnpm` is not on PATH, the installed fallback can run
+the same frontend commands (PowerShell, from the repository root):
+
+```powershell
+$sqwPnpm = 'C:\Users\david\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd'
+Push-Location frontend
+& $sqwPnpm test
+& $sqwPnpm build
+Pop-Location
 ```
 
 Python tests cover analytic path/triangle examples, nonsymmetric complex
@@ -216,16 +247,17 @@ frontend/src/i18n/
   index.ts
   format.ts
   locales/
-    en/{app,components,research,errors}.json
-    de/{app,components,research,errors}.json
+    en/{app,components,research,stationary,errors}.json
+    de/{app,components,research,stationary,errors}.json
 ```
 
 - `app`: application layout, controls, terminology, counts and help.
 - `components`: graph interaction, matrix editor and scientific chart text.
 - `research`: exact strategies, vertex parameters, ensembles and state inspection.
+- `stationary`: communicating classes, support policy, stationary laws and long-time charts.
 - `errors`: localized stable API error codes and request-validation messages.
 
-To add a language, copy all four English namespace files to a new language
+To add a language, copy all five English namespace files to a new language
 folder, translate their values while preserving keys and interpolation tokens,
 then import/register them in `resources` and `supportedLanguages` in `index.ts`.
 Add the locale's number-format configuration in `format.ts` if needed. Retain
@@ -244,9 +276,10 @@ message rather than exposing a missing translation key or arbitrary server text.
 Implemented: graph presets/custom graphs in the core, complex scattering,
 unitary/open edge dynamics, independent reference and exact optimized edge and
 vertex trajectories/means, compact ensembles, stateless API, bilingual controls,
-playback, heatmaps and quantum/Markov inspection. See the result-ID mapping below.
+playback, heatmaps, quantum/Markov inspection, stationary families, periods,
+absorption and long-time analysis. See the result-ID mapping below.
 
-Planned: stationary classes, periods and absorption probabilities; spectral/RKHS
+Planned: class-specific Poisson equations and uncertainty; spectral/RKHS
 analysis; free graph editing and full experiment import/export. Multigraphs,
 partial observations and time-dependent coins are explicitly unsupported.
 
@@ -272,12 +305,13 @@ independent corrected copy with unchanged assertions and tolerances.
 
 - [Theory and time indexing](docs/theory.md)
 - [Architecture and API contract](docs/architecture.md)
+- [Stationary algorithms, examples and limitations](docs/stationary_analysis.md)
 - [Additional mathematical results](docs/mathematical_results.md)
 - [Handoff audit and T34 correction](docs/mathematical_audit.md)
 - [Measured benchmarks](docs/benchmarks.md)
 - [Roadmap](docs/roadmap.md)
 - [Development instructions](AGENTS.md)
 
-The next research step is closed communicating classes, stationary distributions,
-periods and transient absorption probabilities, with the current exact engines
-as the dynamical foundation.
+The next research step is class-specific Poisson equations and justified
+uncertainty estimates, supported by the stationary structure and independent
+ensembles. Sparse vertex construction remains the main scaling prerequisite.

@@ -9,7 +9,7 @@ function complex([real, imaginary]: [number, number]) {
   return imaginary === 0 ? n(real) : `${n(real)} ${imaginary < 0 ? '−' : '+'} ${n(Math.abs(imaginary))}i`;
 }
 
-function DensityTable({ matrix, labels, caption }: { matrix: Matrix; labels: string[]; caption: string }) {
+export function DensityTable({ matrix, labels, caption }: { matrix: Matrix; labels: string[]; caption: string }) {
   return <div className="research-table-scroll"><table className="research-table density-table"><caption>{caption}</caption>
     <thead><tr><th /><th colSpan={labels.length}>ρ</th></tr><tr><th /><>{labels.map((label) => <th key={label}>{label}</th>)}</></tr></thead>
     <tbody>{matrix.map((row, i) => <tr key={i}><th>{labels[i]}</th>{row.map((value, j) => <td key={j} title={`${value[0]} + (${value[1]})i`}>{complex(value)}</td>)}</tr>)}</tbody>

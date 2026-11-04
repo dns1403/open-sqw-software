@@ -50,12 +50,19 @@
     "vertex": "Knoten",
     "vector": "Zustandsvektor",
     "density": "Dichtematrix",
-    "vertex_dynamics": "Vertex-Dynamik"
+    "vertex_dynamics": "Vertex-Dynamik",
+    "analysis_steps": "Markov-Übergänge",
+    "support_atol": "Trägerschwelle",
+    "include_density": "Dichterekonstruktion",
+    "stationary_class": "Rekurrente Klasse"
   },
   "initial_state": "Der Anfangszustand benötigt die richtige Dimension, endliche Einträge und Normierung auf eins. Dichtematrizen müssen hermitesch und positiv semidefinit sein.",
   "vertex_parameters": "Normierte Randvektoren in der gespeicherten Nachbarreihenfolge und für jeden Knoten eine endliche reelle Phase angeben.",
   "ensemble_budget": "Dieses Ensemble überschreitet das interaktive Rechenbudget. Trajektorien oder Schritte reduzieren oder die optimierte Strategie wählen.",
   "ensemble_histories": "Die Anzahl ausgewählter Verläufe darf die Trajektorienanzahl nicht überschreiten.",
   "atom_id": "Ein Atom aus der aktuellen Modellbasis wählen.",
-  "analysis_budget": "Die dichte Zustands- und Übergangsanalyse unterstützt Dimensionen bis 64. Einen kleineren Graphen oder die Python-API verwenden."
+  "analysis_budget": "Die dichte Zustands- und Übergangsanalyse unterstützt Dimensionen bis 64. Einen kleineren Graphen oder die Python-API verwenden.",
+  "stationary_budget": "Diese Analyse überschreitet 250000 Zustands-Zeit-Einträge. Verkleinern Sie den Graphen oder reduzieren Sie die Anzahl der Markov-Übergänge.",
+  "stationary_class": "Wählen Sie eine rekurrente Klasse der aktuellen Analyse.",
+  "stationary_tolerance": "Geben Sie eine endliche Trägerschwelle zwischen 0 und 1e-6 ein."
 }

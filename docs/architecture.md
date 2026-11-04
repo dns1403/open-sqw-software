@@ -34,6 +34,16 @@ NumPy + SciPy CSR + NetworkX
   paths and means, and beta updates that reuse P.
 - `core/ensembles.py`: grouped vectorized ID sampling or streamed independent
   reference paths; requested counts/Born statistics and selected histories.
+- `core/markov_analysis.py`: reusable row-stochastic CSR validation, support,
+  SCCs, periods, stationary families, absorption solves and Cesàro evolution.
+- `core/structural_support.py`: conservative exact recognition of built-in
+  support formulas; metadata never edits a quantum operator or state.
+- `core/stationary.py`: explicit M-transpose/P adapters, q2/r0 initialization,
+  invariant label measures and lazy phase-sensitive stationary barycenters.
+- `api/stationary_cache.py`: bounded 16-model structural cache keyed by complete
+  graph, complex coin/omega bytes and support policy; independent of initial
+  state, horizon, seed once coins are fixed, and beta. Beta updates retain the
+  same P/class analysis while rebuilding chi.
 - `api/schemas.py`: versionable JSON contract; complex values are `[real, imag]`.
 - `api/app.py`: deterministic experiments, diagnostics and API boundary checks.
 - `api/errors.py`: stable error descriptors for presentation, preserving the
@@ -42,6 +52,9 @@ NumPy + SciPy CSR + NetworkX
   preference, English fallback, metadata and observable number formatting.
 - `frontend/src/ResearchPanels.tsx`: ensemble comparison/heatmap, atom/matrix
   inspector and complex omega/beta controls. No physics is computed in the UI.
+- `frontend/src/StationaryPanel.tsx`, `ReducedMarkovGraph.tsx`, `StationaryPlot.tsx`:
+  dedicated bilingual stationary analysis, sparse transitions, class colors,
+  stationary weights, physical-time ordinary/Cesàro charts and quantum density.
 
 ## Memory and extension points
 
@@ -97,6 +110,15 @@ is |V| and its localized initial state is a vertex, not a directed edge.
   and selected-history count -> aggregate frames and compact records.
 - `POST /api/analysis`: configuration + `atom_id` -> small-system transition,
   quantum-state and pre-scattering conditional-state diagnostics.
+- `POST /api/stationary`: open/trajectory/vertex configuration + `analysis_steps`
+  (0..5000, default 200), `support_atol` (0..1e-6, default 1e-14), optional
+  `include_density` and zero-based `stationary_class` in closed-class order.
+  Returns class IDs/membership/periods/cyclic subclasses, stationary-family rows,
+  absorption H, input law, class weights, mixture, support diagnostics, original
+  sparse probabilities, raw finite-time curves and optional quantum density.
+  Full matrices and dense quantum inspection are limited to dimension 64;
+  histories require dimension*(analysis_steps+1) <= 250000. `analysis_steps`
+  counts transitions after t=2 (Edge) or t=1 (Vertex), independently of `steps`.
 - `GET /docs`: generated OpenAPI documentation.
 
 The API accepts `initial.kind` equal to `basis`, `uniform`, `pure`, `mixed` or
@@ -145,13 +167,19 @@ cancels the next scheduled request. It never requests a future path in advance.
 A stateless request replays its prefix; Python sessions avoid that O(T) replay.
 Inspector queries replay the requested prefix without advancing the displayed
 experiment. Mathematical input changes abort stale ensemble/inspector work.
+The stationary panel likewise aborts stale requests and clears results when
+the experiment or its analysis controls change. Class/state selection and
+language changes operate on retained responses; density reconstruction is an
+explicit request. Backend structural caching is separate from this UI state.
+See [stationary analysis](stationary_analysis.md) for support-policy semantics
+and sparse solve costs; the original raw matrix remains available for curves.
 
 ## Internationalization boundary
 
 English is the initial and fallback language. Only explicit choices from the
 header switcher are persisted under `sqw.language`; browser language detection
 is intentionally absent. Resources are bundled under `i18n/locales/{en,de}/`
-in the `app`, `components`, `research` and `errors` namespaces. Resource initialization is
+in the `app`, `components`, `research`, `stationary` and `errors` namespaces. Resource initialization is
 synchronous. Language changes update the document `lang` and metadata and
 rerender presentation without changing component identities.
 

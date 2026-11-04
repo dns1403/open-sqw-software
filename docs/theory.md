@@ -213,8 +213,56 @@ and the amplification of an O(epsilon) residual by a square root. No tolerance
 was enlarged and no small physical completion is zeroed. See the T34 audit.
 Raw compression is trace preserving exactly when every theta has norm one;
 graph size alone does not decide this. Transient initial mass contributes to
-eventual recurrent-class weights through absorption probabilities. Stationary
-and limit diagnostics are deferred until that contribution and periods are handled.
+eventual recurrent-class weights through absorption probabilities. The finite
+stationary solver below includes this contribution and analyzes periods.
+
+## Stationarity and long-time dynamics (E-06/E-07, V-04/V-05, NEW-04)
+
+The reusable engine expects row-stochastic T: Edge explicitly uses T=M.T,
+Vertex uses T=P. Strongly connected support components are communicating
+classes. Those with no outgoing transition are closed/recurrent; all other
+states are transient. Cycle-length gcds, computed from directed search-depth
+differences, give periods and cyclic subclasses without eigenvalue rounding.
+
+For each closed class C_j solve pi_j T=pi_j and sum(pi_j)=1 on that class.
+These extended laws span the stationary simplex. With transient block Q and
+class-entry matrix R, solve `(I-Q)H=R` with recurrent boundary values, then
+
+```text
+a_j = q_start @ h_j
+pi_initial = sum_j a_j pi_j.
+```
+
+The implementation uses sparse normalized balance solves and embedded-jump
+row scaling for absorption; no inverse or degenerate eigenspace selection.
+In particular AUD-01 requires mass at transient vertices in q_start to enter
+the formula. The exact X-04 port ordering gives two closed classes and sends
+all mass initially at vertex 2 into {0,1}, with limit (2/3,1/3,0,0,0).
+
+Cesàro label laws converge to pi_initial for every finite chain. Ordinary
+convergence is guaranteed if all reachable closed classes have period one.
+Periodic classes can still have constant stationary inputs; a warning about
+periodicity is not a claim that every input oscillates. Edge bistochasticity
+gives uniform pi_j on each class and a canonical global barycenter I/|D|;
+uniqueness requires one class. Vertex pi_j and the quantum barycenters are
+generally nonuniform and depend on chi, including its omega/beta phases.
+
+The corresponding invariant measures are sum pi[e] delta_(U|e><e|U†) and
+sum pi[x] delta_(|chi(x)><chi(x)|). Their barycenters are the densities above.
+Ordinary/Cesàro label convergence implies the corresponding mean-density
+convergence. Edge trace distance equals label TV; Vertex trace distance is
+bounded above by label TV, with no general equality because atoms overlap.
+A single path's time average belongs to its eventually selected recurrent
+class, not generally the ensemble absorption mixture. Its instantaneous pure
+state does not converge to a mixed stationary density.
+
+These statements apply to the specified transition support. Built-in formulas
+provide analytical masks when recognized exactly; other inputs use an
+explicit probability cutoff. The original operator is retained and separate
+analysis rows are rescaled after support filtering. Removing a genuine tiny
+rate may change the infinite-time result despite small residuals. The
+[stationary guide](stationary_analysis.md) specifies support assumptions,
+solvers, raw-versus-analysis curves, cache semantics and numerical limitations.
 
 ## Numerics and limits
 
@@ -230,7 +278,7 @@ for accumulated operations. Statistical tests use separate bounds derived from
 ensemble size and variance. Independent-path ensembles retain compact labels,
 requested counts and Born averages; selected histories are optional. These are
 ensemble laws at fixed times, not occupation measures of a single long path.
-Spectral and asymptotic analyses remain separate extensions. Numerical agreement
+Full spectral analysis remains a separate extension. Numerical agreement
 supports implementation validation; it does not prove the mathematical results.
 
 ## Presentation languages

@@ -12,6 +12,7 @@ from .states import (
     validate_density, validate_pure, validate_steps,
 )
 from .walk import ScatteringWalk
+from .structural_support import vertex_support
 
 
 class InducedVertexWalk:
@@ -63,6 +64,7 @@ class InducedVertexWalk:
             phases[x] = phase
         self.omega = MappingProxyType(vectors)
         self.beta = MappingProxyType(phases)
+        self._analytic_support = vertex_support(self.graph, edge_walk.scattering, self.omega)
 
         self._boundary = np.zeros((self.dimension, self.graph.dimension), dtype=complex)
         for x in self.graph.vertices:
@@ -96,6 +98,11 @@ class InducedVertexWalk:
             chi[x] = completed
         self.theta = MappingProxyType(theta)
         self.chi = MappingProxyType(chi)
+
+    @property
+    def analytic_support(self):
+        """Detached analytical row-P support, or None for unrecognized inputs."""
+        return None if self._analytic_support is None else self._analytic_support.copy()
 
     @property
     def boundary_operator(self) -> ComplexArray:

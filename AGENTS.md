@@ -13,6 +13,10 @@
 - Preserve full incoming coherence blocks in edge `q2`. Conditional edge atoms start at t=2, vertex atoms at t=1. Atom weights, Born laws, mean densities and observed-outcome counts are distinct outputs.
 - Keep the four original files in `Material/` unchanged. See `docs/mathematical_audit.md` for the transparent T34 numerical correction and the independent test copy. Numerical checks are not proofs.
 - Reject unsupported instruments/partial observation/time-dependent coins from exact reductions. Do not extend simple-graph purification to parallel ports without a new contract.
+- Stationary structure uses a row-stochastic generic engine: explicitly adapt edge M by transpose, preserve original display orientation and atom start times. Closed classes and cycle-length gcd periods come from transition support, never the original undirected graph alone.
+- Prefer declared analytical support for exactly recognized formulas; otherwise report the probability cutoff, removed mass and changed analysis matrix. Tiny genuine rates can change infinite-time limits. Keep original operators and finite-time curves intact; residuals do not certify asymptotic accuracy.
+- Solve a stationary law per closed class and include transient absorption via a_j = q_start @ h_j (AUD-01/X-04). Uniqueness, irreducibility and ordinary convergence are separate properties. A periodic class removes an arbitrary-input convergence guarantee, not convergence for every individual input.
+- Keep stationary label measures, their quantum barycenters, ensemble Cesàro averages and single-path empirical averages distinct. Preserve complex omega/beta in atom reconstruction. Cache graph/coins/omega/support separately from initial inputs and beta.
 
 ## Development
 - Work in this checkout; preserve user-provided research and files.
@@ -24,6 +28,6 @@
 
 ## Internationalization
 - English is the default and fallback. Only an explicit stored language choice overrides it; do not infer the language from browser settings.
-- Put user-facing text in the matching `app`, `components`, `research`, or `errors` namespaces under `frontend/src/i18n/locales`. Keep keys and interpolation parameters consistent across languages.
+- Put user-facing text in the matching `app`, `components`, `research`, `stationary`, or `errors` namespaces under `frontend/src/i18n/locales`. Keep keys and interpolation parameters consistent across languages.
 - Language changes must preserve experiment state and must not trigger graph or simulation requests. Translate error descriptors when rendering, not when catching errors.
 - Preserve mathematical notation, matrix JSON, model identifiers, and API fields. Format observable numbers only for display. Run `pnpm test` and `pnpm build` in `frontend` after UI changes.

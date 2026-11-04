@@ -54,6 +54,7 @@ class VertexReduction:
         squared.data = abs(squared.data) ** 2
         self._p = squared.T.tocsr()
         self.beta = dict(walk.beta)
+        self._analytic_support = walk.analytic_support
 
     def _weights(self, weights):
         q = checked_probabilities(weights)
@@ -65,6 +66,10 @@ class VertexReduction:
         if not isinstance(label, Integral) or isinstance(label, bool) or label not in self.graph.vertex_index:
             raise ValueError("Unknown vertex atom label.")
         return self.graph.vertex_index[label]
+
+    @property
+    def analytic_support(self):
+        return None if self._analytic_support is None else self._analytic_support.copy()
 
     @property
     def sparse_P(self):
@@ -123,6 +128,7 @@ class VertexReduction:
         result = object.__new__(VertexReduction)
         result.graph, result.dimension, result.eligibility = self.graph, self.dimension, self.eligibility
         result._p = self._p  # invariant even when chi changes
+        result._analytic_support = self._analytic_support
         result._chi = self._chi.copy()
         diagonal = np.array([np.exp(1j * phases[x]) * np.sqrt(self._p[i, i]) for i, x in enumerate(self.graph.vertices)])
         result._chi.setdiag(diagonal)

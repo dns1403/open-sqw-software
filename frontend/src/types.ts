@@ -71,3 +71,29 @@ export interface Analysis {
   atom_ket: Complex[]; transition_matrix: number[][]; next_atom_probabilities: number[];
   eligible: boolean; assumptions: string;
 }
+
+export interface MarkovClass {
+  id: number; states: number[]; closed: boolean; period: number | null;
+  cyclic_subclasses: number[][]; stationary: number[] | null;
+  residual: number | null; raw_residual: number | null;
+}
+export interface LongTimeFrame {
+  step: number; probabilities: number[]; cesaro: number[];
+  total_variation: number; cesaro_total_variation: number;
+}
+export interface StationaryResult {
+  model: 'edge' | 'vertex'; orientation: 'row' | 'column'; start_step: number; analysis_steps: number;
+  atom_labels: (number | [number, number])[]; classes: MarkovClass[]; closed_class_ids: number[];
+  membership: number[]; transient_states: number[]; stationary_family: number[][];
+  absorption: number[][]; initial_law: number[]; class_weights: number[]; stationary_mixture: number[];
+  irreducible: boolean; unique_stationary: boolean; bistochastic: boolean;
+  ordinary_for_all_initials: boolean; ordinary_guaranteed: boolean; reachable_periods: number[];
+  support: { source: 'analytic_builtin' | 'numerical' | 'caller'; policy: string; tolerance: number;
+    discarded_entries: number; discarded_max_probability: number; discarded_max_row_mass: number;
+    matrix_change_max_row_l1: number };
+  diagnostics: { row_residual: number; column_residual: number; absorption_residual: number; absorption_raw_residual: number };
+  transitions: { source: number; target: number; probability: number; analysis_probability: number }[];
+  transition_matrix: number[][] | null; frames: LongTimeFrame[];
+  quantum: { density: Matrix; trace: number; purity: number; channel_residual: number;
+    weights: number[]; class_index: number | null } | null;
+}

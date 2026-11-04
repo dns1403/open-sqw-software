@@ -13,8 +13,9 @@ from sqw.core import (
 from .errors import RequestProblem, client_error, validation_issue
 from .schemas import (
     Frame, GraphRequest, GraphResponse, ScatteringRequest,
-    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest,
+    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest, StationaryRequest,
 )
+from .stationary_cache import stationary_model
 
 app = FastAPI(title="Scattering Quantum Walk Lab", version="0.1.0")
 
@@ -331,5 +332,66 @@ def analysis(request: AnalysisRequest):
             "atom_ket": encode_matrix(ket), "transition_matrix": matrix.tolist(),
             "next_atom_probabilities": (matrix[atom] if vertex else matrix[:, atom]).tolist(),
             "eligible": model.eligibility.eligible, "assumptions": "SIMPLE_STATIC" if not vertex else "STATIC_RANK_ONE_PREPARATION"}
+    except (ValueError, TypeError, KeyError) as error:
+        return client_error(error)
+
+
+@app.post("/api/stationary")
+def stationary(request: StationaryRequest):
+    try:
+        edge, walk, initial = experiment(request)
+        vertex = request.mode == 'vertex'
+        d = walk.dimension if vertex else edge.graph.dimension
+        if d * (request.analysis_steps + 1) > 250_000:
+            raise RequestProblem('stationary_budget', 'Requested stationary-analysis history exceeds 250000 state-time entries.')
+        if request.include_density and d > 64:
+            raise RequestProblem('analysis_budget', 'Dense stationary state inspection is limited to dimension 64.')
+        model = stationary_model(edge, walk if vertex else None, support_atol=request.support_atol)
+        chain = model.chain
+        if request.stationary_class is not None and request.stationary_class >= len(chain.closed_classes):
+            raise RequestProblem('stationary_class', 'Selected recurrent class does not exist.')
+        q = model.initial_law(initial)
+        mixture = chain.mixture(q)
+        frames = tuple(chain.evolve(q, request.analysis_steps, start_step=model.start_step))
+        raw, effective = chain.raw_transition, chain.transition
+        coo = raw.tocoo()
+        transitions = [{'source': int(i), 'target': int(j), 'probability': float(p),
+                        'analysis_probability': float(effective[i, j])}
+                       for i, j, p in zip(coo.row, coo.col, coo.data)]
+        quantum = None
+        if request.include_density:
+            rho = model.stationary_density(initial, class_index=request.stationary_class)
+            quantum = {'density': encode_matrix(rho), 'trace': float(np.trace(rho).real),
+                'purity': float(np.vdot(rho, rho).real),
+                'channel_residual': float(np.max(abs(walk.apply_channel(rho) - rho))),
+                'weights': model.stationary_weights(initial, class_index=request.stationary_class).tolist(),
+                'class_index': request.stationary_class}
+        result = {
+            'model': 'vertex' if vertex else 'edge', 'orientation': model.orientation,
+            'start_step': model.start_step, 'analysis_steps': request.analysis_steps,
+            'atom_labels': list(edge.graph.vertices) if vertex else list(edge.graph.directed_edges),
+            'classes': chain.classes, 'closed_class_ids': [c.id for c in chain.closed_classes],
+            'membership': chain.membership, 'transient_states': chain.transient_states,
+            'stationary_family': chain.stationary_basis.toarray(), 'absorption': chain.absorption.toarray(),
+            'initial_law': q, 'class_weights': mixture.class_weights,
+            'stationary_mixture': mixture.stationary, 'irreducible': chain.irreducible,
+            'unique_stationary': chain.unique_stationary, 'bistochastic': chain.bistochastic,
+            'ordinary_for_all_initials': chain.ordinary_for_all_initials,
+            'ordinary_guaranteed': mixture.ordinary_guaranteed,
+            'reachable_periods': mixture.reachable_periods,
+            'support': {'source': model.support_source, 'policy': chain.support_policy,
+                'tolerance': chain.support_atol, 'discarded_entries': chain.discarded_entries,
+                'discarded_max_probability': chain.discarded_max_probability,
+                'discarded_max_row_mass': chain.discarded_max_row_mass,
+                'matrix_change_max_row_l1': chain.matrix_change_max_row_l1},
+            'diagnostics': {'row_residual': chain.row_residual, 'column_residual': chain.column_residual,
+                'absorption_residual': chain.absorption_residual,
+                'absorption_raw_residual': chain.absorption_raw_residual},
+            'transitions': transitions,
+            # Display in the original model orientation, not the internal row adapter.
+            'transition_matrix': (raw.toarray() if vertex else raw.T.toarray()) if d <= 64 else None,
+            'frames': frames, 'quantum': quantum,
+        }
+        return json_arrays(result)
     except (ValueError, TypeError, KeyError) as error:
         return client_error(error)
