@@ -24,6 +24,7 @@ the supplied specification. Integration status below is separate.
 | E-04 | Current edge atom determined by the last two observed vertices | compact atom IDs and reconstruction | positive-path replay and zero-probability branches |
 | E-05 | Reduced means, state laws, Born Mq and Hermitian observables | `EdgeMeanState`, local `apply_M`, ensembles | full density and observable comparisons through t=8 |
 | E-06, E-07 | Finite Edge invariant measures/barycenters, uniform closed-class laws, periods, ordinary/Cesàro distinctions | `MarkovAnalysis`, `StationaryAnalysis`, Long-Time Dynamics UI | Identity/Hadamard/Swap path3, triangle, class mixtures, channel fixed points and trace/TV equality |
+| E-09; R-08 scalar part | Centered finite irreducible Poisson equation and martingale CLT; periodic chains allowed, classwise reducible extension | `PoissonSolver`, `ClasswiseStatistics`, `TrajectoryStatistics`, bilingual statistics UI | X-01 r/[8(1-r)] including 1/8, two-state variance 1/2, deterministic cycles, X-04, complex atom expectations, seeded long paths |
 | V-01 | Conjugated neighboring omega and coherent chi completion | `core/vertex.py`; stable complementary-port mass | complex boundary tests, T34, tiny nonzero completion |
 | V-02 | Rank-one preparation after t=1, row P, q1=diag(rho0) | `VertexReduction`, `OptimizedVertexTrajectory` | `test_vertex_markov.py`, independent `ReferenceVertexTrajectory` |
 | V-03 (partial) | Retain labels when atoms coincide; no approximate merging | ensemble label counts and UI explanation | handoff oracle; quotient/lumping solver deferred |
@@ -45,12 +46,12 @@ dense Kraus products; the frontend never implements the physics.
 | --- | --- | --- |
 | U-02, U-03 | Unitary time means and spectral mapping | Reference oracle only; spectral interface deferred |
 | E-08 | Channel spectrum, zero modes and product purification | Requires spectral diagnostics; oracle only |
-| E-09, E-10 | Poisson equation, CLT and empirical RKHS errors | Requires class-specific stationary analysis |
+| E-10 | Exact stationary-start empirical RKHS/MMD errors and Kemeny constant | Optional finite-atomic MMD not implemented in Phase 4 |
 | E-11, E-12 | Mixing, flat coins, entropy and resistance | Support/period and TV diagnostics implemented; spectral bounds, entropy and resistance deferred |
 | E-13, E-14, E-15, E-16 | Invariant ensembles, dynamics, two-time laws, reversal | Geometry and joint-law analysis deferred |
 | E-17 | Poissonization and Isom assumptions | Conditional source result; no new engine enabled |
 | V-06, V-07 | Unitality, frames and stabilizers | Phase part implemented; frame/stabilizer analysis deferred; V-07 conditional |
-| R-01--R-08 | Tensor kernels, MMD, moments, identifiability, two-time and fluctuation analysis | Oracle examples only; no RKHS feature presented as complete |
+| R-01--R-08 | Tensor kernels, MMD, moments, identifiability, two-time and fluctuation analysis | R-08 scalar finite-chain foundation used; full RKHS/MMD features remain deferred |
 | NEW-01, NEW-02 | Channel gauges, ranks and perturbation bounds | Oracle examples only; analysis deferred |
 | NEW-03 | Port multigraphs and failure of universal purification | Counterexample tested; actual port graph model deferred |
 
@@ -71,6 +72,17 @@ Analytical masks are recognized conservatively; user-supplied masks are caller
 assertions, and a numerical threshold does not certify zeros. Discarded genuine
 rates can change limits. All four original handoff files and the corrected T34
 oracle retain their prior contents; new tests supplement their assertions.
+
+## Phase-4 proof status and scope
+
+Phase 4 adds no new research theorem: E-09 and R-08's scalar foundation are
+applied under finite irreducibility, fixed transitions and real finite f.
+The classwise extension uses V-05/E-07 and existing absorption functions.
+Poisson solves belong to the explicit analysis matrix; cutoff-induced changes
+are reported, never interpreted as exact physical equivalence. Numerical
+diagnostics, phase-aware caches and interval restrictions are detailed in
+[trajectory statistics](trajectory_statistics.md). E-10 and R-01 were reviewed
+but their optional stationary-start MMD functionality remains unimplemented.
 
 ## Template for future entries
 

@@ -4,6 +4,105 @@ Environment: Windows, Python 3.12.14, Node.js 24.22.1. Resolved Python
 dependencies are recorded in `requirements-tested.txt`; frontend dependencies
 are recorded in `frontend/pnpm-lock.yaml`.
 
+## Phase 4: Poisson equations and trajectory uncertainty
+
+The executed baseline was 301 Python tests, 36 frontend tests and a successful
+production build. Phase 4 adds 59 Python cases (23 generic Poisson, 4 classwise,
+21 SQW statistics and 11 API) and 8 frontend cases. Full final results:
+
+- `python -m pytest -q`: **360 passed**, **5.08 s**, including all **42 corrected independent
+  mathematical handoff checks**. The original oracle and its corrected test copy
+  were not edited; no existing assertion/tolerance was weakened.
+- `pnpm test`: **44 passed** in six files; last run **4.72 s**.
+- `pnpm build`: passed, **87 modules**, **3.61 s**. Existing Plotly chunk warning
+  remains (1129.65 kB); no dependency was added for this phase.
+- All four original Material SHA-256 hashes match the audit. `git diff --check`
+  passes. The pre-existing Starlette/httpx warning remains unsuppressed.
+
+Analytical cases actually computed:
+
+| Case | Computed result |
+| --- | --- |
+| X-01 / actual DFT path3 atom `(0,1)` | mu=0.25, sigma²=0.125, period 2; instantaneous variance 0.1875 |
+| Two-state T with diagonal 2/3 | pi=(0.5,0.5), h=(0.75,-0.75), mu=0.5, sigma²=0.5 |
+| Deterministic 4-cycle | period 4, mu=0.25, sigma²=0; a 5-observation prefix still has nonzero error |
+| Identity path3, maximally mixed input | two period-2 classes, weights (0.5,0.5), means (0.5,0), both variances 0; no global Gaussian |
+| X-04 from delta_2 | transient mass 1, absorption (1,0), limiting law (2/3,1/3,0,0,0), f=1 at vertex 0 gives mu=2/3 and sigma²=2/27=0.074074074… |
+| Complex omega/beta and Hermitian observables | direct atom-density traces agree within 3e-14; beta changes f and reuses P/factors |
+
+Regression also covers invalid/nonreal observables and supplied stationary
+laws, near-singular weak exits, deterministic periods 1–7, a sparse 200-cycle,
+nonreversible/nonuniform chains, shifted/scaled observables, tiny positive
+variance, explicit overflow/underflow rejection and 1e-250 reachable class mass. Equal class means with different
+variances are not collapsed into a global Gaussian. SQW tests check exact
+basis order, outcome/Born distinction, physical starts, burn-in, seed replay,
+existing Vertex sampler equivalence, direct densities, cache separation,
+artificial stationary starts, downsampling, numerical support suppression and
+forbidden density histories. API tests check schema/work limits and cache
+invalidation for beta, omega, coins and support.
+
+### Seeded long-trajectory benchmark
+
+Executed `python examples/trajectory_statistics.py` on this Windows workspace,
+Python 3.12.14, NumPy 2.5.4, SciPy 1.18.1. Each row uses 256 independent
+stationary-start paths with 8192 observations and an atom-0 indicator. Master
+seeds are 20261104 (Edge) and 20261105 (Vertex), with SeedSequence child streams.
+
+| Quantity | Edge path3 DFT | Vertex triangle Grover |
+| --- | ---: | ---: |
+| Period | 2 | 1 |
+| Theoretical mu | 0.25 | 0.33333333333333337 |
+| Theoretical sigma² | 0.125 | 0.37037037037037035 |
+| Exact stationary finite N·Var(mean) | 0.125 | 0.37034625771604934 |
+| Observed N·sample variance of means | 0.1424087150424151 | 0.4054117221458234 |
+| Grand mean | 0.24986743927001953 | 0.33344316482543945 |
+| Observed nominal 95% coverage | 0.93359375 | 0.93359375 |
+| Elapsed sampling time | 14.1254 s | 13.6869 s |
+| Observations / second | 148467 | 153223 |
+| Relative Poisson residual | 0 | 1.67e-16 |
+
+The variance estimates are about 13.9% and 9.5% above theory. Under a Gaussian
+approximation, estimating variance from 256 paths has relative standard error
+sqrt(2/255), about 8.9%; these differences are unsurprising Monte Carlo scatter.
+Observed coverage is evidence, not a finite-sample coverage guarantee. This
+benchmark has no stochastic pass/fail threshold. Each path retains two chart
+points, counts and a running mean; zero density-history entries are allocated.
+These are logical storage counts, not measured process/RSS memory figures.
+Timings are local measurements, not cross-hardware performance guarantees.
+
+### Interface verification and commits
+
+Browser checks used actual FastAPI/Vite responses: DFT path3 showed mu=0.25,
+sigma²=0.125, SE=0.007906 at N=2000, and a correctly centered shaded envelope.
+English/German switching retained all values. Identity path3 displayed two
+means (0.5,0), zero variances and no Gaussian band. Selecting/preparing class 2
+was explicitly labeled. Vertex coherence ran from t=1. Desktop and 390x844
+mobile layouts were inspected; page scroll width equaled client width, legends
+and controls were readable, and no browser warning/error logs were recorded.
+Unit tests also check stale-response abortion, language/state persistence,
+error translation, input validation and band suppression for mismatched classes,
+degeneracy, unstable solves and support approximations.
+
+Local tested milestone commits (no remote push):
+
+- `fbfbfe7 feat(statistics): implement finite Markov Poisson solver`
+- `a074736 feat(statistics): add classwise asymptotic variance`
+- `867f7eb feat(sqw): integrate quantum trajectory uncertainty`
+- `cba8f35 feat(ui): add trajectory statistics dashboard`
+- `f8ab9c3 fix(statistics): reject unrepresentable observable scales`
+- Final documentation/benchmark commit follows this record; use `git log` for
+  its hash (a commit cannot include its own hash in its content).
+
+Files: new `core/markov_statistics.py`, `classwise_statistics.py`,
+`trajectory_statistics.py`, `api/statistics_cache.py`, their four regression
+files, `StatisticsPanel.tsx`, `StatisticsPlot.tsx`, `statisticsTypes.ts`,
+`statistics.test.tsx`, EN/DE statistics resources, the benchmark example and
+`docs/trajectory_statistics.md`. Existing core exports/reachability, API schema,
+stationary cache/routes, UI/i18n/error registration/styles and all requested
+project documentation were extended. Original dynamics and research files
+are preserved. Optional finite-atomic MMD remains deferred; normal intervals
+remain pointwise asymptotic approximations with unquantified transient bias.
+
 ## Phase 3: stationary distributions and long-time analysis
 
 The pre-change baseline was executed, not assumed: **242 Python tests**,

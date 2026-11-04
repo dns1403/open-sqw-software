@@ -20,6 +20,8 @@ nonnegative conditional martingale variance sum_ij pi_i T_ij(h_j-(Th)_i)²,
 with row-local shifts for stability. The independent identity
 2*pi[g*h]-pi[g²] is checked. Positive tiny variances are never clipped; a zero
 result is explicitly degenerate and gives no Gaussian confidence interval.
+Variance arithmetic that underflows or overflows Float64 is rejected with a
+rescaling instruction, rather than silently turning a positive variance into zero.
 Deterministic cycles can have zero CLT variance but nonzero finite-length bias.
 
 sqrt(N)(mean_N-mu) converges weakly to N(0,sigma²), including from any fixed
@@ -54,6 +56,7 @@ the global scalar CLT fields. Multiple classes always report conditional laws,
 even if their means happen to coincide: unequal variances can still give a
 non-Gaussian mixture. No approximate numerical equality merges these laws.
 Finite transient contributions are distinct from within-class CLT noise.
+
 ## SQW observables and trajectory sampling (E-02–E-05, V-01–V-05)
 
 `TrajectoryStatistics` uses `T=M.T` for Edge and `T=P` for Vertex. Atom
@@ -97,3 +100,49 @@ Sampling always uses original transitions. For numerical support with removed
 entries, or if the path leaves an analyzed closed class, empirical Gaussian
 bands are suppressed. Classwise theoretical values still describe the explicitly
 reported analysis matrix. No support approximation silently changes physics.
+
+## Reproducible reference values and benchmark
+
+| Example and observable | Period | mu | sigma² |
+| --- | --- | --- | --- |
+| X-01 path3, one `(0,1)` atom indicator, r=1/2 | 2 | 1/4 | 1/8 |
+| T=[[2/3,1/3],[1/3,2/3]], f=[1,0] | 1 | 1/2 | 1/2 |
+| Deterministic 4-cycle, one state indicator | 4 | 1/4 | 0 |
+| Identity path3, f=1 at `(0,1)`, first closed pair | 2 | 1/2 | 0 |
+| Identity path3, same f, other closed pair | 2 | 0 | 0 |
+| X-04 from transient vertex 2, f=1 at vertex 0, absorbed class | 1 | 2/3 | 2/27 |
+
+The X-01 handoff order `(01),(21),(10),(12)` is explicitly permuted into
+the stored order `(01),(10),(12),(21)` in adapter tests. The regression spans
+r=0,.01,.2,.5,.9 with the formula r/[8(1-r)]; r=1 is reducible and excluded
+from that irreducible formula. Other tests independently validate generic
+row chains, complex Hermitian expectations against densities and beta updates.
+
+`python examples/trajectory_statistics.py` runs 256 independent paths per SQW
+model, each with N=8192, and prints JSON measurements. Seeds are spawned using
+NumPy SeedSequence from masters 20261104 and 20261105. Initialization is
+explicitly stationary within the one closed class. For additional context the
+benchmark computes the **finite**, stationary-start identity
+
+`N Var(mean_N) = pi[g²] + 2 sum_(k=1)^(N-1) (1-k/N) pi[g * T^k g]`.
+
+This finite sum is valid even with periodicity; it is not an assumed convergent
+infinite autocorrelation series and is not used as the production Poisson
+solver. The benchmark reports random empirical variance and interval coverage
+without making either a brittle pass/fail oracle. See
+[executed results](validation.md) for measurements and statistical caveats.
+
+## Interface and remaining scope
+
+The English/German dashboard exposes label/outcome/probability/coherence
+presets, N, warm-up, independent trajectory seed, confidence and initialization.
+The API/Python interface additionally accepts arbitrary Hermitian A or real f.
+Class selection changes the inspected reference, not the retained path. The
+plot envelope is centered at the selected theoretical mean; the final interval
+for that mean is centered at the empirical estimate. They use the same normal
+half-width but answer distinct display questions. A different selected class,
+degenerate variance or an unstable/support-sensitive result hides the envelope.
+
+No optional MMD, RKHS reconstruction, Kemeny-constant computation, adaptive
+confidence sequence or finite-time mixing/bias guarantee is implemented here.
+E-10/R-01 remain separately scoped. All four original Material files are intact.

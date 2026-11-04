@@ -40,6 +40,16 @@ NumPy + SciPy CSR + NetworkX
   support formulas; metadata never edits a quantum operator or state.
 - `core/stationary.py`: explicit M-transpose/P adapters, q2/r0 initialization,
   invariant label measures and lazy phase-sensitive stationary barycenters.
+- `core/markov_statistics.py`: centered sparse bordered Poisson LU, stable
+  martingale variance, independent identity checks and uncertainty diagnostics.
+- `core/classwise_statistics.py`: one reusable factorization per existing closed
+  class, absorption-weighted random limits and conservative global-CLT fields.
+- `core/trajectory_statistics.py`: Hermitian atom expectations, recorded outcome
+  and next-Born semantics; original-transition sampling without density history.
+- `api/statistics_cache.py`: bounded structural (16) and phase-specific (32)
+  engines. Graph/coin/omega/support changes invalidate factors; beta changes
+  invalidate quantum observables while sharing factors. Each solver and engine
+  retains at most 16 observable entries; shared mutation/solves are locked.
 - `api/stationary_cache.py`: bounded 16-model structural cache keyed by complete
   graph, complex coin/omega bytes and support policy; independent of initial
   state, horizon, seed once coins are fixed, and beta. Beta updates retain the
@@ -55,6 +65,9 @@ NumPy + SciPy CSR + NetworkX
 - `frontend/src/StationaryPanel.tsx`, `ReducedMarkovGraph.tsx`, `StationaryPlot.tsx`:
   dedicated bilingual stationary analysis, sparse transitions, class colors,
   stationary weights, physical-time ordinary/Cesàro charts and quantum density.
+- `frontend/src/StatisticsPanel.tsx`, `StatisticsPlot.tsx`, `statisticsTypes.ts`:
+  observable and trajectory controls, class statistics, running mean and
+  asymptotic envelope, translated diagnostics and independent-sampling comparison.
 
 ## Memory and extension points
 
@@ -179,7 +192,7 @@ and sparse solve costs; the original raw matrix remains available for curves.
 English is the initial and fallback language. Only explicit choices from the
 header switcher are persisted under `sqw.language`; browser language detection
 is intentionally absent. Resources are bundled under `i18n/locales/{en,de}/`
-in the `app`, `components`, `research`, `stationary` and `errors` namespaces. Resource initialization is
+in the `app`, `components`, `research`, `stationary`, `statistics` and `errors` namespaces. Resource initialization is
 synchronous. Language changes update the document `lang` and metadata and
 rerender presentation without changing component identities.
 
@@ -194,3 +207,41 @@ numeric constraints, excluding rejected nonfinite input. The frontend maps
 these codes through the `errors` namespace at render time. Unknown codes use
 a localized generic fallback; the original English detail remains available to
 machine/API consumers without being injected into the localized interface.
+
+## Statistics API contract
+
+`POST /api/statistics` takes an open/trajectory/vertex `SimulationRequest` plus:
+
+- `observable`: `kind` (`label_indicator`, `outcome_indicator`,
+  `vertex_probability`, `coherence_real`, `coherence_imag`, `quantum`,
+  `label_values`), zero-based `index`/`second`, actual `vertex` label,
+  optional complex-pair Hermitian `matrix`, optional real `values`.
+- `samples`: 1..100000 observations (default 2000), `burn_in`: 0..10000
+  discarded observations, `trajectory_seed`: uint32 (default 42),
+  `confidence`: strictly between 0 and 1 (default .95).
+- `initialization`: `experiment` or explicitly prepared `stationary_class`;
+  `stationary_class`: zero-based closed-class index (default 0).
+- `support_atol`: 0..1e-6, default 1e-14. Analytical support takes precedence.
+
+The inherited `steps` does not set N. Inherited `seed` controls random coins;
+`trajectory_seed` controls the new sampled path. Dense Hermitian inspection
+is limited to dimension 64 and total dimension*(N+burn_in) to 5000000.
+Errors use the existing localized descriptor mechanism. Responses include
+original orientation, atom start time/labels, observable values, classwise
+Poisson solutions, absorption weights, residuals, stability diagnostics,
+conditional uncertainties, and an empirical law/mean with at most 1001 points.
+Returned points retain physical step and observation count; all observations
+contribute even when chart points are thinned. No density history is returned.
+
+Class weights and global-CLT fields describe the original experimental input.
+Artificial stationary initialization is marked separately with its selected
+class. The browser class selector inspects retained data and specifies the
+class for the next explicit stationary-start run; it never silently resamples.
+Sampling-control changes clear displayed results; experiment changes abort
+stale responses. Language changes preserve all state and make no request.
+Aborting a browser request does not yet cancel server-side computation.
+
+Sparse LU can have fill-in. Small-class condition estimates cost dense cubic
+work (dimension <=128); larger classes omit that estimate. Sampling retains
+O(d + displayed points) state after constructing transition tables. The existing
+Vertex constructor still has its documented dense diagnostic allocations.

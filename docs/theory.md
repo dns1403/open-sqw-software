@@ -266,6 +266,46 @@ solvers, raw-versus-analysis curves, cache semantics and numerical limitations.
 
 ## Numerics and limits
 
+### Poisson equations and scalar trajectory CLTs (E-09, R-08)
+
+For a finite irreducible row chain T, real f and its unique stationary pi, put
+mu=pi f, g=f-mu. The centered Poisson equation (I-T)h=g, pi h=0 has a unique
+solution, including when T is periodic. E-09 in the supplied handoff is a
+PROVEN derivation using a finite-state martingale CLT, not a new numbered
+theorem of Joye. The same scalar argument underlies the fluctuations in R-08.
+
+Let D_k=h(X_k)-(Th)(X_(k-1)). Then
+sum_(k=0)^(N-1) g(X_k)=h(X_0)-h(X_N)+sum_(k=1)^N D_k.
+The boundary divided by sqrt(N) vanishes. Ergodic averages of the conditional
+martingale variance yield sigma²=pi[h²-(Th)²]=2 pi[g h]-pi[g²] >=0.
+Thus sqrt(N)(mean_N-mu) converges in distribution to N(0,sigma²), from any
+fixed initial law in the irreducible class. Periodicity does not obstruct this
+CLT, although an unaveraged infinite autocorrelation series need not converge.
+For sigma²=0 the limit is a point mass; finite errors need not vanish exactly.
+
+On a reducible finite chain, apply this within each closed class C_j and include
+transient absorption a_j=q_start h_j (V-05/AUD-01). The limiting time average
+is mu_J, with random class J. Its ensemble expectation sum_j a_j mu_j is not
+the almost-sure limit of every trajectory. Different means preclude a global
+sqrt(N) Gaussian about that expectation; equal means with different variances
+can also produce a non-Gaussian mixture. Finite transient prefixes affect bias,
+separately from conditional asymptotic fluctuation variance.
+
+Edge adapts T=M.T, f(e)=Re tr(A U|e><e|U†), beginning at t=2 with coherent q2.
+Vertex uses T=P, f(x)=Re tr(A|chi(x)><chi(x)|), beginning at t=1 with r0.
+The already observed X_n, the atom label, its next Born law and its analytic
+expectation of A are distinct. No additional physical measurement is performed.
+Beta can change f while leaving P unchanged. See the
+[statistics guide](trajectory_statistics.md) for numerical policy and API usage.
+
+Normal intervals use sigma/sqrt(N), not sqrt(pi[g²]/N). They are pointwise
+asymptotic approximations, not exact finite-length guarantees or simultaneous
+confidence sequences. Initial/transient bias is excluded; warm-up does not
+certify stationarity. Deterministic mean-channel error and Monte Carlo
+independent-trajectory ensemble variance are separate quantities.
+
+### Floating-point validation
+
 Operators and states use complex double precision. Validation uses an explicit
 absolute tolerance, without an implicit large relative tolerance. Incorrect
 norms or traces, non-Hermitian inputs and nonpositive inputs are rejected rather

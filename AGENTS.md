@@ -17,6 +17,9 @@
 - Prefer declared analytical support for exactly recognized formulas; otherwise report the probability cutoff, removed mass and changed analysis matrix. Tiny genuine rates can change infinite-time limits. Keep original operators and finite-time curves intact; residuals do not certify asymptotic accuracy.
 - Solve a stationary law per closed class and include transient absorption via a_j = q_start @ h_j (AUD-01/X-04). Uniqueness, irreducibility and ordinary convergence are separate properties. A periodic class removes an arbitrary-input convergence guarantee, not convergence for every individual input.
 - Keep stationary label measures, their quantum barycenters, ensemble Cesàro averages and single-path empirical averages distinct. Preserve complex omega/beta in atom reconstruction. Cache graph/coins/omega/support separately from initial inputs and beta.
+- Poisson/CLT analysis requires a real finite observable and an irreducible closed class, but not aperiodicity. Reuse the existing SCCs and absorption laws; never regularize a reducible chain into an irreducible one. Report class-conditional means/variances; multiple reachable classes do not imply one global Gaussian.
+- Verify Poisson centering, residuals and variance identities. Preserve positive tiny variances; a zero asymptotic variance does not imply zero finite-time error. CLT intervals are pointwise asymptotic approximations, exclude transient bias and are suppressed for unstable solves or unresolved support approximations.
+- Cache phase-sensitive atom observables using beta as well as complex omega/coins. Sampling must use original reduced transitions and compact labels, with explicit t=2/t=1 starts and separate scattering/trajectory seeds. Analytic atom expectations introduce no additional measurements.
 
 ## Development
 - Work in this checkout; preserve user-provided research and files.
@@ -31,6 +34,6 @@
 
 ## Internationalization
 - English is the default and fallback. Only an explicit stored language choice overrides it; do not infer the language from browser settings.
-- Put user-facing text in the matching `app`, `components`, `research`, `stationary`, or `errors` namespaces under `frontend/src/i18n/locales`. Keep keys and interpolation parameters consistent across languages.
+- Put user-facing text in the matching `app`, `components`, `research`, `stationary`, `statistics`, or `errors` namespaces under `frontend/src/i18n/locales`. Keep keys and interpolation parameters consistent across languages.
 - Language changes must preserve experiment state and must not trigger graph or simulation requests. Translate error descriptors when rendering, not when catching errors.
 - Preserve mathematical notation, matrix JSON, model identifiers, and API fields. Format observable numbers only for display. Run `pnpm test` and `pnpm build` in `frontend` after UI changes.

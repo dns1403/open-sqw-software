@@ -247,17 +247,18 @@ frontend/src/i18n/
   index.ts
   format.ts
   locales/
-    en/{app,components,research,stationary,errors}.json
-    de/{app,components,research,stationary,errors}.json
+    en/{app,components,research,stationary,statistics,errors}.json
+    de/{app,components,research,stationary,statistics,errors}.json
 ```
 
 - `app`: application layout, controls, terminology, counts and help.
 - `components`: graph interaction, matrix editor and scientific chart text.
 - `research`: exact strategies, vertex parameters, ensembles and state inspection.
 - `stationary`: communicating classes, support policy, stationary laws and long-time charts.
+- `statistics`: Poisson diagnostics, classwise CLTs, atom observables and trajectory uncertainty.
 - `errors`: localized stable API error codes and request-validation messages.
 
-To add a language, copy all five English namespace files to a new language
+To add a language, copy all six English namespace files to a new language
 folder, translate their values while preserving keys and interpolation tokens,
 then import/register them in `resources` and `supportedLanguages` in `index.ts`.
 Add the locale's number-format configuration in `format.ts` if needed. Retain
@@ -277,10 +278,11 @@ Implemented: graph presets/custom graphs in the core, complex scattering,
 unitary/open edge dynamics, independent reference and exact optimized edge and
 vertex trajectories/means, compact ensembles, stateless API, bilingual controls,
 playback, heatmaps, quantum/Markov inspection, stationary families, periods,
-absorption and long-time analysis. See the result-ID mapping below.
+absorption, long-time analysis, centered Poisson solvers and classwise trajectory
+uncertainty. See the result-ID mapping below.
 
-Planned: class-specific Poisson equations and uncertainty; spectral/RKHS
-analysis; free graph editing and full experiment import/export. Multigraphs,
+Planned: finite-atomic MMD and spectral/RKHS analysis; free graph editing and
+full experiment import/export. Multigraphs,
 partial observations and time-dependent coins are explicitly unsupported.
 
 Dense density-matrix methods target small reference systems. The interactive
@@ -306,12 +308,48 @@ independent corrected copy with unchanged assertions and tolerances.
 - [Theory and time indexing](docs/theory.md)
 - [Architecture and API contract](docs/architecture.md)
 - [Stationary algorithms, examples and limitations](docs/stationary_analysis.md)
+- [Poisson equations, CLTs and trajectory uncertainty](docs/trajectory_statistics.md)
 - [Additional mathematical results](docs/mathematical_results.md)
 - [Handoff audit and T34 correction](docs/mathematical_audit.md)
 - [Measured benchmarks](docs/benchmarks.md)
 - [Roadmap](docs/roadmap.md)
 - [Development instructions](AGENTS.md)
 
-The next research step is class-specific Poisson equations and justified
-uncertainty estimates, supported by the stationary structure and independent
-ensembles. Sparse vertex construction remains the main scaling prerequisite.
+The next research step is support-sensitivity diagnostics and finite-atomic
+MMD with explicit stationary-start assumptions. Sparse vertex construction
+remains the main scaling prerequisite.
+
+## Trajectory statistics (Phase 4)
+
+In any open Edge/Vertex mode, use **Trajectory Statistics & Uncertainty**
+(**Trajektorienstatistik & Unsicherheit**). Select an atom/outcome indicator,
+next Born probability or Hermitian coherence; choose N, warm-up and a trajectory
+seed. Inspect recurrent classes, absorption probabilities, means, periods,
+Poisson residuals and correlated standard errors. Running means are compared
+with a selected class mean and, when justified, a pointwise asymptotic band.
+Class selection and English/German switching preserve the sampled path.
+
+The Python core and `/api/statistics` also accept arbitrary real label values
+and Hermitian matrices. Edge atoms start at t=2, Vertex atoms at t=1.
+Observations are correlated; the displayed IID error is only a comparison.
+Periodic irreducible chains are supported. Reducible chains retain conditional
+CLTs, transient mass and random class-dependent limits. Zero variance gives no
+nondegenerate Gaussian interval and does not eliminate finite-length bias.
+
+```python
+from sqw.core import PoissonSolver, TrajectoryStatistics
+
+solution = PoissonSolver([[2/3, 1/3], [1/3, 2/3]]).solve([1, 0])
+assert abs(solution.asymptotic_variance - 0.5) < 1e-14
+# For a previously constructed ScatteringWalk or InducedVertexWalk:
+statistics = TrajectoryStatistics(walk)
+f = statistics.observable('label_indicator', index=0)
+classes = statistics.analyze(initial, f)
+path = statistics.sample(initial, f, 10000, seed=42, max_points=501)
+```
+
+Run the seeded long-trajectory benchmark with
+`python examples/trajectory_statistics.py`. Its measured results, analytical
+checks and limitations are in [the validation record](docs/validation.md).
+Each tested milestone is committed locally; remote pushes require explicit
+authorization. The application remains local and needs no new dependencies.

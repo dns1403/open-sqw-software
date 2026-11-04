@@ -19,16 +19,21 @@
 - Cached structure independent of initial state/beta; bilingual Long-Time
   Dynamics graphs, sparse/full matrix inspection and exact X-04 regression.
 
-## Next: class-specific Poisson equations and uncertainty
+- Sparse centered Poisson equations, stable classwise Markov variances,
+  periodic-chain CLTs, transient-conditioned limits and numerical diagnostics.
+- Phase-sensitive SQW observables, compact seeded time averages, explicitly
+  prepared stationary ensembles, IID comparison and bilingual uncertainty UI.
+- Atomic tested local commits, analytical variance regressions and reproducible
+  seeded long-trajectory benchmarking (E-09; scalar part of R-08).
 
-Use the implemented class/absorption structure to select a recurrent class,
-center observables and solve normalized Poisson equations (E-09/E-10, R-08).
-State stationarity/ergodicity and periodicity assumptions before adding CLT or
-confidence-interval claims. Validate asymptotic variance against independent
-ensembles, and distinguish single-path uncertainty from ensemble sampling.
-Sparse Vertex construction and experiment import/export are useful parallel
-engineering priorities. Support-sensitivity analysis should precede numerical
-claims for nearly reducible chains.
+## Next: support sensitivity and finite-atomic MMD
+
+Compare support thresholds and preserve genuine rare transitions before
+interpreting nearly reducible long-time statistics. Add finite-atomic Gram
+diagnostics and MMD (E-10/R-01/R-08), with explicit stationary initialization for
+finite-length identities, periodicity and duplicate-atom qualifications.
+Do not claim characteristic kernels for arbitrary measures. Sparse Vertex
+construction and experiment import/export remain useful engineering priorities.
 
 ## Subsequent priorities and dependencies
 
@@ -39,10 +44,10 @@ claims for nearly reducible chains.
 2. **Spectral analysis:** E-08/E-11/E-12, U-02/U-03, NEW-02. Build on class/period
    diagnostics; use sparse operators, distinguish channel zero modes from
    nonzero Markov modes and cite the paper's spectral-mapping hypotheses.
-3. **Poisson equations and uncertainty:** E-09/E-10 and R-08. Require a specified
-   recurrent class, centered observable, stationarity/ergodicity conditions and
-   justified variance estimates. Independent ensembles are already available;
-   single-path CLTs are a different statistical interface.
+3. **Finite-length uncertainty:** build on the implemented E-09 scalar CLT;
+   investigate explicit bias/mixing bounds or confidence sequences only under
+   appropriate hypotheses. Current pointwise asymptotic intervals do not
+   guarantee finite-time or simultaneous coverage.
 4. **Ensemble geometry, RKHS and MMD:** V-03/V-07, R-01--R-05/R-07. First expose
    Gram matrices and duplicate-atom handling; then kernels, moment order and
    identifiability conditions. Source V-07 is conditional. Do not infer equality
