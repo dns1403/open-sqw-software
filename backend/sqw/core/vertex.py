@@ -1,6 +1,7 @@
 """Independent induced vertex channel from Joye Section 6, equations 6.1-6.18."""
 
 from collections.abc import Mapping
+from math import fsum
 from types import MappingProxyType
 
 import numpy as np
@@ -72,14 +73,22 @@ class InducedVertexWalk:
         for x in self.graph.vertices:
             local_scattered = edge_walk.scattering[x] @ vectors[x]
             reduced = np.zeros(self.dimension, dtype=complex)
+            missing_terms = []
             for i, z in enumerate(self.graph.neighbors[x]):
                 reverse_index = self.graph.neighbors[z].index(x)
                 reduced[self.graph.vertex_index[z]] = vectors[z][reverse_index].conjugate() * local_scattered[i]
+                # V-01 / T34: for normalized boundary vectors and S omega,
+                # 1-||theta||² = sum_z |v_z|² sum_{u != x} |omega_u(z)|².
+                # Sum nonnegative complementary port masses instead of
+                # subtracting two near-unit numbers before a square root.
+                # This preserves genuine tiny masses; no threshold is used.
+                complement = fsum(float(abs(value) ** 2) for j, value in enumerate(vectors[z]) if j != reverse_index)
+                missing_terms.append(float(abs(local_scattered[i]) ** 2) * complement)
             norm_squared = float(np.vdot(reduced, reduced).real)
             if norm_squared > 1 + ATOL:
                 raise ArithmeticError("The norm of theta exceeds one beyond numerical tolerance.")
             completed = reduced.copy()
-            completed[self.graph.vertex_index[x]] = np.exp(1j * phases[x]) * np.sqrt(max(0.0, 1 - norm_squared))
+            completed[self.graph.vertex_index[x]] = np.exp(1j * phases[x]) * np.sqrt(fsum(missing_terms))
             validate_pure(completed, self.dimension)
             reduced.setflags(write=False)
             completed.setflags(write=False)

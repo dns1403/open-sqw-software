@@ -27,9 +27,35 @@
     "invalid": "The value is invalid."
   },
   "fields": {
-    "request": "Request", "graph": "Graph", "kind": "Type", "size": "Number of vertices",
-    "preset": "Scattering preset", "seed": "Random seed", "degree": "Degree",
-    "scattering": "Scattering matrices", "mode": "Walk mode", "initial": "Initial state",
-    "edge": "Directed edge", "steps": "Number of steps"
-  }
+    "request": "Request",
+    "graph": "Graph",
+    "kind": "Type",
+    "size": "Number of vertices",
+    "preset": "Scattering preset",
+    "seed": "Random seed",
+    "degree": "Degree",
+    "scattering": "Scattering matrices",
+    "mode": "Walk mode",
+    "initial": "Initial state",
+    "edge": "Directed edge",
+    "steps": "Number of steps",
+    "strategy": "Strategy",
+    "trajectories": "Trajectories",
+    "statistics": "Statistics",
+    "selected_histories": "Selected histories",
+    "vertex_parameters": "Vertex parameters",
+    "omega": "Omega",
+    "beta": "Beta",
+    "atom_id": "Atom id",
+    "vertex": "Vertex",
+    "vector": "Vector",
+    "density": "Density",
+    "vertex_dynamics": "Vertex dynamics"
+  },
+  "initial_state": "The initial state must have the correct dimension, finite entries and unit normalization. Density matrices must be Hermitian and positive semidefinite.",
+  "vertex_parameters": "Provide normalized boundary vectors in the stored neighbor order and a finite real phase for every vertex.",
+  "ensemble_budget": "This ensemble exceeds the interactive work budget. Reduce trajectories or steps, or select the optimized strategy.",
+  "ensemble_histories": "The number of selected histories cannot exceed the number of trajectories.",
+  "atom_id": "Select an atom in the current model basis.",
+  "analysis_budget": "Dense state and transition inspection supports dimensions up to 64. Use a smaller graph or the Python API."
 }

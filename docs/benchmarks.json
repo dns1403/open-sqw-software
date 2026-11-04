@@ -1,0 +1,183 @@
+{
+  "measured_utc": "2026-11-04T12:08:27.937774+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.14",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "runtime_method": "Median perf_counter seconds; model/initial construction and tracemalloc excluded; reduction construction inside run_ensemble included.",
+  "memory_method": "Peak bytes tracked by tracemalloc in a separate run, with prebuilt model/initial excluded; not process RSS or total native-library memory.",
+  "statistics": [
+    "states",
+    "vertices",
+    "edges",
+    "exact"
+  ],
+  "selected_histories": 3,
+  "seed": 42,
+  "cases": [
+    {
+      "model": "edge",
+      "graph": "cycle",
+      "vertices": 8,
+      "dimension": 16,
+      "trajectories": 300,
+      "steps": 20,
+      "initial": "complex mixed",
+      "scattering": "random unitary",
+      "max_mean_density_error_through_step_8": 4.1648019860362827e-17,
+      "strategies": {
+        "reference": {
+          "seconds": [
+            0.35739850002573803,
+            0.3519959999830462,
+            0.3633296999614686
+          ],
+          "median_seconds": 0.35739850002573803,
+          "peak_traced_bytes": 432171,
+          "final_born_vertex_tv": 0.04578981096191228,
+          "final_label_tv": 0.0746594539229983
+        },
+        "optimized": {
+          "seconds": [
+            0.006317000021226704,
+            0.006240700022317469,
+            0.006139000004623085
+          ],
+          "median_seconds": 0.006240700022317469,
+          "peak_traced_bytes": 92618,
+          "final_born_vertex_tv": 0.03561338509910965,
+          "final_label_tv": 0.07867435136061711
+        }
+      }
+    },
+    {
+      "model": "edge",
+      "graph": "star",
+      "vertices": 10,
+      "dimension": 18,
+      "trajectories": 300,
+      "steps": 20,
+      "initial": "complex mixed",
+      "scattering": "random unitary",
+      "max_mean_density_error_through_step_8": 4.860322466063819e-17,
+      "strategies": {
+        "reference": {
+          "seconds": [
+            0.3855902000213973,
+            0.39506120001897216,
+            0.38489169999957085
+          ],
+          "median_seconds": 0.3855902000213973,
+          "peak_traced_bytes": 541814,
+          "final_born_vertex_tv": 0.02481589996125717,
+          "final_label_tv": 0.10132748964548184
+        },
+        "optimized": {
+          "seconds": [
+            0.006897100014612079,
+            0.006700800033286214,
+            0.006803099997341633
+          ],
+          "median_seconds": 0.006803099997341633,
+          "peak_traced_bytes": 106006,
+          "final_born_vertex_tv": 0.027944107017311454,
+          "final_label_tv": 0.10577171886566843
+        }
+      }
+    },
+    {
+      "model": "vertex",
+      "graph": "cycle",
+      "vertices": 8,
+      "dimension": 8,
+      "trajectories": 300,
+      "steps": 20,
+      "initial": "complex mixed",
+      "scattering": "random unitary",
+      "max_mean_density_error_through_step_8": 8.326672684688674e-16,
+      "strategies": {
+        "reference": {
+          "seconds": [
+            0.21659600001294166,
+            0.21604149998165667,
+            0.21522559999721125
+          ],
+          "median_seconds": 0.21604149998165667,
+          "peak_traced_bytes": 134885,
+          "final_born_vertex_tv": 0.00819912619696769,
+          "final_label_tv": 0.04210247794952374
+        },
+        "optimized": {
+          "seconds": [
+            0.004647699999623001,
+            0.0044787999941036105,
+            0.004439599986653775
+          ],
+          "median_seconds": 0.0044787999941036105,
+          "peak_traced_bytes": 61798,
+          "final_born_vertex_tv": 0.02270181968463935,
+          "final_label_tv": 0.06735713560666876
+        }
+      }
+    },
+    {
+      "model": "vertex",
+      "graph": "star",
+      "vertices": 10,
+      "dimension": 10,
+      "trajectories": 300,
+      "steps": 20,
+      "initial": "complex mixed",
+      "scattering": "random unitary",
+      "max_mean_density_error_through_step_8": 2.787728152484798e-16,
+      "strategies": {
+        "reference": {
+          "seconds": [
+            0.2180798000190407,
+            0.2290381999919191,
+            0.2190351000172086
+          ],
+          "median_seconds": 0.2190351000172086,
+          "peak_traced_bytes": 192540,
+          "final_born_vertex_tv": 0.029464176340577575,
+          "final_label_tv": 0.04521501747584397
+        },
+        "optimized": {
+          "seconds": [
+            0.0047821999760344625,
+            0.004983099992386997,
+            0.004653399984817952
+          ],
+          "median_seconds": 0.0047821999760344625,
+          "peak_traced_bytes": 65300,
+          "final_born_vertex_tv": 0.03694560696207616,
+          "final_label_tv": 0.04156380783233566
+        }
+      }
+    },
+    {
+      "model": "edge",
+      "graph": "cycle",
+      "vertices": 32,
+      "dimension": 64,
+      "trajectories": 50000,
+      "steps": 40,
+      "initial": "complex mixed",
+      "scattering": "random unitary",
+      "max_mean_density_error_through_step_8": 1.3969180119399976e-17,
+      "strategies": {
+        "optimized": {
+          "seconds": [
+            0.09624230000190437,
+            0.09422710002399981,
+            0.09908499999437481
+          ],
+          "median_seconds": 0.09624230000190437,
+          "peak_traced_bytes": 1808969,
+          "final_born_vertex_tv": 0.008061459668179683,
+          "final_label_tv": 0.013401509095801787
+        }
+      }
+    }
+  ]
+}

@@ -31,15 +31,26 @@ class ScatteringRequest(StrictModel):
 
 
 class InitialState(StrictModel):
-    kind: Literal["basis", "uniform"] = "basis"
+    kind: Literal["basis", "uniform", "pure", "mixed", "maximally_mixed"] = "basis"
     edge: tuple[VertexLabel, VertexLabel] | None = None
+    vertex: VertexLabel | None = None
+    vector: list[ComplexScalar] | None = None
+    density: ComplexMatrix | None = None
+
+
+class VertexParameters(StrictModel):
+    omega: dict[str, list[ComplexScalar]] | None = None
+    beta: dict[str, FiniteFloat] | None = None
 
 
 class SimulationRequest(StrictModel):
     graph: GraphSpec = Field(default_factory=GraphSpec)
     preset: Preset = "dft"
     scattering: dict[str, ComplexMatrix] | None = None
-    mode: Literal["unitary", "open", "trajectory"] = "unitary"
+    mode: Literal["unitary", "open", "trajectory", "vertex"] = "unitary"
+    strategy: Literal["reference", "optimized"] = "reference"
+    vertex_dynamics: Literal["trajectory", "mean"] = "trajectory"
+    vertex_parameters: VertexParameters = Field(default_factory=VertexParameters)
     initial: InitialState = Field(default_factory=InitialState)
     steps: int = Field(default=20, ge=0, le=200, strict=True)
     seed: int = Field(default=42, ge=0, le=2**32 - 1, strict=True)
@@ -63,6 +74,12 @@ class Frame(StrictModel):
     measurement: int | None = None
     measurement_probability: float | None = None
     measurement_probabilities: list[float] | None = None
+    stage: str = "initial"
+    state_kind: str = "conditional"
+    atom_id: int | None = None
+    atom_edge: tuple[int, int] | None = None
+    atom_vertex: int | None = None
+    state_weights: list[float] | None = None
 
 
 class SimulationResponse(StrictModel):
@@ -70,3 +87,17 @@ class SimulationResponse(StrictModel):
     mode: str
     frames: list[Frame]
     outcomes: list[int]
+    strategy: str = "reference"
+    model: str = "edge"
+
+
+class EnsembleRequest(SimulationRequest):
+    mode: Literal["trajectory", "vertex"] = "trajectory"
+    trajectories: int = Field(default=1000, ge=1, le=100_000, strict=True)
+    selected_histories: int = Field(default=3, ge=0, le=20, strict=True)
+    statistics: list[Literal["states", "vertices", "edges", "exact"]] = Field(default_factory=lambda: ["states", "vertices", "edges", "exact"])
+
+
+class AnalysisRequest(SimulationRequest):
+    mode: Literal["open", "trajectory", "vertex"] = "trajectory"
+    atom_id: int = Field(default=0, ge=0, strict=True)

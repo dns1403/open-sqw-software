@@ -1,0 +1,93 @@
+{
+  "status": "FAIL",
+  "validation_date": "2026-11-04",
+  "python_version": "3.13.5",
+  "numpy_version": "2.3.5",
+  "test_count": 42,
+  "passed_count": 41,
+  "failure_count": 1,
+  "error_count": 0,
+  "elapsed_seconds": 0.06462994200001049,
+  "passed_tests": [
+    "sqw_reference_checks.MathematicalRegression.test_T01_unitarity_and_flip",
+    "sqw_reference_checks.MathematicalRegression.test_T02_local_unitary_application",
+    "sqw_reference_checks.MathematicalRegression.test_T03_unitary_cesaro_degeneracy",
+    "sqw_reference_checks.MathematicalRegression.test_T04_star_block_square",
+    "sqw_reference_checks.MathematicalRegression.test_T05_kraus_and_channel",
+    "sqw_reference_checks.MathematicalRegression.test_T06_two_step_products",
+    "sqw_reference_checks.MathematicalRegression.test_T07_mixed_input_two_step_purity",
+    "sqw_reference_checks.MathematicalRegression.test_T08_initial_coherences_and_reachability",
+    "sqw_reference_checks.MathematicalRegression.test_T09_q2_mean_and_time_offset",
+    "sqw_reference_checks.MathematicalRegression.test_T10_markov_transition_and_intertwining",
+    "sqw_reference_checks.MathematicalRegression.test_T11_observable_reconstruction",
+    "sqw_reference_checks.MathematicalRegression.test_T12_T3_hadamard_matrix",
+    "sqw_reference_checks.MathematicalRegression.test_T13_identity_and_swap_classes",
+    "sqw_reference_checks.MathematicalRegression.test_T14_trace_norm_identities",
+    "sqw_reference_checks.MathematicalRegression.test_T15_channel_ranks",
+    "sqw_reference_checks.MathematicalRegression.test_T16_superoperator_adjoint_product",
+    "sqw_reference_checks.MathematicalRegression.test_T17_poisson_variances",
+    "sqw_reference_checks.MathematicalRegression.test_T18_empirical_error_spectrum",
+    "sqw_reference_checks.MathematicalRegression.test_T19_one_and_two_step_norms",
+    "sqw_reference_checks.MathematicalRegression.test_T20_flat_adjacency_reduction",
+    "sqw_reference_checks.MathematicalRegression.test_T21_same_measure_pair_law",
+    "sqw_reference_checks.MathematicalRegression.test_T22_same_measure_different_spectral_rate",
+    "sqw_reference_checks.MathematicalRegression.test_T23_flip_reversibility",
+    "sqw_reference_checks.MathematicalRegression.test_T24_parallel_arcs_counterexample",
+    "sqw_reference_checks.MathematicalRegression.test_T25_vertex_construction",
+    "sqw_reference_checks.MathematicalRegression.test_T26_complex_boundary_conjugation",
+    "sqw_reference_checks.MathematicalRegression.test_T27_raw_compression_trace_preserving_counterexample",
+    "sqw_reference_checks.MathematicalRegression.test_T28_vertex_conditional_purity",
+    "sqw_reference_checks.MathematicalRegression.test_T29_vertex_mean_and_born_timing",
+    "sqw_reference_checks.MathematicalRegression.test_T30_duplicate_atoms_lumping",
+    "sqw_reference_checks.MathematicalRegression.test_T31_vertex_stationarity_and_norm_sandwich",
+    "sqw_reference_checks.MathematicalRegression.test_T32_dft_transient_basin_weights",
+    "sqw_reference_checks.MathematicalRegression.test_T33_bistochastic_not_unital",
+    "sqw_reference_checks.MathematicalRegression.test_T35_edge_rkhs_and_masa",
+    "sqw_reference_checks.MathematicalRegression.test_T36_tensor_gram_identifiability",
+    "sqw_reference_checks.MathematicalRegression.test_T37_higher_moment_factorization",
+    "sqw_reference_checks.MathematicalRegression.test_T38_pair_reconstruction_and_triangle_reversal",
+    "sqw_reference_checks.MathematicalRegression.test_T39_lyapunov_and_residual",
+    "sqw_reference_checks.MathematicalRegression.test_T40_measure_gauge_not_channel_gauge",
+    "sqw_reference_checks.MathematicalRegression.test_T41_perturbation_bound",
+    "sqw_reference_checks.MathematicalRegression.test_T42_equation_431_probability_factor"
+  ],
+  "failures": [
+    {
+      "test": "test_T34_grover_alpha_invariance (sqw_reference_checks.MathematicalRegression.test_T34_grover_alpha_invariance)",
+      "traceback": "Traceback (most recent call last):\n  File \"/mnt/data/sqw_handoff/tests/reference_checks.py\", line 392, in test_T34_grover_alpha_invariance\n    for chi in out:close(chi,out[0])\n                   ~~~~~^^^^^^^^^^^^\n  File \"/mnt/data/sqw_handoff/tests/reference_checks.py\", line 16, in close\n    assert_allclose(a, b, atol=atol, rtol=ATOL)\n    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/numpy/testing/_private/utils.py\", line 1711, in assert_allclose\n    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                         verbose=verbose, header=header, equal_nan=equal_nan,\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                         strict=strict)\n                         ^^^^^^^^^^^^^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/numpy/testing/_private/utils.py\", line 919, in assert_array_compare\n    raise AssertionError(msg)\nAssertionError: \nNot equal to tolerance rtol=2e-10, atol=2e-10\n\nMismatched elements: 1 / 9 (11.1%)\nMax absolute difference among violations: 1.29763587e-08\nMax relative difference among violations: 0.87082869\n ACTUAL: array([[7.035742e-01+7.059289e-02j, 7.071068e-01+1.848893e-32j,\n        0.000000e+00+0.000000e+00j],\n       [7.071068e-01+0.000000e+00j, 2.732183e-08+5.538408e-09j,...\n DESIRED: array([[7.035742e-01+7.059289e-02j, 7.071068e-01+0.000000e+00j,\n        0.000000e+00+0.000000e+00j],\n       [7.071068e-01+0.000000e+00j, 1.460413e-08+2.960404e-09j,...\n"
+    }
+  ],
+  "errors": [],
+  "specification": {
+    "schema_validation": "PASS",
+    "result_count": 39,
+    "test_registry_count": 42,
+    "fixture_count": 7,
+    "cross_references": "PASS"
+  },
+  "document": {
+    "word_count_whitespace": 12178,
+    "character_count": 114733,
+    "control_char_check": "PASS",
+    "display_math_pairs": 122,
+    "inline_math_pairs": 173,
+    "math_delimiter_check": "PASS",
+    "code_fence_check": "PASS"
+  },
+  "scope_note": "Tests are deterministic finite-dimensional numerical regression checks. They are not formal proofs and do not verify every general statement, infinite-graph claim, or cited theorem.",
+  "results_without_direct_executable_test": [
+    "E-17",
+    "V-07",
+    "R-04"
+  ],
+  "sha256_files": {
+    "README.md": "a3712ab8ceb7ff980ff753c8d2b44391f110c099ecb80f28db8bbdb9d402692b",
+    "docs/mathematical_results.md": "70c8d89c1baac823f89c12b46857dcdcbd3449e2ba766561d4b28e54e170e07c",
+    "spec/mathematical_results.json": "52ee38aa3761ec371c2ea3a2f20237ab19ac5ee7af9aa7a1a3a692b36189982f",
+    "spec/mathematical_results.schema.json": "aee665719089bb61bbe55fe9cb4c176883b18e247462e9607eb478ad32926d18",
+    "spec/reference_fixtures.json": "ff5c6f0a109a8df5d3352eeb1018e879654b1470c508c8fe057eafc67e85c452",
+    "spec/test_cases.json": "e9040ddd057256b897fffb7600a5cfbcc51b4964719a720bc0cf592605c894c3",
+    "tests/reference_checks.py": "ab23054c36cf3adfd9dc3c2c454b2a08e44d87e338e630f1fd97319ded799ce9"
+  },
+  "test_log": "test_T01_unitarity_and_flip (sqw_reference_checks.MathematicalRegression.test_T01_unitarity_and_flip) ... ok\ntest_T02_local_unitary_application (sqw_reference_checks.MathematicalRegression.test_T02_local_unitary_application) ... ok\ntest_T03_unitary_cesaro_degeneracy (sqw_reference_checks.MathematicalRegression.test_T03_unitary_cesaro_degeneracy) ... ok\ntest_T04_star_block_square (sqw_reference_checks.MathematicalRegression.test_T04_star_block_square) ... ok\ntest_T05_kraus_and_channel (sqw_reference_checks.MathematicalRegression.test_T05_kraus_and_channel) ... ok\ntest_T06_two_step_products (sqw_reference_checks.MathematicalRegression.test_T06_two_step_products) ... ok\ntest_T07_mixed_input_two_step_purity (sqw_reference_checks.MathematicalRegression.test_T07_mixed_input_two_step_purity) ... ok\ntest_T08_initial_coherences_and_reachability (sqw_reference_checks.MathematicalRegression.test_T08_initial_coherences_and_reachability) ... ok\ntest_T09_q2_mean_and_time_offset (sqw_reference_checks.MathematicalRegression.test_T09_q2_mean_and_time_offset) ... ok\ntest_T10_markov_transition_and_intertwining (sqw_reference_checks.MathematicalRegression.test_T10_markov_transition_and_intertwining) ... ok\ntest_T11_observable_reconstruction (sqw_reference_checks.MathematicalRegression.test_T11_observable_reconstruction) ... ok\ntest_T12_T3_hadamard_matrix (sqw_reference_checks.MathematicalRegression.test_T12_T3_hadamard_matrix) ... ok\ntest_T13_identity_and_swap_classes (sqw_reference_checks.MathematicalRegression.test_T13_identity_and_swap_classes) ... ok\ntest_T14_trace_norm_identities (sqw_reference_checks.MathematicalRegression.test_T14_trace_norm_identities) ... ok\ntest_T15_channel_ranks (sqw_reference_checks.MathematicalRegression.test_T15_channel_ranks) ... ok\ntest_T16_superoperator_adjoint_product (sqw_reference_checks.MathematicalRegression.test_T16_superoperator_adjoint_product) ... ok\ntest_T17_poisson_variances (sqw_reference_checks.MathematicalRegression.test_T17_poisson_variances) ... ok\ntest_T18_empirical_error_spectrum (sqw_reference_checks.MathematicalRegression.test_T18_empirical_error_spectrum) ... ok\ntest_T19_one_and_two_step_norms (sqw_reference_checks.MathematicalRegression.test_T19_one_and_two_step_norms) ... ok\ntest_T20_flat_adjacency_reduction (sqw_reference_checks.MathematicalRegression.test_T20_flat_adjacency_reduction) ... ok\ntest_T21_same_measure_pair_law (sqw_reference_checks.MathematicalRegression.test_T21_same_measure_pair_law) ... ok\ntest_T22_same_measure_different_spectral_rate (sqw_reference_checks.MathematicalRegression.test_T22_same_measure_different_spectral_rate) ... ok\ntest_T23_flip_reversibility (sqw_reference_checks.MathematicalRegression.test_T23_flip_reversibility) ... ok\ntest_T24_parallel_arcs_counterexample (sqw_reference_checks.MathematicalRegression.test_T24_parallel_arcs_counterexample) ... ok\ntest_T25_vertex_construction (sqw_reference_checks.MathematicalRegression.test_T25_vertex_construction) ... ok\ntest_T26_complex_boundary_conjugation (sqw_reference_checks.MathematicalRegression.test_T26_complex_boundary_conjugation) ... ok\ntest_T27_raw_compression_trace_preserving_counterexample (sqw_reference_checks.MathematicalRegression.test_T27_raw_compression_trace_preserving_counterexample) ... ok\ntest_T28_vertex_conditional_purity (sqw_reference_checks.MathematicalRegression.test_T28_vertex_conditional_purity) ... ok\ntest_T29_vertex_mean_and_born_timing (sqw_reference_checks.MathematicalRegression.test_T29_vertex_mean_and_born_timing) ... ok\ntest_T30_duplicate_atoms_lumping (sqw_reference_checks.MathematicalRegression.test_T30_duplicate_atoms_lumping) ... ok\ntest_T31_vertex_stationarity_and_norm_sandwich (sqw_reference_checks.MathematicalRegression.test_T31_vertex_stationarity_and_norm_sandwich) ... ok\ntest_T32_dft_transient_basin_weights (sqw_reference_checks.MathematicalRegression.test_T32_dft_transient_basin_weights) ... ok\ntest_T33_bistochastic_not_unital (sqw_reference_checks.MathematicalRegression.test_T33_bistochastic_not_unital) ... ok\ntest_T34_grover_alpha_invariance (sqw_reference_checks.MathematicalRegression.test_T34_grover_alpha_invariance) ... FAIL\ntest_T35_edge_rkhs_and_masa (sqw_reference_checks.MathematicalRegression.test_T35_edge_rkhs_and_masa) ... ok\ntest_T36_tensor_gram_identifiability (sqw_reference_checks.MathematicalRegression.test_T36_tensor_gram_identifiability) ... ok\ntest_T37_higher_moment_factorization (sqw_reference_checks.MathematicalRegression.test_T37_higher_moment_factorization) ... ok\ntest_T38_pair_reconstruction_and_triangle_reversal (sqw_reference_checks.MathematicalRegression.test_T38_pair_reconstruction_and_triangle_reversal) ... ok\ntest_T39_lyapunov_and_residual (sqw_reference_checks.MathematicalRegression.test_T39_lyapunov_and_residual) ... ok\ntest_T40_measure_gauge_not_channel_gauge (sqw_reference_checks.MathematicalRegression.test_T40_measure_gauge_not_channel_gauge) ... ok\ntest_T41_perturbation_bound (sqw_reference_checks.MathematicalRegression.test_T41_perturbation_bound) ... ok\ntest_T42_equation_431_probability_factor (sqw_reference_checks.MathematicalRegression.test_T42_equation_431_probability_factor) ... ok\n\n======================================================================\nFAIL: test_T34_grover_alpha_invariance (sqw_reference_checks.MathematicalRegression.test_T34_grover_alpha_invariance)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/data/sqw_handoff/tests/reference_checks.py\", line 392, in test_T34_grover_alpha_invariance\n    for chi in out:close(chi,out[0])\n                   ~~~~~^^^^^^^^^^^^\n  File \"/mnt/data/sqw_handoff/tests/reference_checks.py\", line 16, in close\n    assert_allclose(a, b, atol=atol, rtol=ATOL)\n    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/numpy/testing/_private/utils.py\", line 1711, in assert_allclose\n    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                         verbose=verbose, header=header, equal_nan=equal_nan,\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                         strict=strict)\n                         ^^^^^^^^^^^^^^\n  File \"/opt/pyvenv/lib/python3.13/site-packages/numpy/testing/_private/utils.py\", line 919, in assert_array_compare\n    raise AssertionError(msg)\nAssertionError: \nNot equal to tolerance rtol=2e-10, atol=2e-10\n\nMismatched elements: 1 / 9 (11.1%)\nMax absolute difference among violations: 1.29763587e-08\nMax relative difference among violations: 0.87082869\n ACTUAL: array([[7.035742e-01+7.059289e-02j, 7.071068e-01+1.848893e-32j,\n        0.000000e+00+0.000000e+00j],\n       [7.071068e-01+0.000000e+00j, 2.732183e-08+5.538408e-09j,...\n DESIRED: array([[7.035742e-01+7.059289e-02j, 7.071068e-01+0.000000e+00j,\n        0.000000e+00+0.000000e+00j],\n       [7.071068e-01+0.000000e+00j, 1.460413e-08+2.960404e-09j,...\n\n----------------------------------------------------------------------\nRan 42 tests in 0.064s\n\nFAILED (failures=1)\n"
+}

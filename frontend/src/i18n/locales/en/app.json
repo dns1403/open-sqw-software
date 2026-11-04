@@ -7,63 +7,121 @@
     "title": "Quantum Walk Explorer",
     "tagline": "Local scattering. Global dynamics.",
     "research": "RESEARCH WORKSPACE",
-    "edgeWalks": "EDGE WALKS",
+    "edgeWalks": "EDGE & VERTEX WALKS",
     "reference": "Theoretical reference"
   },
-  "language": { "label": "Interface language", "switchTo": "Switch to {{language}}" },
-  "experiment": { "configure": "CONFIGURE EXPERIMENT", "local": "Local · Reference methods" },
+  "language": {
+    "label": "Interface language",
+    "switchTo": "Switch to {{language}}"
+  },
+  "experiment": {
+    "configure": "CONFIGURE EXPERIMENT",
+    "local": "Local · Reference methods"
+  },
   "graph": {
-    "title": "Graph", "topology": "Topology", "size": "Number of vertices",
-    "includesCenter": "including center", "sizeRange": "{{min}}–{{max}}",
-    "vertices_one": "{{count}} vertex", "vertices_other": "{{count}} vertices",
-    "edges_one": "{{count}} edge", "edges_other": "{{count}} edges", "unknownEdges": "— edges",
-    "directedEdges_one": "{{count}} directed edge", "directedEdges_other": "{{count}} directed edges",
-    "presets": { "path": "Path", "cycle": "Cycle", "complete": "Complete graph", "star": "Star" },
+    "title": "Graph",
+    "topology": "Topology",
+    "size": "Number of vertices",
+    "includesCenter": "including center",
+    "sizeRange": "{{min}}–{{max}}",
+    "vertices_one": "{{count}} vertex",
+    "vertices_other": "{{count}} vertices",
+    "edges_one": "{{count}} edge",
+    "edges_other": "{{count}} edges",
+    "unknownEdges": "— edges",
+    "directedEdges_one": "{{count}} directed edge",
+    "directedEdges_other": "{{count}} directed edges",
+    "presets": {
+      "path": "Path",
+      "cycle": "Cycle",
+      "complete": "Complete graph",
+      "star": "Star"
+    },
     "globalScattering": "Scattering at all vertices",
     "matrixHint": "Edit local matrices in the inspector. Changing the topology, global preset, or seed resets them.",
-    "space": "CONFIGURATION SPACE", "loading": "Loading graph", "preparing": "Preparing graph…",
-    "startBackend": "Start the backend to load the graph.", "selectedVertex": "Selected vertex",
+    "space": "CONFIGURATION SPACE",
+    "loading": "Loading graph",
+    "preparing": "Preparing graph…",
+    "startBackend": "Start the backend to load the graph.",
+    "selectedVertex": "Selected vertex",
     "incomingMarginal": "Incoming vertex marginal"
   },
   "initial": {
-    "title": "Initial state", "preparation": "Preparation", "basis": "Localized edge state",
-    "uniform": "Uniform superposition", "directedEdge": "Directed edge |xy⟩",
+    "title": "Initial state",
+    "preparation": "Preparation",
+    "basis": "Localized edge state",
+    "uniform": "Uniform superposition",
+    "directedEdge": "Directed edge |xy⟩",
     "convention": "|xy⟩ points from y to x. The first coordinate is the target vertex."
   },
   "simulation": {
-    "title": "Simulation", "steps": "Steps", "seed": "Seed", "run": "Run simulation",
-    "computing": "Computing…", "reset": "Reset to initial state", "controls": "Simulation controls",
-    "previous": "Previous step", "step": "Single step", "timeline": "Timeline",
-    "stepCount_one": "{{count}} step", "stepCount_other": "{{count}} steps"
+    "title": "Simulation",
+    "steps": "Steps",
+    "seed": "Seed",
+    "run": "Run simulation",
+    "computing": "Computing…",
+    "reset": "Reset to initial state",
+    "controls": "Simulation controls",
+    "previous": "Previous step",
+    "step": "Single step",
+    "timeline": "Timeline",
+    "stepCount_one": "{{count}} step",
+    "stepCount_other": "{{count}} steps"
   },
   "modes": {
-    "label": "Walk mode", "unitary": "Unitary", "open": "Open", "trajectory": "Trajectory",
-    "unitaryFull": "Unitary Scattering Quantum Walk", "openFull": "Open Scattering Edge Walk",
-    "trajectoryFull": "Quantum Trajectory", "vertex": "Vertex Walk", "planned": "UI PLANNED",
-    "vertexHint": "Induced Open Vertex Walk is implemented in the Python core; API and interface support are planned."
+    "label": "Walk mode",
+    "unitary": "Unitary",
+    "open": "Open",
+    "trajectory": "Trajectory",
+    "unitaryFull": "Unitary Scattering Quantum Walk",
+    "openFull": "Open Scattering Edge Walk",
+    "trajectoryFull": "Quantum Trajectory",
+    "vertex": "Vertex Walk",
+    "planned": "UI PLANNED",
+    "vertexHint": "Induced Open Vertex Walk is implemented in the Python core; API and interface support are planned.",
+    "vertexFull": "Induced Open Vertex Walk"
   },
-  "error": { "heading": "Request failed", "retry": "Reconnect" },
+  "error": {
+    "heading": "Request failed",
+    "retry": "Reconnect"
+  },
   "metrics": {
-    "model": "MODEL", "hilbertSpace": "HILBERT SPACE", "time": "TIME STEP",
-    "ofSteps": "of {{count}}", "purity": "PURITY tr(ρ²)", "pure": "Pure state", "mixed": "Mixed state"
+    "model": "MODEL",
+    "hilbertSpace": "HILBERT SPACE",
+    "time": "TIME STEP",
+    "ofSteps": "of {{count}}",
+    "purity": "PURITY tr(ρ²)",
+    "pure": "Pure state",
+    "mixed": "Mixed state"
   },
   "inspector": {
-    "operator": "LOCAL OPERATOR", "matrix": "Scattering matrix", "vertex": "Vertex",
-    "degree": "Degree {{degree}}", "empty": "Select a vertex in the graph once it has loaded."
+    "operator": "LOCAL OPERATOR",
+    "matrix": "Scattering matrix",
+    "vertex": "Vertex",
+    "degree": "Degree {{degree}}",
+    "empty": "Select a vertex in the graph once it has loaded."
   },
   "distribution": {
-    "observable": "OBSERVABLE", "title": "Probability distribution", "vertices": "Vertices",
-    "edges": "Edges", "vertexLabel": "Vertex {{vertex}}", "edgeLabel": "Edge {{source}} → {{target}}",
+    "observable": "OBSERVABLE",
+    "title": "Probability distribution",
+    "vertices": "Vertices",
+    "edges": "Edges",
+    "vertexLabel": "Vertex {{vertex}}",
+    "edgeLabel": "Edge {{source}} → {{target}}",
     "empty": "The distribution appears when the graph is loaded."
   },
   "dynamics": {
-    "label": "DYNAMICS", "title": "Time evolution", "states_one": "{{count}} state",
-    "states_other": "{{count}} states", "emptyTitle": "The dynamics begin with a single step.",
+    "label": "DYNAMICS",
+    "title": "Time evolution",
+    "states_one": "{{count}} state",
+    "states_other": "{{count}} states",
+    "emptyTitle": "The dynamics begin with a single step.",
     "emptyRun": "Run a simulation or advance one step at a time.",
     "emptyHistory": "All states remain available on the timeline."
   },
   "trajectory": {
-    "log": "MEASUREMENT RECORD", "title": "Conditional quantum trajectory",
+    "log": "MEASUREMENT RECORD",
+    "title": "Conditional quantum trajectory",
     "timing": "xₙ is measured in the state at t = n − 1. The state shown at t = n is after reduction and scattering.",
     "conditionalProbability": "Conditional probability: {{probability}}",
     "probabilities": "Measurement probabilities before the current step:",

@@ -112,11 +112,43 @@ Tests compare full Monte Carlo ensemble density matrices with statistical error
 bounds and independently compare the exact weighted sum of all short measurement
 paths with the channel.
 
-After two measurement/scattering steps on a simple graph, conditional edge states
-belong to a family of pure scattered states: consecutive vertex outcomes identify
-the intervening directed edge. This motivates future Markov methods. The reference
-algorithm does not use that reduction. New strategies must state their hypotheses
-and be validated against the reference, including complex coherences.
+## Exact edge reduction (E-02 through E-05)
+
+On the validated simple loopless graph with static unitaries and every incoming
+vertex measurement observed, at n >= 2 the conditional state is
+`sigma_(X_n,X_(n-1)) = |eta><eta|`, where `eta_xy = U|xy>`.
+An edge ID labels this generally coherent scattered state, not an occupied basis
+edge. A mixed input can remain mixed at t=1. This assertion does not imply that
+the mean state becomes pure.
+
+With `A_y = rho0[I_y,I_y]`, the full first-pair law is
+
+```text
+q2[(x,y)] = (S(y) @ A_y @ S(y)†)[port(x),port(x)]
+         = Pr(X1=y, X2=x).
+M[(z,x),(x,y)] = |S(x)[port(z),port(y)]|²
+q_n = M^(n-2) @ q2                      (column-stochastic convention)
+mean_rho_n = U @ diag(q_n) @ U†
+nu_n = sum_e q_n[e] delta_(sigma_e)
+```
+
+Discarding off-diagonal entries of `A_y` changes the experiment. The sequential
+online engine samples X1, keeps the normalized scattered local block, then
+samples X2. The direct batch initializer samples `(X2,X1)` from q2 and reconstructs
+both stages. It has the same joint law but may consume a different random stream.
+Queries, explicit conditioning and reconstruction do not consume random draws.
+
+The physical post-scattering edge Born distribution is **M @ q_n**. Its target
+marginal gives the next vertex measurement probabilities. A past outcome count,
+a preparation-label count and this Born distribution are distinct statistics.
+For a Hermitian A, precompute `a[e]=<eta_e|A|eta_e>` and evaluate `q_n @ a`.
+Since the edge atoms are orthogonal, mean purity is `q_n @ q_n`.
+Local multiplication by `|S(x)|²` needs no dense M or density matrix. The direct
+Kraus reference remains independent of this reduction.
+
+Parallel ports with coarse vertex measurements, partial observations, different
+instruments and changing coins do not satisfy this contract. The eligibility
+checks reject them; the current graph model itself rejects multigraphs.
 
 ## Independent induced vertex walk
 
@@ -149,6 +181,41 @@ The row-stochastic matrix is `P[x,y] = |chi(x)[y]|²`; classical distributions
 are row vectors evolving as `p_next = p @ P`. Direct Kraus evolution remains
 the implemented quantum reference.
 
+## Exact vertex reduction (V-01, V-02, V-04, V-06)
+
+At n >= 1 the conditional state is `tau_(X_n)=|chi(X_n)><chi(X_n)|`. With
+`r0=diag(rho0)` (or squared moduli of a pure vector),
+
+```text
+q_n = r0 @ P^(n-1)          # current preparation-label law
+mean_rho_n = sum_x q_n[x] tau_x
+born_vertices_n = q_n @ P   # next position measurement
+```
+
+Initial off-diagonal terms disappear in the first vertex measurement, unlike
+the edge incoming blocks. No extra transition is applied when initializing q1.
+Vertex atoms may be nonorthogonal or identical; label counts are retained without
+approximate merging. Mean purity is therefore not generally `q_n @ q_n`.
+Sparse chi columns and P support lazy reconstruction, local transitions and
+phase-sensitive observable expectations. Changing beta leaves P invariant and
+updates the quantum kets; `VertexReduction.with_beta` explicitly reuses P.
+Bistochastic P does not imply that the quantum channel is unital.
+
+For numerical stability, the completion coefficient is evaluated using the
+equivalent nonnegative identity
+
+```text
+1 - ||theta(x)||² = sum_(z~x) |v_z(x)|² sum_(u~z, u!=x) |omega_u(z)|².
+```
+
+Normalized v and omega imply this identity. It avoids cancellation near zero
+and the amplification of an O(epsilon) residual by a square root. No tolerance
+was enlarged and no small physical completion is zeroed. See the T34 audit.
+Raw compression is trace preserving exactly when every theta has norm one;
+graph size alone does not decide this. Transient initial mass contributes to
+eventual recurrent-class weights through absorption probabilities. Stationary
+and limit diagnostics are deferred until that contribution and periods are handled.
+
 ## Numerics and limits
 
 Operators and states use complex double precision. Validation uses an explicit
@@ -160,8 +227,11 @@ sampling remains well defined. This is not a physical correction.
 
 Reference tests generally use `1e-12` for small analytic examples and `1e-10`
 for accumulated operations. Statistical tests use separate bounds derived from
-ensemble size and variance. Large ensembles, spectral analyses and new mathematical
-reductions are separate extensions, not part of the reference channel definition.
+ensemble size and variance. Independent-path ensembles retain compact labels,
+requested counts and Born averages; selected histories are optional. These are
+ensemble laws at fixed times, not occupation measures of a single long path.
+Spectral and asymptotic analyses remain separate extensions. Numerical agreement
+supports implementation validation; it does not prove the mathematical results.
 
 ## Presentation languages
 

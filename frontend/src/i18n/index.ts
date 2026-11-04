@@ -6,6 +6,8 @@ import enComponents from './locales/en/components.json';
 import deComponents from './locales/de/components.json';
 import enErrors from './locales/en/errors.json';
 import deErrors from './locales/de/errors.json';
+import enResearch from './locales/en/research.json';
+import deResearch from './locales/de/research.json';
 
 export const LANGUAGE_STORAGE_KEY = 'sqw.language';
 export const supportedLanguages = [
@@ -14,8 +16,8 @@ export const supportedLanguages = [
 ] as const;
 export type SupportedLanguage = typeof supportedLanguages[number]['code'];
 export const resources = {
-  en: { app: enApp, components: enComponents, errors: enErrors },
-  de: { app: deApp, components: deComponents, errors: deErrors },
+  en: { app: enApp, components: enComponents, errors: enErrors, research: enResearch },
+  de: { app: deApp, components: deComponents, errors: deErrors, research: deResearch },
 };
 
 /** Language selection is explicit: browser/system preferences are never used. */
@@ -42,7 +44,7 @@ void i18n.use(initReactI18next).init({
   lng: getInitialLanguage(),
   fallbackLng: 'en',
   supportedLngs: supportedLanguages.map(({ code }) => code),
-  ns: ['app', 'components', 'errors'],
+  ns: ['app', 'components', 'errors', 'research'],
   defaultNS: 'app',
   initAsync: false,
   interpolation: { escapeValue: false },

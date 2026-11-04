@@ -27,9 +27,35 @@
     "invalid": "Der Wert ist ungültig."
   },
   "fields": {
-    "request": "Anfrage", "graph": "Graph", "kind": "Typ", "size": "Knotenzahl",
-    "preset": "Scattering-Voreinstellung", "seed": "Zufallsseed", "degree": "Grad",
-    "scattering": "Scatteringmatrizen", "mode": "Walk-Modus", "initial": "Anfangszustand",
-    "edge": "Gerichtete Kante", "steps": "Schrittzahl"
-  }
+    "request": "Anfrage",
+    "graph": "Graph",
+    "kind": "Typ",
+    "size": "Knotenzahl",
+    "preset": "Scattering-Voreinstellung",
+    "seed": "Zufallsseed",
+    "degree": "Grad",
+    "scattering": "Scatteringmatrizen",
+    "mode": "Walk-Modus",
+    "initial": "Anfangszustand",
+    "edge": "Gerichtete Kante",
+    "steps": "Schrittzahl",
+    "strategy": "Strategie",
+    "trajectories": "Trajektorien",
+    "statistics": "Statistik",
+    "selected_histories": "Ausgewählte Verläufe",
+    "vertex_parameters": "Vertex-Parameter",
+    "omega": "Randvektoren ω",
+    "beta": "Phasen β",
+    "atom_id": "Atom-ID",
+    "vertex": "Knoten",
+    "vector": "Zustandsvektor",
+    "density": "Dichtematrix",
+    "vertex_dynamics": "Vertex-Dynamik"
+  },
+  "initial_state": "Der Anfangszustand benötigt die richtige Dimension, endliche Einträge und Normierung auf eins. Dichtematrizen müssen hermitesch und positiv semidefinit sein.",
+  "vertex_parameters": "Normierte Randvektoren in der gespeicherten Nachbarreihenfolge und für jeden Knoten eine endliche reelle Phase angeben.",
+  "ensemble_budget": "Dieses Ensemble überschreitet das interaktive Rechenbudget. Trajektorien oder Schritte reduzieren oder die optimierte Strategie wählen.",
+  "ensemble_histories": "Die Anzahl ausgewählter Verläufe darf die Trajektorienanzahl nicht überschreiten.",
+  "atom_id": "Ein Atom aus der aktuellen Modellbasis wählen.",
+  "analysis_budget": "Die dichte Zustands- und Übergangsanalyse unterstützt Dimensionen bis 64. Einen kleineren Graphen oder die Python-API verwenden."
 }

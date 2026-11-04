@@ -57,7 +57,7 @@ def test_trajectory_reproducibility_and_prefix_for_step_button():
 
 
 @pytest.mark.parametrize("changes", [
-    {"steps": -1}, {"steps": 201}, {"steps": 1.5}, {"mode": "vertex"},
+    {"steps": -1}, {"steps": 201}, {"steps": 1.5}, {"mode": "unknown_walk"},
     {"initial": {"kind": "basis", "edge": [0, 2]}},
     {"graph": {"kind": "cycle", "size": 2}},
     {"graph": {"kind": "complete", "size": 32}},

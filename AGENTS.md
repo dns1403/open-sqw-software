@@ -9,6 +9,10 @@
 - Implement optimizations only with stated assumptions and tests against the direct reference algorithm. No unproved reductions.
 - Induced vertex channels are distinct from edge-walk vertex marginals.
 - Record trajectory time indices and RNG semantics; use explicit NumPy generators, never global random state.
+- Edge atom weights use column-stochastic `q_next = M @ q`; vertex preparation labels use row-stochastic `q_next = q @ P`. Keep these orientations explicit.
+- Preserve full incoming coherence blocks in edge `q2`. Conditional edge atoms start at t=2, vertex atoms at t=1. Atom weights, Born laws, mean densities and observed-outcome counts are distinct outputs.
+- Keep the four original files in `Material/` unchanged. See `docs/mathematical_audit.md` for the transparent T34 numerical correction and the independent test copy. Numerical checks are not proofs.
+- Reject unsupported instruments/partial observation/time-dependent coins from exact reductions. Do not extend simple-graph purification to parallel ports without a new contract.
 
 ## Development
 - Work in this checkout; preserve user-provided research and files.
@@ -20,6 +24,6 @@
 
 ## Internationalization
 - English is the default and fallback. Only an explicit stored language choice overrides it; do not infer the language from browser settings.
-- Put user-facing text in the matching `app`, `components`, or `errors` namespaces under `frontend/src/i18n/locales`. Keep keys and interpolation parameters consistent across languages.
+- Put user-facing text in the matching `app`, `components`, `research`, or `errors` namespaces under `frontend/src/i18n/locales`. Keep keys and interpolation parameters consistent across languages.
 - Language changes must preserve experiment state and must not trigger graph or simulation requests. Translate error descriptors when rendering, not when catching errors.
 - Preserve mathematical notation, matrix JSON, model identifiers, and API fields. Format observable numbers only for display. Run `pnpm test` and `pnpm build` in `frontend` after UI changes.

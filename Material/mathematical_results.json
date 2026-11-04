@@ -1,0 +1,1524 @@
+{
+  "schema_version": "1.0.0",
+  "language": "de",
+  "title": "Scattering Quantum Walk mathematical handoff",
+  "created_on": "2026-11-04",
+  "primary_source": {
+    "author": "Alain Joye",
+    "title": "Unitary and Open Scattering Quantum Walks on Graphs",
+    "arxiv": "2409.08428v2",
+    "pdf_pages": 55,
+    "pdf_date": "2026-04-09",
+    "sha256": "de3ccede8b943b57e87d1d89df1cba328a3011c87eabb4a67cb6aa8aa3dbb879"
+  },
+  "conventions": {
+    "arc_tuple": "(target,source)",
+    "edge_transition_orientation": "column-stochastic; q_next=M q",
+    "vertex_transition_orientation": "row-stochastic; q_next=q P",
+    "edge_measurement_order": "incoming vertex projection before unitary scattering",
+    "edge_atomic_start_step": 2,
+    "vertex_atomic_start_step": 1,
+    "norm_convention": "trace norm has no factor 1/2; trace distance and total variation have factor 1/2",
+    "default_graph_class": "simple undirected loopless connected, at least two vertices",
+    "coins": "static complex unitary local matrices",
+    "quantum_state_phase": "reconstructed kets are defined up to global phase; projector identities are exact"
+  },
+  "graph_contracts": {
+    "SIMPLE_STATIC": {
+      "simple": true,
+      "loopless": true,
+      "undirected": true,
+      "connected": true,
+      "minimum_vertices": 2,
+      "time_homogeneous": true
+    },
+    "FINITE": {
+      "finite_vertices": true
+    },
+    "PORT_EXTENSION": {
+      "simple": false,
+      "loopless": true,
+      "explicit_parallel_port_ids": true,
+      "reverse_arc_pairing": true,
+      "edge_two_step_purity_guaranteed": false
+    }
+  },
+  "proof_status_definitions": {
+    "PROVEN": "Complete derivation given, possibly invoking explicitly named standard theorem.",
+    "PAPER_THEOREM": "Original theorem cited; long proof not reproduced in full.",
+    "CONDITIONAL": "Precise extra assumptions or interpretation explicitly stated.",
+    "OPEN": "Not established; do not enable exact optimization."
+  },
+  "results": [
+    {
+      "id": "U-01",
+      "title": "Lokale unitäre Streuung und sparse Anwendung",
+      "proof_status": "PROVEN",
+      "origin": "PAPER_SUPPLEMENT",
+      "document_anchor": "U-01",
+      "statement_latex": "Mit \\(F|xy\\rangle=|yx\\rangle\\) und \\(C=\\bigoplus_xS(x)\\) gilt\n\\[\nU=FC,\\qquad UP_x^I=P_x^OU,\n\\qquad\\psi_{n+1}(z,x)=\\sum_{y\\sim x}S_{zy}(x)\\psi_n(x,y).\n\\]\nU ist unitär. Unter \\(\\rho\\mapsto U\\rho U^*\\) bleiben Spur, Positivität, Rang, Eigenwerte, Reinheit und von-Neumann-Entropie erhalten.",
+      "assumptions": "`SIMPLE_STATIC`; reine oder gemischte Anfangszustände; keine Zwischenmessung. Direkte Summen funktionieren auch auf dem abzählbaren Graphen.",
+      "proof": "Die eingehenden Kantenblöcke bilden eine orthogonale direkte Summe. C ist die direkte Summe unitärer Matrizen. F ist eine involutive Basispermutation, also \\(F=F^*=F^{-1}\\). Daher ist FC unitär und bildet den Eingangsblock bei x auf den Ausgangsblock bei x ab. Die Zustandsinvarianten folgen aus unitärer Konjugation.",
+      "paper_and_literature_references": "Definition2.1, Lemma2.3, (2.5)–(2.9), (3.9)–(3.12).",
+      "simulation_consequences": "Pro Knoten lokales Matvec, danach Arcflip; kein dichter globaler U notwendig. Aufwand \\(O(\\sum_xd_x^2)\\) pro Ket, Speicher O(d). Für gemischte Zustände optional Faktor \\(\\rho=LL^*\\) mit Update L→UL. Ein unitärer Walk darf nicht durch die Kette \\(|U|^{\\circ2}\\) ersetzt werden: Diese verliert Interferenz. Tests T01,T02.",
+      "contract": {
+        "model": "unitary_edge_sqw",
+        "inputs": {
+          "graph": "SIMPLE_STATIC",
+          "S": "local complex unitary matrices",
+          "state": "ket, density, or low-rank density factor"
+        },
+        "preconditions": [
+          "fixed ordered local neighbors",
+          "arc=(target,source)"
+        ],
+        "outputs": {
+          "ket_update": "psi_next[z,x]=sum_y S[x][z,y]*psi[x,y]",
+          "unitary": "U=F direct_sum_x S(x)"
+        },
+        "invariants": [
+          "norm(psi)=constant",
+          "spectrum(rho)=constant",
+          "trace(rho)=1"
+        ],
+        "memory": "O(d) per ket; O(r*d) for rank-r factor"
+      },
+      "test_case_ids": [
+        "T01",
+        "T02"
+      ]
+    },
+    {
+      "id": "U-02",
+      "title": "Unitäre Zeitmittel und fehlende universelle Relaxation",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/PAPER_SUPPLEMENT",
+      "document_anchor": "U-02",
+      "statement_latex": "In endlicher Dimension mit \\(U=\\sum_\\lambda\\lambda E_\\lambda\\):\n\\[\n\\frac1L\\sum_{n=0}^{L-1}U^n\\rho U^{-n}\\longrightarrow\\sum_\\lambda E_\\lambda\\rho E_\\lambda.\n\\]\nDer Fehler ist bei festem Spektrum O(1/L), mit eigenwertabstandsabhängiger Konstante. Für zwei Anfangszustände bleibt \\(\\|U^n\\rho U^{-n}-U^n\\tau U^{-n}\\|_1=\\|\\rho-\\tau\\|_1\\); alle Zustände können daher nicht gegen dasselbe Gleichgewicht relaxieren.",
+      "assumptions": "Endlicher Graph für die angegebene Matrixformel. Im unendlichen Fall nur die gesonderten lokalen Spektral-/Zeitmittelaussagen des Papers anwenden.",
+      "proof": "Zerlege ρ in Blöcke \\(E_\\lambda\\rho E_\\mu\\). Ihr Zeitfaktor ist \\((\\lambda\\bar\\mu)^n\\). Die Cesàrosumme bleibt1 für λ=μ und hat sonst Betrag höchstens \\(2/(L|1-\\lambda\\bar\\mu|)\\). Die Spurnorm ist unitär invariant.",
+      "paper_and_literature_references": "Lemma2.7, (2.16)–(2.19), Remark2.8; endliche Spektralrechnung.",
+      "simulation_consequences": "Bei degenerierten Eigenwerten ganze Spektralräume erhalten, nicht einzelne Eigenvektoren dephasieren. Nahe Entartungen führen zu großen Fehlerkonstanten. Stationäre unitäre Dichtematrizen erfüllen [U,ρ]=0. Test T03.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher Graph für die angegebene Matrixformel. Im unendlichen Fall nur die gesonderten lokalen Spektral-/Zeitmittelaussagen des Papers anwenden."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "In endlicher Dimension mit \\(U=\\sum_\\lambda\\lambda E_\\lambda\\):\n\\[\n\\frac1L\\sum_{n=0}^{L-1}U^n\\rho U^{-n}\\longrightarrow\\sum_\\lambda E_\\lambda\\rho E_\\lambda.\n\\]\nDer Fehler ist bei festem Spektrum O(1/L), mit eigenwertabstandsabhängiger Konstante. Für zwei Anfangszustände bleibt \\(\\|U^n\\rho U^{-n}-U^n\\tau U^{-n}\\|_1=\\|\\rho-\\tau\\|_1\\); alle Zustände können daher nicht gegen dasselbe Gleichgewicht relaxieren."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T03"
+      ]
+    },
+    {
+      "id": "U-03",
+      "title": "Sterne und verallgemeinerte Grover-Spektralabbildung",
+      "proof_status": "PAPER_THEOREM",
+      "origin": "PAPER_SUPPLEMENT",
+      "document_anchor": "U-03",
+      "statement_latex": "Für einen Stern mit b Blättern:\n\\[\nU=\\begin{pmatrix}0&D_\\theta\\\\S&0\\end{pmatrix},\\qquad\nU^{2n}=\\operatorname{diag}((D_\\theta S)^n,(SD_\\theta)^n),\n\\quad\\sigma(U)=\\{\\pm\\sqrt\\lambda:\\lambda\\in\\sigma(D_\\theta S)\\}.\n\\]\nFür \\(S_\\alpha(x)=|\\omega(x)\\rangle\\langle\\omega(x)|+e^{i\\alpha}(I-|\\omega(x)\\rangle\\langle\\omega(x)|)\\), normiertes ω und α≠0, definiere \\(R=\\sum_x|x\\rangle\\langle\\omega(x)|\\), \\(T_\\omega=RFR^*\\). Dann\n\\[\n(T_\\omega)_{xy}=\\overline{\\omega_y(x)}\\omega_x(y),\\quad\n\\varphi_\\alpha(\\lambda)=\\frac{\\lambda^2-e^{i\\alpha}}{\\lambda(1-e^{i\\alpha})}.\n\\]\nAbseits der im Paper separat behandelten Ausnahmeigenwerte wird das U-Spektrum auf Tω abgebildet. Für \\(\\mu\\in(-1,1)\\) entstehen zwei Lösungen von \\(\\lambda^2-\\mu(1-e^{i\\alpha})\\lambda-e^{i\\alpha}=0\\). Bei α=π lautet die innere Relation λ+λ⁻¹=2μ. Uniformes reelles ω ergibt die normierte Adjazenzmatrix.",
+      "assumptions": "Exakte lokale Groverform beziehungsweise Sternstruktur; feste Basisreihenfolge. Ausnahmeigenwerte ±e^{iα}, Randwerte μ=±1 und α=0 nicht unbesehen in die innere Formel einsetzen.",
+      "proof": "Sternformeln folgen durch Blockmultiplikation und Ähnlichkeit von DθS und SDθ. Die Tω-Koordinaten folgen direkt aus RFR*. Der vollständige Spektralabbildungsbeweis mit Ausnahmeigenräumen wird nicht hier erneut geführt; dafür gelten die zitierten Theoreme. Dies ist ausdrücklich keine als eigener vollständiger Chatbeweis rekonstruierte Aussage.",
+      "paper_and_literature_references": "§3.3, Lemma3.6; §3.4, Theoreme3.9/3.11, Proposition3.13, (3.86)–(3.98), Appendix A.",
+      "simulation_consequences": "Analytische Testfixtures und optionale Dimensionsreduktion. Ausnahmeeigenräume und Vielfachheiten gesondert erfassen. Coined-QW-Adapter brauchen explizite Port-/Shift-Konventionen. Test T04.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Exakte lokale Groverform beziehungsweise Sternstruktur; feste Basisreihenfolge. Ausnahmeigenwerte ±e^{iα}, Randwerte μ=±1 und α=0 nicht unbesehen in die innere Formel einsetzen."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Für einen Stern mit b Blättern:\n\\[\nU=\\begin{pmatrix}0&D_\\theta\\\\S&0\\end{pmatrix},\\qquad\nU^{2n}=\\operatorname{diag}((D_\\theta S)^n,(SD_\\theta)^n),\n\\quad\\sigma(U)=\\{\\pm\\sqrt\\lambda:\\lambda\\in\\sigma(D_\\theta S)\\}.\n\\]\nFür \\(S_\\alpha(x)=|\\omega(x)\\rangle\\langle\\omega(x)|+e^{i\\alpha}(I-|\\omega(x)\\rangle\\langle\\omega(x)|)\\), normiertes ω und α≠0, definiere \\(R=\\sum_x|x\\rangle\\langle\\omega(x)|\\), \\(T_\\omega=RFR^*\\). Dann\n\\[\n(T_\\omega)_{xy}=\\overline{\\omega_y(x)}\\omega_x(y),\\quad\n\\varphi_\\alpha(\\lambda)=\\frac{\\lambda^2-e^{i\\alpha}}{\\lambda(1-e^{i\\alpha})}.\n\\]\nAbseits der im Paper separat behandelten Ausnahmeigenwerte wird das U-Spektrum auf Tω abgebildet. Für \\(\\mu\\in(-1,1)\\) entstehen zwei Lösungen von \\(\\lambda^2-\\mu(1-e^{i\\alpha})\\lambda-e^{i\\alpha}=0\\). Bei α=π lautet die innere Relation λ+λ⁻¹=2μ. Uniformes reelles ω ergibt die normierte Adjazenzmatrix."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T04"
+      ]
+    },
+    {
+      "id": "E-01",
+      "title": "Krausoperatoren, Kanal und Diag",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/PAPER",
+      "document_anchor": "E-01",
+      "statement_latex": "\\[\nK(x)=UP_x^I=P_x^OU,\\quad K(x)^*K(x)=P_x^I,\\quad K(x)K(x)^*=P_x^O,\n\\]\n\\[\n\\Phi(A)=\\sum_xK(x)AK(x)^*=U\\mathcal D^I(A)U^*=\\mathcal D^O(UAU^*),\n\\quad\\mathcal D^\\#(A)=\\sum_xP_x^\\#AP_x^\\#.\n\\]\n\\[\n\\mathcal D^I\\mathcal D^O=\\mathcal D^O\\mathcal D^I=\\operatorname{Diag},\\qquad\n\\operatorname{Diag}(A)=\\sum_eQ_eAQ_e.\n\\]\nErgebniswahrscheinlichkeit und bedingtes Update sind \\(p_x=\\operatorname{tr}(P_x^I\\rho)\\) und \\(K(x)\\rho K(x)^*/p_x\\) bei pₓ>0.",
+      "assumptions": "`SIMPLE_STATIC`; beliebiger positiver Spur-eins-Anfangsoperator; vollständige Beobachtung des vorgegebenen Knoteninstruments.",
+      "proof": "Aus Intertwining und Unitarität folgen die Krausidentitäten; Summation ergibt \\(\\sum K^*K=\\sum KK^*=I\\), also CPTP und in endlicher Dimension unital. Die beiden Pinchings sind HS-Projektionen. Ihr Produkt verwendet \\(P_x^IP_y^O=Q_{xy}\\) für Nachbarn und0 sonst. Mittelung über die normierten Zweige liefert Φ.",
+      "paper_and_literature_references": "Lemma4.1, Definition4.2, Proposition4.3, (4.10)–(4.18), sowie (2.3)/(2.7).",
+      "simulation_consequences": "Dichtes Oracle und blockweise Implementation vergleichen. Nur die Eingangsblöcke \\(P_x^I\\rho P_x^I\\) sind im nächsten Schritt relevant; innerhalb eines Blocks vorhandene Kohärenzen nicht entfernen. Nullzweige nicht normieren. Tests T05,T06.",
+      "contract": {
+        "model": "open_edge_sqw",
+        "inputs": {
+          "rho": "positive trace-one density",
+          "outcome": "vertex x"
+        },
+        "preconditions": [
+          "measurement before scattering",
+          "p_x>0 for normalized branch"
+        ],
+        "outputs": {
+          "probability": "p_x=tr(P_x^I rho)",
+          "branch": "U P_x^I rho P_x^I U^* / p_x",
+          "channel": "Phi(rho)=sum_x K(x)rho K(x)^*"
+        },
+        "invariants": [
+          "sum_x p_x=1",
+          "sum K^*K=I",
+          "sum KK^*=I"
+        ],
+        "reject_for": [
+          "normalization of a zero-probability branch"
+        ]
+      },
+      "test_case_ids": [
+        "T05",
+        "T06"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Exakte Purifikation nach höchstens zwei Schritten",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-02",
+      "statement_latex": "Für x∼y:\n\\[\nK(x)K(y)=UP_x^IP_y^OU=UQ_{xy}U.\n\\]\nMit \\(\\eta_{xy}=U|xy\\rangle\\), \\(\\sigma_{xy}=|\\eta_{xy}\\rangle\\langle\\eta_{xy}|\\) gilt\n\\[\nK(x)K(y)\\rho K(y)^*K(x)^*=\n\\langle xy|U\\rho U^*|xy\\rangle\\,\\sigma_{xy}.\n\\]\nSomit für jedes zulässige Messpräfix und n≥2:\n\\[\n\\boxed{\\rho_n=\\sigma_{X_nX_{n-1}}.}\n\\]\nVor der letzten Streuung ist der Zustand Q, nachher \\(\\eta_{xy}=\\sum_zS_{zy}(x)|zx\\rangle\\), im Allgemeinen eine kohärente Superposition.",
+      "assumptions": "Einfacher schleifenfreier Graph, beliebige unitäre Coins, reiner **oder gemischter** Input. Keine Nichtnullannahme an Coin-Einträge. Endliche und abzählbare Graphen. Normierung nur für positive Wahrscheinlichkeiten endlicher Präfixe.",
+      "proof": "Für Rang-eins-Q gilt \\(QAQ=\\langle e|A|e\\rangle Q\\). Einsetzen in \\(UQU\\rho U^*QU^*\\) ergibt die Formel. Bei längeren Produkten \\(W_n=K(x_n)\\cdots K(x_1)\\) schreibt man\n\\[\nW_n=U|x_nx_{n-1}\\rangle\\langle x_nx_{n-1}|U W_{n-2}.\n\\]\nDas Bild des unnormierten Zustands ist daher höchstens die Gerade \\(\\mathbb C\\eta_{x_nx_{n-1}}\\). Bei positiver Spur ist es genau diese Gerade und Normierung ergibt σ. Diese Argumentation beweist die Aussage direkt ohne Induktionslücke.",
+      "paper_and_literature_references": "Folgerung aus (2.3), (2.7), §4.2; nicht bereits die bloße Aussage von Korollar4.5. Allgemeiner Purifikationsrahmen [PUR], [BFPP].",
+      "simulation_consequences": "Ab Schritt2 eine Arc-ID statt Dichtematrix/Ket pro Trajektorie. Rekonstruktion benötigt eine lokale S-Spalte. Ein reiner Input bleibt bereits ab dem ersten beobachteten Schritt rein; ein gemischter muss das nicht: bei ρ₀=I/d ist \\(\\rho_1(x)=P_x^O/d_x\\). Ketgleichheiten sind nur bis auf globale Phase gemeint, Projektorgleichheiten exakt. Unbeobachtete Ergebnisse oder parallele Kanten verletzen Voraussetzungen. Tests T06,T07,T08,T24.",
+      "contract": {
+        "model": "open_edge_sqw",
+        "inputs": {
+          "graph": "simple undirected loopless with fixed neighbor order",
+          "S": "static local unitary matrices",
+          "rho0": "arbitrary positive trace-one density",
+          "record": "vertex outcomes of positive finite-prefix probability"
+        },
+        "preconditions": [
+          "n>=2",
+          "fully observed instrument",
+          "measurement before unitary"
+        ],
+        "outputs": {
+          "tag": "EdgeAtom(target=X_n, source=X_(n-1))",
+          "ket": "U|X_n X_(n-1)>",
+          "density": "ket * ket.adjoint()"
+        },
+        "invariants": [
+          "trace=1",
+          "rank=1",
+          "rho^2=rho"
+        ],
+        "reject_for": [
+          "parallel arcs under coarse vertex measurement",
+          "unobserved outcomes",
+          "a different Kraus instrument"
+        ]
+      },
+      "test_case_ids": [
+        "T06",
+        "T07",
+        "T08",
+        "T24"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Markovmatrix, Initialisierung und Pfadwahrscheinlichkeiten",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-03",
+      "statement_latex": "\\[\nK(z)\\eta_{xy}=S_{zy}(x)\\eta_{zx},\\quad\nM_{(zx),(xy)}=|S_{zy}(x)|^2,\n\\]\nalle anderen Übergänge sind0. M ist bistochastisch. Die reduzierte Kette startet bei Schritt2 mit\n\\[\nq_2(x,y)=\\Pr(X_1=y,X_2=x)\n=\\langle xy|U\\rho_0U^*|xy\\rangle\n=\\langle xy|\\Phi(\\rho_0)|xy\\rangle.\n\\]\nFür den lokalen Eingangsblock \\(A_y=(\\langle yu|\\rho_0|yv\\rangle)_{u,v\\sim y}\\):\n\\[\nq_2(x,y)=(S(y)A_yS(y)^*)_{x,x}.\n\\]\nFür n≥2:\n\\[\n\\Pr(x_1,\\ldots,x_n)=q_2(x_2,x_1)\n\\prod_{j=2}^{n-1}|S_{x_{j+1},x_{j-1}}(x_j)|^2.\n\\]",
+      "assumptions": "E-02; statische Coins. Endliche Kette nur bei endlichem D, sonst abzählbare Kette.",
+      "proof": "Projektion von \\(U|xy\\rangle\\) auf den nächsten Eingangsblock z selektiert genau \\(S_{zy}(x)|zx\\rangle\\). Die nächste Streuung ergibt die angegebene Krauswirkung und quadrierte Norm. Für q₂ nimmt man die Spur in E-02. Der Vektor \\(U^*|xy\\rangle\\) liegt vollständig im Eingangsblock bei y, was die lokale Formel und die Gleichheit mit der Diagonale von Φρ₀ beweist. Unitarität liefert sämtliche Zeilen- und Spaltensummen1. Die Pfadformel folgt aus der Kettenregel.",
+      "paper_and_literature_references": "Lemma5.3, (5.12)–(5.14), Remark5.4 und §4.2. M ist exakt die Matrix von \\(\\Phi^{\\mathrm{Diag}}\\), nicht eine neu angenäherte Markovmatrix.",
+      "simulation_consequences": "Speicherzustand (x,y); nächsten z aus Spalte y von \\(|S(x)|^2\\) ziehen, dann (z,x). X allein ist im Allgemeinen zweiter Ordnung, ab dem purifizierten Stadium bei flachen Coins einfacher Nachbar-Random-Walk. Für q₂ reichen lokale ρ₀-Blöcke, **nicht** bloß diagρ₀. Ein einmal gezogener Arc (x,y) aus q₂ liefert exakt beide ersten Ergebnisse X₁=y, X₂=x. Tests T07,T08,T09,T10.",
+      "contract": {
+        "model": "open_edge_sqw",
+        "inputs": {
+          "rho0": "density or its local incoming principal blocks",
+          "S": "static coins"
+        },
+        "preconditions": [
+          "SIMPLE_STATIC",
+          "E-02"
+        ],
+        "outputs": {
+          "q2": "q2[x,y]=(S[y] @ rho0[incoming_y,incoming_y] @ S[y]^*)[x,x]",
+          "transition": "M[(z,x),(x,y)]=abs(S[x][z,y])^2",
+          "next_tag": "(z,x)"
+        },
+        "invariants": [
+          "q2>=0",
+          "sum(q2)=1",
+          "M column sums=1",
+          "M row sums=1"
+        ],
+        "memory": "one arc ID after warmstart",
+        "reject_for": [
+          "using only diag(rho0) unless justified by actual input diagonal structure"
+        ]
+      },
+      "test_case_ids": [
+        "T07",
+        "T08",
+        "T09",
+        "T10"
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Erreichbare Zustände und endliches Filtergedächtnis",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-04",
+      "statement_latex": "\\(\\mathcal S_U=\\{\\sigma_e:e\\in D\\}\\) ist absorbierend und orthogonal:\n\\(\\operatorname{tr}(\\sigma_e\\sigma_f)=\\delta_{ef}\\). Jeder Atomzustand ist mit geeignetem Input erreichbar, etwa \\(\\rho_0=U^*Q_eU\\) liefert q₂=δₑ. Für einen festgehaltenen Input ist die tatsächlich erreichbare Menge durch die von supp(q₂) im positiven M-Träger erreichbaren Arcs gegeben. Zwei verschiedene Priors mit demselben unter beiden kompatiblen Messpräfix liefern ab Schritt2 denselben bedingten Zustand.",
+      "assumptions": "E-02; zur Filtervergleichsaussage müssen die benutzten Präfixe unter beiden Priors positive Wahrscheinlichkeit besitzen.",
+      "proof": "Orthogonalität folgt aus U*U=I; das Inputbeispiel aus der q₂-Formel. Erreichbarkeit ist die übliche Markoverreichbarkeit. Der letzte-Zweierproduktbeweis zeigt, dass der normierte Zustand keine weitere Priorinformation enthält.",
+      "paper_and_literature_references": "Modellspezifische Folgerung aus §4.2/§5 und E-02/E-03; allgemeine Einordnung [PUR], [BFPP].",
+      "simulation_consequences": "Exakte Beschränkung auf erreichbare Arcs möglich. „Alle möglichen Atome“ nicht mit „alle für diesen Input erreichbaren Atome“ verwechseln. Zwei Knoten-IDs sind ausreichendes Gedächtnis, nicht in jedem degenerierten Modell nachgewiesen minimal. Ein individueller unendlicher Pfad darf Wahrscheinlichkeit0 haben; es geht um seine zulässigen endlichen Präfixe. Tests T08,T09.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "E-02; zur Filtervergleichsaussage müssen die benutzten Präfixe unter beiden Priors positive Wahrscheinlichkeit besitzen."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "\\(\\mathcal S_U=\\{\\sigma_e:e\\in D\\}\\) ist absorbierend und orthogonal:\n\\(\\operatorname{tr}(\\sigma_e\\sigma_f)=\\delta_{ef}\\). Jeder Atomzustand ist mit geeignetem Input erreichbar, etwa \\(\\rho_0=U^*Q_eU\\) liefert q₂=δₑ. Für einen festgehaltenen Input ist die tatsächlich erreichbare Menge durch die von supp(q₂) im positiven M-Träger erreichbaren Arcs gegeben. Zwei verschiedene Priors mit demselben unter beiden kompatiblen Messpräfix liefern ab Schritt2 denselben bedingten Zustand."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "id": "E-05",
+      "title": "Mittelwerte, Born-Verteilungen und Observable ohne Dichtematrix",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-05",
+      "statement_latex": "Setze \\(\\mathcal B_U(q)=U\\operatorname{diag}(q)U^*=\\sum_eq_e\\sigma_e\\). Für n≥2:\n\\[\nq_n=M^{n-2}q_2,\\quad\\nu_n=\\sum_eq_n(e)\\delta_{\\sigma_e},\\quad\n\\bar\\rho_n=\\Phi^n(\\rho_0)=\\mathcal B_U(q_n),\\quad\n\\Phi\\mathcal B_U=\\mathcal B_UM.\n\\]\n\\[\n\\operatorname{diag}\\bar\\rho_n=Mq_n=q_{n+1},\\qquad\n\\Pr(X_n=x)=\\sum_yq_n(x,y).\n\\]\nFür jede beschränkte Observable A und jede Funktion f auf den Atomen:\n\\[\n\\mathbb E\\operatorname{tr}(A\\rho_n)=\\sum_eq_n(e)\\langle\\eta_e|A|\\eta_e\\rangle,\n\\quad\\mathbb Ef(\\rho_n)=\\sum_eq_n(e)f(\\sigma_e).\n\\]\nLetzteres ist im Allgemeinen nicht f(\\(\\bar\\rho_n\\)).",
+      "assumptions": "E-03, n≥2; abzählbar q∈ℓ¹ und beschränkte Observable. Für den Schritt1 gesondert E-01 verwenden.",
+      "proof": "Aus dem Gesetz folgt der Mittelwert; Proposition4.8 identifiziert ihn mit Φⁿρ₀. Die Diagonale eines σₑ ist die e-te Spalte von M. Die Krauswirkung E-03 liefert das Intertwining. Diagonales A erfüllt Φ(A)=UAU*, und q₂ entspricht DiagΦρ₀; damit ergibt sich\n\\[\n\\Phi^n=\\Phi\\circ(\\Phi^{\\rm Diag})^{n-2}\\circ\\operatorname{Diag}\\circ\\Phi,\n\\]\nalso Korollar4.5.",
+      "paper_and_literature_references": "Korollar4.5 (4.19), Proposition4.8 (4.38), Messzeitpunkte (4.23)–(4.24).",
+      "simulation_consequences": "Gemittelte Evolution als d reelle Gewichte. Physikalische Dichtematrix bei Bedarf als Ausgangsblöcke \\(S(x)\\operatorname{diag}(q_n(x,\\cdot))S(x)^*\\) rekonstruieren. diag(q) ist lediglich eine Darstellung in der U-rotierten Basis, nicht die physikalische ρ. Feste Observable atomweise vorrechnen. Ihre analytische Auswertung darf nicht mit einer zusätzlichen realen Messung verwechselt werden; letztere ändert das Instrument. Tests T09,T10,T11.",
+      "contract": {
+        "model": "open_edge_sqw",
+        "inputs": {
+          "q2": "E-03 output",
+          "n": "integer >=2"
+        },
+        "preconditions": [
+          "same static S used for atoms and M"
+        ],
+        "outputs": {
+          "q_n": "M^(n-2) q2",
+          "mean": "U diag(q_n) U^*",
+          "law": "sum_e q_n[e] delta_sigma_e",
+          "born_diagonal": "M q_n",
+          "last_outcome": "sum_y q_n[x,y]"
+        },
+        "invariants": [
+          "mean equals Phi^n(rho0)",
+          "trace(mean)=1"
+        ],
+        "reject_for": [
+          "reporting diag(q_n) as physical density in original arc basis",
+          "using q_n rather than Mq_n for post-scattering Born edge distribution"
+        ]
+      },
+      "test_case_ids": [
+        "T09",
+        "T10",
+        "T11"
+      ]
+    },
+    {
+      "id": "E-06",
+      "title": "Alle stationären Zustände und invarianten Maße",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-06",
+      "statement_latex": "In endlicher Dimension bestehen affine Bijektionen\n\\[\nM\\pi=\\pi\\quad\\longleftrightarrow\\quad\n\\nu_\\pi=\\sum_e\\pi_e\\delta_{\\sigma_e}\\text{ invariant}\n\\quad\\longleftrightarrow\\quad\\rho_\\pi=\\mathcal B_U(\\pi)\\text{ stationär}.\n\\]\nJede endliche bistochastische Kette zerfällt in abgeschlossene irreduzible Klassen Cⱼ ohne transiente Zustände. Alle stationären Verteilungen sind\n\\[\n\\pi=\\sum_jw_j\\frac{\\mathbf1_{C_j}}{|C_j|},\\quad w_j\\ge0,\\quad\\sum_jw_j=1.\n\\]\nInsbesondere sind \\(u=\\mathbf1/d\\), \\(\\nu_U=d^{-1}\\sum_e\\delta_{\\sigma_e}\\) und I/d stets stationär. Bei Irreduzibilität sind sie eindeutig.",
+      "assumptions": "Endlicher `SIMPLE_STATIC`-Graph, beliebige unitäre Coins. Eindeutigkeit benötigt Irreduzibilität, Existenz des kanonischen Maßes nicht.",
+      "proof": "Jeder Zustand erreicht nach zwei Schritten die atomare Familie; ein invariantes Maß muss daher darauf getragen sein. Dort wirkt M. Jeder feste Dichteoperator erfüllt ρ=Φ²ρ und liegt deshalb im Bild von \\(\\mathcal B_U\\). Diese ist injektiv, also folgt Mπ=π. Die positive uniforme stationäre Verteilung schließt transiente Zustände einer endlichen Kette aus, weil diese in jedem stationären Maß Gewicht0 haben. Auf jeder abgeschlossenen Klasse ist die Einschränkung bistochastisch und ihre eindeutige stationäre Verteilung uniform [MC].",
+      "paper_and_literature_references": "Lemma5.3, Perron–Frobenius-Aussagen nach (5.14), Korollar5.7 für hinreichend irreduziblen Fall; die Maßkorrespondenz folgt aus der Trajektorienreduktion.",
+      "simulation_consequences": "SCC-Zerlegung statt willkürlicher Eigenvektorwahl bei mehrfacher Eigenvalue1. Klassenwahlgewichte eines Inputs sind \\(\\sum_{e\\in C_j}q_2(e)\\). Das uniforme kanonische Maß ist bei Reduzibilität nur eines von vielen. Tests T12,T13.",
+      "contract": {
+        "model": "finite_open_edge_sqw",
+        "inputs": {
+          "M": "bistochastic transition matrix"
+        },
+        "preconditions": [
+          "finite graph"
+        ],
+        "outputs": {
+          "stationary_classes": "closed SCCs",
+          "class_weights": "uniform within each closed SCC",
+          "canonical_law": "uniform on all d atoms"
+        },
+        "invariants": [
+          "no transient SCCs",
+          "M pi=pi"
+        ],
+        "reject_for": [
+          "claiming uniqueness when more than one class exists"
+        ]
+      },
+      "test_case_ids": [
+        "T12",
+        "T13"
+      ]
+    },
+    {
+      "id": "E-07",
+      "title": "Gesetzes-, empirische und Zustandskonvergenz unterscheiden",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/PAPER",
+      "document_anchor": "E-07",
+      "statement_latex": "Für gemeinsame orthogonale Atome:\n\\[\n\\|\\mathcal B_U(q)-\\mathcal B_U(p)\\|_1=\\|q-p\\|_1=2\\|\\nu_q-\\nu_p\\|_{\\rm TV},\n\\quad\\|\\mathcal B_U(q)-\\mathcal B_U(p)\\|_{\\rm HS}=\\|q-p\\|_2.\n\\]\nIst M irreduzibel und aperiodisch, konvergiert νₙ exponentiell gegen νᵤ. Bei bloßer Irreduzibilität gilt auch periodisch fast sicher\n\\[\n\\frac1L\\sum_{n=2}^{L+1}\\delta_{\\rho_n}\\to\\nu_U\\quad\\text{in TV},\\qquad\n\\frac1L\\sum_{n=2}^{L+1}\\rho_n\\to I/d\\quad\\text{in Spurnorm}.\n\\]\nDas Cesàromittel der gemittelten Dynamik erfüllt bei endlicher Irreduzibilität auch im periodischen Fall\n\\[\n\\frac1L\\sum_{n=0}^{L-1}\\Phi^n(\\rho_0)=I/d+O(L^{-1}).\n\\]\nDies ist eine Aussage über gemittelte Zustände, nicht über die zufälligen Fehler eines empirischen Pfadmittels. Die beschränkten geometrischen Summen der peripheren Nicht-1-Eigenwerte und die summierbaren inneren Spektralmoden begründen die Rate.\n\nDer momentane Zustand konvergiert dagegen nicht:\n\\[\n\\|\\rho_{n+1}-\\rho_n\\|_1=2,\\qquad\n\\|\\rho_n-I/d\\|_1=2(1-1/d),\\quad n\\ge2.\n\\]\nWenn sämtliche lokalen Streumatrixeinträge ungleich0 sind, ist M irreduzibel, bei einem ungeraden Zyklus aperiodisch, andernfalls von Periode2. Mit strukturellen Nullen sind andere Klassen und Perioden möglich.",
+      "assumptions": "Endliche Kette. Normidentitäten benötigen keine Irreduzibilität. Die erste Pfadnormidentität benötigt Schleifenfreiheit; bei Schleifen könnte derselbe Arc aufeinanderfolgen.",
+      "proof": "In der orthonormalen Basis ηₑ sind die Differenzeigenwerte qₑ−pₑ. Der starke endliche Markov-Ergodensatz liefert alle empirischen Häufigkeiten gleichzeitig; auf endlichem Träger ist das TV-Konvergenz. Perron–Frobenius liefert bei Aperiodizität exponentielle Relaxation. Aufeinanderfolgende Arcs (x,y) und (z,x) sind wegen x≠y verschieden. Ihre Projektoren sind orthogonal, die Differenz besitzt Eigenwerte ±1. Ein reiner Projektor minus I/d hat Eigenwerte 1−1/d und −1/d mit Vielfachheit d−1.",
+      "paper_and_literature_references": "Proposition5.5, Korollar5.7, (5.15)–(5.18). Der TV-Satz ist eine Folgerung aus dem dortigen Mittelwertsatz **plus** E-02. Pfadweiser Hintergrund [KM], allgemeine invariant-measure-Theorie [BFPP].",
+      "simulation_consequences": "Für Fehlerkontrolle bei n≥2 kann exakt zwischen Kanalspurnorm und Zustandsgesetz-TV umgerechnet werden. Empirische Knotenergebnisfrequenzen sind dₓ/d. Irreduzibilität/Periode am positiven M-Träger prüfen. SLEM \\(r_*<1\\) beschreibt die exponentielle Wurzelrate; wegen Jordanblöcken ist nicht immer O(\\(r_*^n\\)) ohne Polynomfaktor korrekt. Sicher ist O(\\(r'^n\\)) für jedes r′>r*. Tests T12,T13,T14.",
+      "contract": {
+        "model": "finite_open_edge_sqw",
+        "inputs": {
+          "M": "transition matrix",
+          "q": "label distribution"
+        },
+        "preconditions": [
+          "irreducible for unique empirical limit",
+          "aperiodic additionally for ordinary law convergence"
+        ],
+        "outputs": {
+          "trace_TV": "trace_norm(mean(q)-I/d)=2*TV(law(q),canonical_law)",
+          "pure_jump_distance": 2,
+          "distance_to_mixed": "2*(1-1/d)"
+        },
+        "invariants": [
+          "successive realized arcs differ on loopless graph"
+        ],
+        "reject_for": [
+          "claiming the instantaneous pure state converges to I/d"
+        ]
+      },
+      "test_case_ids": [
+        "T12",
+        "T13",
+        "T14"
+      ]
+    },
+    {
+      "id": "E-08",
+      "title": "Spektrum, Nullmoden, Entanglement-breaking und Produkt-Purifikation",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/PAPER",
+      "document_anchor": "E-08",
+      "statement_latex": "In endlicher Dimension:\n\\[\n\\Phi^\\dagger\\Phi=\\mathcal D^I,\\quad\n\\operatorname{rank}\\Phi=\\sum_xd_x^2,\\quad\n\\dim\\ker\\Phi=d^2-\\sum_xd_x^2,\n\\quad\\sigma(\\Phi)\\setminus\\{0\\}=\\sigma(M)\\setminus\\{0\\}.\n\\]\nEigenvektoren Mq=λq liefern Eigenoperatoren \\(\\mathcal B_U(q)\\). Bei einem Grad≥2 ist Φ nicht diagonalisierbar; periphere Eigenwerte sind semisimpel. Der EB-Index ist1, wenn alle Grade1 sind, sonst2.\n\nEs existiert kein zweidimensionales E, auf dem alle endlichen Krausprodukte skalierte Isometrien sind. Schon die Produkte der Länge2 schließen dies aus.",
+      "assumptions": "Endliche Dimension für Rang und Spektralvielfachheiten. Der Rang-eins-Produktbeweis selbst gilt abzählbar. \\(\\dagger\\) ist der Hilbert–Schmidt-Superoperatoradjungierte.",
+      "proof": "Aus Φ=Adᵤ DI folgt Φ†Φ=DI und dessen Rang ist die Summe der Blockquadrate. Nichtverschwindende Spektren und periphere Aussagen folgen aus Theorem5.1/Remark5.2 und E-05. Nondiagonalisierbarkeit folgt auch aus rankΦ>rankΦ²=d (NEW-02). Φ² hat durch E-02 eine Rang-eins-Krausdarstellung und ist damit EB [EB]. Ein mindestens zweidimensionaler Eingangsblock trägt jedoch einen mit einer Hilfsumgebung verschränkten Zustand, den DI unverändert lässt; die anschließende unitäre Konjugation erhält Verschränkung. Daher ist Φ selbst dann nicht EB.\n\nFür die Produktbedingung würde \\(P_EW^*WP_E=a_WP_E\\) bei a>0 Rang2 haben, obwohl W ein Rang-eins-Zweierprodukt ist. Also müssten alle WPₑ=0 sein. Aber \\(\\sum_{x,y}(K(x)K(y))^*K(x)K(y)=I\\); Kompression auf E ist ein Widerspruch.",
+      "paper_and_literature_references": "Theorem5.1, Remark5.2. Allgemeine EB-Charakterisierung [EB], Indexbegriff [EBI], Purifikationsbedingungen [PUR]/[BFPP]. Der exakte Index1/2 ist eine Modellfolgerung.",
+      "simulation_consequences": "Nichtverschwindende Spektren über d×d-M statt d²×d²-Supermatrix berechnen. Keine Eigenbasis von Φ voraussetzen. Dichte Supermatrix nur als kleines Oracle. Schur-/Krylovverfahren sind stabiler als numerische Jordanzerlegung. Tests T15,T16.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche Dimension für Rang und Spektralvielfachheiten. Der Rang-eins-Produktbeweis selbst gilt abzählbar. \\(\\dagger\\) ist der Hilbert–Schmidt-Superoperatoradjungierte."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "In endlicher Dimension:\n\\[\n\\Phi^\\dagger\\Phi=\\mathcal D^I,\\quad\n\\operatorname{rank}\\Phi=\\sum_xd_x^2,\\quad\n\\dim\\ker\\Phi=d^2-\\sum_xd_x^2,\n\\quad\\sigma(\\Phi)\\setminus\\{0\\}=\\sigma(M)\\setminus\\{0\\}.\n\\]\nEigenvektoren Mq=λq liefern Eigenoperatoren \\(\\mathcal B_U(q)\\). Bei einem Grad≥2 ist Φ nicht diagonalisierbar; periphere Eigenwerte sind semisimpel. Der EB-Index ist1, wenn alle Grade1 sind, sonst2.\n\nEs existiert kein zweidimensionales E, auf dem alle endlichen Krausprodukte skalierte Isometrien sind. Schon die Produkte der Länge2 schließen dies aus."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T15",
+        "T16"
+      ]
+    },
+    {
+      "id": "E-09",
+      "title": "Poisson-Gleichung und zentraler Grenzwertsatz",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-09",
+      "statement_latex": "Für reelles f auf den Atomen setze \\(g(e)=f(\\sigma_e)-\\nu_U(f)\\). Löse\n\\[\n(I-M^{\\mathsf T})h=g,\\qquad\\sum_eh(e)=0.\n\\]\nDann bei endlicher Irreduzibilität\n\\[\n\\sqrt L\\left[\\frac1L\\sum_{n=2}^{L+1}f(\\rho_n)-\\nu_U(f)\\right]\n\\Rightarrow\\mathcal N(0,s_f^2),\\quad\ns_f^2=\\frac1d\\sum_e[h(e)^2-(M^{\\mathsf T}h(e))^2].\n\\]\nFür eine allgemeine Zeilenkette T mit π ist der entsprechende Solve \\((I-T+\\mathbf1\\pi)h=f-\\pi f\\), Varianz \\(\\pi[h^2-(Th)^2]\\).",
+      "assumptions": "Endliche irreduzible Kette; Aperiodizität nicht erforderlich, beliebiger Initialzustand, endlicher Warmstart. Varianz darf0 sein.",
+      "proof": "Auf zentrierten Funktionen ist I−T invertierbar. Es gilt\n\\[\n\\sum_{k=0}^{L-1}g(E_k)=\\sum_{k=0}^{L-1}[h(E_{k+1})-(Th)(E_k)]+h(E_0)-h(E_L).\n\\]\nDie Summe ist ein Martingal mit beschränkten Inkrementen. Ihre mittlere bedingte Varianz konvergiert nach dem Ergodensatz zu \\(\\pi[Th^2-(Th)^2]=\\pi[h^2-(Th)^2]\\). Beschränktheit liefert Lindeberg; der Martingal-CLT und der O(1)-Randterm beweisen die Aussage. Dies verwendet einen Standard-CLT, nicht bloß numerische Plausibilität.",
+      "paper_and_literature_references": "Kein eigener Satz in [J]; allgemeiner Quantentrajektorienrahmen und Methode [BFP], endliche Markov-Spezialisierung.",
+      "simulation_consequences": "Korrelationskorrigierte Standardfehler durch Poisson-Solve statt i.i.d.-Formel. O(1/L) beim Kanal-Cesàromittel ist keine Pfadfehlerschranke; typische Fluktuation ist O(1/√L). Test T17.",
+      "contract": {
+        "model": "finite_irreducible_markov_state_chain",
+        "inputs": {
+          "T": "row transition, M.T for edge",
+          "pi": "stationary row",
+          "f": "real state observable values"
+        },
+        "preconditions": [
+          "irreducible",
+          "finite"
+        ],
+        "outputs": {
+          "g": "f - pi@f",
+          "h": "solve(I-T+ones_column*pi,g)",
+          "variance": "pi @ (h*h-(T@h)**2)"
+        },
+        "invariants": [
+          "pi@h=0",
+          "variance>=0 up to roundoff"
+        ],
+        "reject_for": [
+          "unconditional centering on a nonergodic class mixture",
+          "i.i.d. variance shortcut"
+        ]
+      },
+      "test_case_ids": [
+        "T17"
+      ]
+    },
+    {
+      "id": "E-10",
+      "title": "Exakter empirischer RKHS-Fehler und Kemeny-Konstante",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-10",
+      "statement_latex": "Für \\(k_r(\\rho,\\tau)=(\\operatorname{tr}\\rho\\tau)^r\\), r≥1, und stationäre L Schritte:\n\\[\n\\mathbb E\\operatorname{MMD}_{k_r}^2(\\widehat\\nu_L,\\nu_U)\n=\\frac{1-1/d}{L}+\\frac2{dL^2}\\sum_{t=1}^{L-1}(L-t)(\\operatorname{tr}M^t-1).\n\\]\nBei Irreduzibilität gilt, auch periodisch,\n\\[\n\\mathbb E\\operatorname{MMD}_{k_r}^2=\\frac{\\mathcal V(M)}L+O(L^{-2}),\\quad\n\\mathcal V(M)=\\frac1d\\sum_{j=2}^d\\frac{1-|\\lambda_j|^2}{|1-\\lambda_j|^2}\n=\\frac{2\\mathcal K(M)-(d-1)}d,\n\\quad\\mathcal K(M)=\\sum_{j=2}^d\\frac1{1-\\lambda_j}.\n\\]\nEigenwerte werden algebraisch gezählt. \\(\\mathcal V=0\\) genau bei einer deterministischen zyklischen Permutation.",
+      "assumptions": "Endlicher Kantenwalk; **stationärer Start** für die exakte finite-L-Formel. Irreduzibel für die asymptotische Variante mit nur einer Eigenvalue1.",
+      "proof": "Die Features auf den Atomen sind orthonormal, daher ist die zentrierte stationäre Autokorrelation \\(c_t=(\\operatorname{tr}M^t-1)/d\\). Quadrieren des empirischen Featuresummanden ergibt die erste Formel. Benutze\n\\[\n\\sum_{t=1}^{L-1}(L-t)\\lambda^t=\\frac{L\\lambda}{1-\\lambda}+\\frac{\\lambda^{L+1}-\\lambda}{(1-\\lambda)^2}\n\\]\nund \\(\\operatorname{tr}M^t=\\sum_j\\lambda_j^t\\). Konjugierte Paare liefern den reellen nichtnegativen Ausdruck, keine Diagonalisierbarkeit nötig. Bei V=0 liegen alle Eigenwerte auf dem Einheitskreis. Alle Singulärwerte sind≤1, aber ihr Produkt ist dann |det M|=1; alle sind1. Eine nichtnegative orthogonale stochastische Matrix ist eine Permutation, irreduzibel also ein einziger Zyklus.",
+      "paper_and_literature_references": "Chatfolgerung; Fundamentalmatrix/Kemeny-Hintergrund [DOYLE].",
+      "simulation_consequences": "Analytische Monte-Carlo-Fehlerkurven. Nicht einfach auf nichtstationäre Anfangsverteilungen übertragen. Die einzelne Observable hängt zusätzlich von Eigenrichtungen ab; diese Gesamtfehlersumme nur von Eigenwerten. Test T18.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher Kantenwalk; **stationärer Start** für die exakte finite-L-Formel. Irreduzibel für die asymptotische Variante mit nur einer Eigenvalue1."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Für \\(k_r(\\rho,\\tau)=(\\operatorname{tr}\\rho\\tau)^r\\), r≥1, und stationäre L Schritte:\n\\[\n\\mathbb E\\operatorname{MMD}_{k_r}^2(\\widehat\\nu_L,\\nu_U)\n=\\frac{1-1/d}{L}+\\frac2{dL^2}\\sum_{t=1}^{L-1}(L-t)(\\operatorname{tr}M^t-1).\n\\]\nBei Irreduzibilität gilt, auch periodisch,\n\\[\n\\mathbb E\\operatorname{MMD}_{k_r}^2=\\frac{\\mathcal V(M)}L+O(L^{-2}),\\quad\n\\mathcal V(M)=\\frac1d\\sum_{j=2}^d\\frac{1-|\\lambda_j|^2}{|1-\\lambda_j|^2}\n=\\frac{2\\mathcal K(M)-(d-1)}d,\n\\quad\\mathcal K(M)=\\sum_{j=2}^d\\frac1{1-\\lambda_j}.\n\\]\nEigenwerte werden algebraisch gezählt. \\(\\mathcal V=0\\) genau bei einer deterministischen zyklischen Permutation."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T18"
+      ]
+    },
+    {
+      "id": "E-11",
+      "title": "Nichtkontraktion in einem Schritt, strikte Zweischritt-Mischung und flache Coins",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-11",
+      "statement_latex": "Setze \\(B=\\bigoplus_x|S(x)|^{\\circ2}\\), \\(M=FB\\), \\(\\Pi=\\mathbf1\\mathbf1^{\\mathsf T}/d\\). Stets gilt \\(\\|M-\\Pi\\|_{2\\to2}=1\\). Sind alle lokalen Einträge ungleich0 und der Graph nichtbipartit, dann\n\\[\nc_2=\\|M^2-\\Pi\\|_{2\\to2}<1,\\qquad\n\\|M^nq-u\\|_2\\le c_2^{\\lfloor n/2\\rfloor}\\|q-u\\|_2.\n\\]\nBei flachen Coins \\(|S_{zy}(x)|^2=1/d_x\\) definiere\n\\[\nJ|x\\rangle=\\frac1{\\sqrt{d_x}}\\sum_{y\\sim x}|xy\\rangle,\\quad\nA_{\\rm norm}=J^*FJ,\n\\quad(A_{\\rm norm})_{xy}=\\frac{\\mathbf1_{x\\sim y}}{\\sqrt{d_xd_y}}.\n\\]\nDann \\(M=FJJ^*\\) und für n≥1\n\\[\nM^n=FJ A_{\\rm norm}^{n-1}J^*,\\qquad\n\\|M^n-\\Pi\\|_{2\\to2}=\\beta^{n-1},\\quad\\beta=\\max_{j\\ge2}|\\mu_j(A_{\\rm norm})|.\n\\]",
+      "assumptions": "Endlicher einfacher zusammenhängender Graph. Strikte Kontraktion nur unter genannten zusätzlichen Positivitäts-/Nichtbipartitheitsannahmen. Flache Formeln nur bei uniformen lokalen Betragsquadraten.",
+      "proof": "Bistochastizität liefert ℓ²-Kontraktion via Jensen. Ein zentrierter blockkonstanter Vektor \\(a_{xy}=c_x\\), \\(\\sum_xd_xc_x=0\\), erfüllt Ba=a und Ma=Fa, also keine strikte Ein-Schritt-Kontraktion. Bei positiven Bₓ ist Gleichheit in Jensen nur blockkonstant möglich. Normerhaltung über zwei Schritte verlangt sowohl a als auch Fa blockkonstant; dann sind die cₓ entlang gerader Wege gleich. Nichtbipartite Zusammenhangsgraphen verbinden so alle Knoten, weshalb im zentrierten Raum nur0 bleibt. Endliche Kompaktheit gibt die strikte Normschranke. Bei flachen Coins ist B=JJ*, die Potenzformel folgt durch Multiplikation. Für \\(w_x=\\sqrt{d_x/d}\\) gilt \\(Jw=FJw=\\mathbf1/\\sqrt d\\). Die äußeren Isometrien erhalten die Operatornorm der zentrierten normierten Adjazenzpotenz.",
+      "paper_and_literature_references": "Aus (3.9)–(3.12), (5.13)–(5.14) hergeleitet; diese genauen Normformeln sind zusätzliche Chatfolgerungen.",
+      "simulation_consequences": "Keine Konvergenzentscheidung allein anhand des größten Singulärwerts. Flache Coins ermöglichen eine m-dimensionale Graphreduktion. Bei bipartitem Graph β=1. Fourier-Coins sind flach; Grover-Coins im Allgemeinen nicht. Tests T19,T20.",
+      "contract": {
+        "model": "finite_open_edge_sqw",
+        "inputs": {
+          "S": "coins",
+          "graph": "graph"
+        },
+        "preconditions": [
+          "uniform |S|^2 for adjacency compression",
+          "all nonzero and nonbipartite for strict two-step norm bound"
+        ],
+        "outputs": {
+          "general_one_step_norm": "norm2(M-Pi)=1",
+          "flat_reduction": "M^n=F J A_norm^(n-1) J^*"
+        },
+        "invariants": [
+          "J^*J=I",
+          "A_norm symmetric"
+        ],
+        "reject_for": [
+          "assuming every Grover coin is flat"
+        ]
+      },
+      "test_case_ids": [
+        "T19",
+        "T20"
+      ]
+    },
+    {
+      "id": "E-12",
+      "title": "Entropie, Spektralreduktion und elektrische Widerstände",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-12",
+      "statement_latex": "Bei flacher Streuung:\n\\[\n\\det(\\lambda I_d-M)=\\lambda^{d-m}\\det(\\lambda I_m-A_{\\rm norm}),\\quad\n\\mathcal V(M)=\\frac{d-2m+1+2\\sum_{j=2}^m(1-\\mu_j)^{-1}}d.\n\\]\nIst G zusätzlich k-regulär:\n\\[\n\\mathcal V(M)=1-\\frac2k+\\frac1{km}+\\frac{2\\operatorname{Kf}(G)}{m^2}.\n\\]\nStationäre Entropierate:\n\\[\nh_U=-\\frac1d\\sum_x\\sum_{y,z\\sim x}|S_{zy}(x)|^2\\log|S_{zy}(x)|^2,\n\\quad0\\le h_U\\le\\frac1d\\sum_xd_x\\log d_x.\n\\]\nFür n≥2 ist die gemittelte Reinheit \\(\\operatorname{tr}(\\bar\\rho_n^2)=\\sum_eq_n(e)^2\\), die Entropie \\(S(\\bar\\rho_n)=-\\sum_eq_n(e)\\log q_n(e)\\). Bedingte Zustände haben Reinheit1/Entropie0. Φ erhöht in endlicher Dimension die Entropie nichtnegativ: S(Φρ)≥S(ρ).",
+      "assumptions": "Endliche Dimension; Spektral-/Widerstandsformeln nur flache Coins, letzte zusätzlich Regularität. 0log0=0.",
+      "proof": "M=(FJ)J* und J*FJ=A liefern die AB/BA-Determinantenidentität. Die d−m zusätzlichen Nulleigenwerte in E-10 liefern die Formel. Bei Regularität ist \\(1-\\mu_j=\\ell_j/k\\) und \\(\\operatorname{Kf}(G)=m\\sum_{j\\ge2}\\ell_j^{-1}\\) [KIRCHHOFF]. Die Entropierate ist der uniforme Mittelwert der Spaltenentropien, maximal bei lokal uniformen Ausgängen. Mean-Purity/-Entropie folgen aus seinen Eigenwerten q. Das Pinching ist eine unitäre Phasenmittelung; Entropiekonkavität und unitäre Invarianz ergeben S(Φρ)≥S(ρ).",
+      "paper_and_literature_references": "[J] (4.16) für Entropie; weitere Folgerungen aus E-10/E-11; [DOYLE], [KIRCHHOFF].",
+      "simulation_consequences": "Entropie/Purity ohne Dichtematrixdiagonalisierung. Widerstandsformel als unabhängiger Graphbenchmark, nicht ungeprüft auf irreguläre Graphen übertragen. Pfadentropierate ist weder bedingte Zustandsentropie noch Mischungsrate. Tests T18,T20.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche Dimension; Spektral-/Widerstandsformeln nur flache Coins, letzte zusätzlich Regularität. 0log0=0."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Bei flacher Streuung:\n\\[\n\\det(\\lambda I_d-M)=\\lambda^{d-m}\\det(\\lambda I_m-A_{\\rm norm}),\\quad\n\\mathcal V(M)=\\frac{d-2m+1+2\\sum_{j=2}^m(1-\\mu_j)^{-1}}d.\n\\]\nIst G zusätzlich k-regulär:\n\\[\n\\mathcal V(M)=1-\\frac2k+\\frac1{km}+\\frac{2\\operatorname{Kf}(G)}{m^2}.\n\\]\nStationäre Entropierate:\n\\[\nh_U=-\\frac1d\\sum_x\\sum_{y,z\\sim x}|S_{zy}(x)|^2\\log|S_{zy}(x)|^2,\n\\quad0\\le h_U\\le\\frac1d\\sum_xd_x\\log d_x.\n\\]\nFür n≥2 ist die gemittelte Reinheit \\(\\operatorname{tr}(\\bar\\rho_n^2)=\\sum_eq_n(e)^2\\), die Entropie \\(S(\\bar\\rho_n)=-\\sum_eq_n(e)\\log q_n(e)\\). Bedingte Zustände haben Reinheit1/Entropie0. Φ erhöht in endlicher Dimension die Entropie nichtnegativ: S(Φρ)≥S(ρ)."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T18",
+        "T20"
+      ]
+    },
+    {
+      "id": "E-13",
+      "title": "Gleichheit der kanonischen invarianten Maße",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-13",
+      "statement_latex": "Für endliche Unitaries:\n\\[\n\\nu_U=\\nu_{\\widetilde U}\n\\iff \\widetilde U|e\\rangle=e^{i\\theta_e}U|\\pi(e)\\rangle\n\\iff U^*\\widetilde U=P_\\pi D_\\theta.\n\\]\nFür SQW-Familien auf demselben Graphen ist dies äquivalent zu\n\\[\n\\widetilde S(x)=S(x)P_xD_x\\quad\\forall x.\n\\]\nDie monomialen Unitaries bilden den Normalisator \\(N(T_x)=T_x\\rtimes\\mathfrak S_{d_x}\\). Die kanonischen Maße werden durch\n\\[\n\\mathcal M_G\\cong\\prod_xU(d_x)/N(T_x),\\qquad\n\\dim_{\\mathbb R}\\mathcal M_G=\\sum_x(d_x^2-d_x)\n\\]\nparametrisiert. Für den Dreiknotenbaum ergibt sich ℝP². Ein einzelner reiner Zustand liegt auf \\(\\mathbb{CP}^{d-1}\\cong U(d)/(U(1)\\times U(d-1))\\).",
+      "assumptions": "Endlicher fester beschrifteter Graph; kanonisches **gleichgewichtetes** Maß. Bei Reduzibilität werden dadurch nicht alle möglichen nichtuniformen stationären Maße klassifiziert. Kein Quotient nach Graphautomorphismen, außer ausdrücklich hinzugefügt.",
+      "proof": "Gleichheit der diskreten Maße permutiert deren verschiedenen Atome. Gleiche normierte Rang-eins-Projektoren bedeuten Ketgleichheit bis auf eine Phase. Bei einer eingehenden Kante am Knoten x liegt das Bild beider Streuoperatoren im Ausgangsblock x; orthogonale Ausgangsblöcke verbieten eine Permutation zu einem anderen Knoten. Koeffizientenvergleich liefert die lokale Bedingung. Der Normalisator permutiert die minimalen Diagonalprojektoren und ist daher genau monomial. Quotientendimension folgt aus dimU(n)=n² und dimT=n. Für Grad2 ist U(2)/T² die Blochkugeloberfläche S²; Vertauschen orthogonaler Geraden ist Antipodenidentifikation, also ℝP².",
+      "paper_and_literature_references": "Lokale Struktur [J] (2.7). Allgemeine MASA-/Normalisator-/Flaggengeometrie [ZCV]; keine behauptete Neuheit dieser Lie-Theorie.",
+      "simulation_consequences": "Lokaler Spaltenabgleich bis auf Phase/Permutation vergleicht die Ensembles. Gleiches Ensemble bedeutet nicht gleicher Kanal, nicht gleiche M und nicht gleiche Mischungsrate. Der Schwerpunkt ist immer I/d, während die Atome von S einschließlich relativer Spaltenkomponentenphasen abhängen. Tests T21,T22,T35.",
+      "contract": {
+        "model": "canonical_edge_ensemble",
+        "inputs": {
+          "S": "first family",
+          "S_tilde": "second family"
+        },
+        "preconditions": [
+          "same finite labeled graph",
+          "equal uniform atom weights"
+        ],
+        "outputs": {
+          "equal_measure": "for all x, S_tilde[x]=S[x] P_x D_x",
+          "parameter_space": "product_x U(d_x)/N(T_x)"
+        },
+        "invariants": [
+          "mean canonical state=I/d"
+        ],
+        "reject_for": [
+          "using this equivalence as full channel equality"
+        ]
+      },
+      "test_case_ids": [
+        "T21",
+        "T22",
+        "T35"
+      ]
+    },
+    {
+      "id": "E-14",
+      "title": "Gleiche Maße, unterschiedliche Dynamik; endliche Permutationsoptimierung",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-14",
+      "statement_latex": "Für \\(\\widetilde U=URD_\\theta\\) gilt \\(\\widetilde M=MR\\). In gemeinsamer Beschriftung durch die physischen Atome σₑ ist der zweite Übergangskern dagegen RM. Beide sind permutationsähnlich zueinander, nicht allgemein ähnlich zu M. Singulärwerte und stationäre Entropierate bleiben gleich, Eigenwerte und Mischung können sich ändern. Innerhalb einer festen kanonischen Maßklasse gibt es genau \\(\\prod_xd_x!\\) verschiedene Zustandskerne RM; Spaltenphasen erzeugen keine weiteren.",
+      "assumptions": "E-13. Aussagen über Relaxationsraten beziehen sich auf tatsächlich irreduzible aperiodische Kandidaten. Die Klasse eines festen Maßes kann auch nichtmischende Kandidaten enthalten.",
+      "proof": "Rechtsmultiplikation durch R permutiert Spalten der Betragsquadrate; D fällt aus ihnen heraus. Die Zuordnung \\(\\widetilde\\sigma_e=\\sigma_{\\pi(e)}\\) konjugiert MR in RM. Permutationsmultiplikation erhält Singulärwerte; die Spaltenentropiesumme bleibt ebenfalls gleich. Lokal vertauschbare Zeilen von M besitzen disjunkte nichtleere Spaltenträger: Zeile (x,y) liegt in den Spalten des Eingangsblocks bei y. Daher kann keine nichttriviale lokale Zeilenpermutation M fixieren, was die genaue Anzahl beweist. X-02 zeigt unterschiedliche SLEMs explizit.",
+      "paper_and_literature_references": "Modellspezifische Chatfolgerung aus [J] (5.13) und E-13.",
+      "simulation_consequences": "Bei kleinen Graden exakte Enumeration lokaler Permutationen für ein vorgegebenes Optimierungsziel möglich. Ein allgemein effizienter Optimierungsalgorithmus wurde nicht gezeigt. Phasenoptimierung verbessert innerhalb dieser Klasse nicht die reduzierte stationäre Mischung, kann aber kohärente Warmstarts verändern. Caches für M, Atome und volle Kanäle trennen. Tests T21,T22,T40.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "E-13. Aussagen über Relaxationsraten beziehen sich auf tatsächlich irreduzible aperiodische Kandidaten. Die Klasse eines festen Maßes kann auch nichtmischende Kandidaten enthalten."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Für \\(\\widetilde U=URD_\\theta\\) gilt \\(\\widetilde M=MR\\). In gemeinsamer Beschriftung durch die physischen Atome σₑ ist der zweite Übergangskern dagegen RM. Beide sind permutationsähnlich zueinander, nicht allgemein ähnlich zu M. Singulärwerte und stationäre Entropierate bleiben gleich, Eigenwerte und Mischung können sich ändern. Innerhalb einer festen kanonischen Maßklasse gibt es genau \\(\\prod_xd_x!\\) verschiedene Zustandskerne RM; Spaltenphasen erzeugen keine weiteren."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T21",
+        "T22",
+        "T40"
+      ]
+    },
+    {
+      "id": "E-15",
+      "title": "Zweizeitgesetze lösen die Weyl-Permutationsmehrdeutigkeit auf",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-15",
+      "statement_latex": "Beim kanonischen stationären Start:\n\\[\n\\Gamma_U=\\frac1d\\sum_{e,f}M_{f,e}\\delta_{(\\sigma_e,\\sigma_f)}.\n\\]\n\\[\n\\Gamma_U=\\Gamma_{\\widetilde U}\\iff\\widetilde S(x)=S(x)D_x\\quad\\forall x.\n\\]\nBei schon gleichem Einzeitmaß mit lokaler Permutation π:\n\\[\n\\|\\Gamma_U-\\Gamma_{\\widetilde U}\\|_{\\rm TV}=\\frac{\\#\\{e:\\pi(e)\\ne e\\}}d,\n\\quad\n\\operatorname{MMD}_{k_2\\otimes k_2}^2=\\frac{\\|M-RM\\|_F^2}{d^2}.\n\\]\nZweizeitgesetze werden damit durch \\(\\prod_xU(d_x)/T_x\\) statt durch \\(\\prod_xU(d_x)/N(T_x)\\) klassifiziert.",
+      "assumptions": "Endlicher einfacher Graph, fester physikalischer Zustandsraum, alle Atome stationär mit Gewicht1/d.",
+      "proof": "Gleiche Zweizeitgesetze haben gleiche Randmaße. Nach E-13/E-14 ist ihr Vergleich daher M=RM. Die disjunkten nichtleeren Zeilenträger erzwingen R=I. Umgekehrt lassen individuelle Spaltenphasen die Atome und Übergänge unverändert. Jede bewegte Zeile hat zur ersetzenden Zeile ℓ¹-Abstand2, wodurch die TV-Formel folgt. Paarfeatures auf orthogonalen Atomen sind orthonormal; Ausmultiplizieren ergibt die Frobeniusformel. Der Produktkernel identifiziert zunächst die Randträger durch R-02 und danach die Paargewichte.",
+      "paper_and_literature_references": "Chatfolgerung; Ausgangspunkt [J] §4.2 und (5.13). Keine Vollständigkeits-/Neuheitsrecherche zu dieser speziellen Klassifikation behauptet.",
+      "simulation_consequences": "Paarzähler unterscheiden Dynamiken mit gleichem stationärem Mittel und Maß. Wegen Markov bestimmen sie alle stationären Mehrzeitgesetze, jedoch nicht alle ersten Schritte aus beliebigen kohärenten Inputs. Test T21.",
+      "contract": {
+        "model": "stationary_edge_path_law",
+        "inputs": {
+          "S": "family",
+          "S_tilde": "family"
+        },
+        "preconditions": [
+          "same labeled simple graph",
+          "canonical stationary initialization"
+        ],
+        "outputs": {
+          "equal_pair_law": "local column phases only",
+          "pair_mass": "M[f,e]/d",
+          "same_measure_pair_TV": "number_moved_arcs/d"
+        },
+        "invariants": [
+          "both marginals canonical ensemble"
+        ]
+      },
+      "test_case_ids": [
+        "T21"
+      ]
+    },
+    {
+      "id": "E-16",
+      "title": "Richtungsangepasste Zeitumkehr und Birkhoff-Darstellung",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "E-16",
+      "statement_latex": "Die Umkehr von \\((x,y)\\to(z,x)\\) als räumlicher Pfad ist \\((x,z)\\to(y,x)\\). Dementsprechend\n\\[\nM=FM^{\\mathsf T}F\\iff B_x=B_x^{\\mathsf T}\\quad\\forall x\n\\iff |S_{zy}(x)|^2=|S_{yz}(x)|^2.\n\\]\nFür Grade≤2 gilt dies automatisch. Gewöhnliches M=Mᵀ gilt dagegen nur für Bₓ=I. Für \\(\\Theta(\\sigma_e,\\sigma_f)=(\\sigma_{Ff},\\sigma_{Fe})\\):\n\\[\n\\operatorname{MMD}_{k_2\\otimes k_2}^2(\\Gamma_U,\\Theta_*\\Gamma_U)\n=\\frac1{d^2}\\sum_x\\|B_x-B_x^{\\mathsf T}\\|_F^2.\n\\]\nEine Birkhoffzerlegung \\(M=\\sum_ja_jP_{\\pi_j}\\) realisiert die reduzierte Kette auch als i.i.d. zufällige Permutationswirkung; die entsprechenden Zustandsunitaries sind \\(UP_{\\pi_j}U^*\\). Gruppenbahnen der erzeugten endlichen Permutationsgruppe sind die irreduziblen Klassen.",
+      "assumptions": "Endlicher einfacher Graph. Es geht um die gemessenen Pfade, nicht automatisch um antiunitäre Zeitumkehrsymmetrie von U. Birkhoffgewichte positiv auf den benutzten Permutationen.",
+      "proof": "M=FB impliziert FMᵀF=FBᵀ. Ein nichtzurückstreuender Übergang hat keinen gewöhnlichen umgekehrten Übergang auf denselben gerichteten Arcs; Symmetrie M=Mᵀ erzwingt daher ausschließlich Zurückstreuung. 2×2-bistochastische Blöcke sind symmetrisch. Die Kernelidentität folgt aus orthogonalen Paarfeatures. Die alternative Permutationsdarstellung folgt aus Birkhoff–von Neumann. Inversen endlicher Permutationen sind positive Potenzen, also stimmen erreichbare Mengen mit Gruppenbahnen überein.",
+      "paper_and_literature_references": "Flip [J] (3.9), Markovstruktur (5.13); Birkhoff–von Neumann ist klassischer Hintergrund.",
+      "simulation_consequences": "Reversal-Test mit Arcflip versehen. Die alternative Random-unitary-Darstellung gilt auf der purifizierten Familie; daraus folgt nicht Gleichheit des vollen Kanals auf beliebigen Dichtematrizen. Lokales Spaltensampling ist meist einfacher als Birkhoffzerlegung. Test T23.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher einfacher Graph. Es geht um die gemessenen Pfade, nicht automatisch um antiunitäre Zeitumkehrsymmetrie von U. Birkhoffgewichte positiv auf den benutzten Permutationen."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Die Umkehr von \\((x,y)\\to(z,x)\\) als räumlicher Pfad ist \\((x,z)\\to(y,x)\\). Dementsprechend\n\\[\nM=FM^{\\mathsf T}F\\iff B_x=B_x^{\\mathsf T}\\quad\\forall x\n\\iff |S_{zy}(x)|^2=|S_{yz}(x)|^2.\n\\]\nFür Grade≤2 gilt dies automatisch. Gewöhnliches M=Mᵀ gilt dagegen nur für Bₓ=I. Für \\(\\Theta(\\sigma_e,\\sigma_f)=(\\sigma_{Ff},\\sigma_{Fe})\\):\n\\[\n\\operatorname{MMD}_{k_2\\otimes k_2}^2(\\Gamma_U,\\Theta_*\\Gamma_U)\n=\\frac1{d^2}\\sum_x\\|B_x-B_x^{\\mathsf T}\\|_F^2.\n\\]\nEine Birkhoffzerlegung \\(M=\\sum_ja_jP_{\\pi_j}\\) realisiert die reduzierte Kette auch als i.i.d. zufällige Permutationswirkung; die entsprechenden Zustandsunitaries sind \\(UP_{\\pi_j}U^*\\). Gruppenbahnen der erzeugten endlichen Permutationsgruppe sind die irreduziblen Klassen."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T23"
+      ]
+    },
+    {
+      "id": "E-17",
+      "title": "Poissonisierung und die ursprünglich diskutierten (Isom)-Annahmen",
+      "proof_status": "CONDITIONAL",
+      "origin": "CHAT",
+      "document_anchor": "E-17",
+      "statement_latex": "Für die ausdrücklich zusätzlich gewählte Lindbladkonstruktion Cₓ=K(x), H=0 gilt\n\\[\n\\mathcal L=\\Phi-\\mathrm{id},\\qquad e^{t\\mathcal L}=e^{-t}\\sum_{n\\ge0}\\frac{t^n}{n!}\\Phi^n.\n\\]\nBei endlichem irreduziblem M relaxiert diese Halbgruppe gegen I/d, ohne Aperiodizität. Nach dem zweiten Sprung sind konditionierte Zustände rein; zwischen Sprüngen bleibt der normierte Zustand gleich.\n\nFür einen Unterraum E ist \\(K|_E=cV\\), V Isometrie E→H, äquivalent zu \\(P_EK^*KP_E=|c|^2P_E\\), auch bei c=0. Unter der im Chat verwendeten Interpretation der Screenshot-Hypothese ist die Vereinigung problematischer zweidimensionaler Unterräume projektiv\n\\[\n\\mathbb P(W),\\qquad W=\\bigoplus_{d_x\\ge2}\\mathcal H_x^I.\n\\]\nDie Hamilton-Orbitbedingung lautet \\(\\bigcap_t e^{itH}W=\\{0\\}\\), äquivalent dazu, dass W keinen Eigenvektor des selbstadjungierten H enthält. Für H=0 und W≠0 scheitert sie, während die Produkt-Purifikation E-08 gilt.",
+      "assumptions": "Endliche Dimension; keine Identifikation eines beliebigen Lindbladmodells mit dem diskreten Walk. Die bibliografische Quelle der ursprünglichen Screenshots wurde nicht vollständig identifiziert; die Interpretation der Skalare pro Krausoperator ist explizit.",
+      "proof": "\\(\\sum K^*K=I\\) ergibt L=Φ−I. Eigenwerte λ werden zu λ−1; außer λ=1 liegen sie strikt in der linken Halbebene. Für die Isometrieäquivalenz setze T=K|E und nutze T*T=aI; bei a>0 V=T/√a, bei a=0 T=0. Grad-eins-Blöcke können wegen Rangvergleich keinen Anteil eines solchen 2D-E tragen. Umgekehrt wählt man zu jedem Blockanteil ψₓ in W einen orthogonalen ηₓ gleicher Norm; E=span(ψ,η) erfüllt die Kompressionsbedingung. Der Hamiltonschnitt ist der größte in W enthaltene H-invariante Unterraum; in endlicher Dimension enthält jeder nichttriviale davon einen Eigenvektor.",
+      "paper_and_literature_references": "Eigenständige Konstruktion; [PUR]/[BFPP] betreffen die diskrete Produktbedingung. Es wurde kein allgemeiner kontinuierlicher Ergodensatz durch einfaches Ersetzen von (Isom) bewiesen.",
+      "simulation_consequences": "Optional Poisson-Event-Backend mit Rate1. Zweiter Sprung ist nicht deterministische Zeit2. Hinzufügen eines H verändert die Dynamik und erfordert neue Prüfung. Poissonisierung ist nicht dasselbe wie eine exakte Einbettung \\(e^{\\mathcal L}=\\Phi\\); ein nichtinvertierbarer endlicher Kanal kann nicht selbst der Exponentialwert einer endlichen linearen Generatormatrix sein.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche Dimension; keine Identifikation eines beliebigen Lindbladmodells mit dem diskreten Walk. Die bibliografische Quelle der ursprünglichen Screenshots wurde nicht vollständig identifiziert; die Interpretation der Skalare pro Krausoperator ist explizit."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Für die ausdrücklich zusätzlich gewählte Lindbladkonstruktion Cₓ=K(x), H=0 gilt\n\\[\n\\mathcal L=\\Phi-\\mathrm{id},\\qquad e^{t\\mathcal L}=e^{-t}\\sum_{n\\ge0}\\frac{t^n}{n!}\\Phi^n.\n\\]\nBei endlichem irreduziblem M relaxiert diese Halbgruppe gegen I/d, ohne Aperiodizität. Nach dem zweiten Sprung sind konditionierte Zustände rein; zwischen Sprüngen bleibt der normierte Zustand gleich.\n\nFür einen Unterraum E ist \\(K|_E=cV\\), V Isometrie E→H, äquivalent zu \\(P_EK^*KP_E=|c|^2P_E\\), auch bei c=0. Unter der im Chat verwendeten Interpretation der Screenshot-Hypothese ist die Vereinigung problematischer zweidimensionaler Unterräume projektiv\n\\[\n\\mathbb P(W),\\qquad W=\\bigoplus_{d_x\\ge2}\\mathcal H_x^I.\n\\]\nDie Hamilton-Orbitbedingung lautet \\(\\bigcap_t e^{itH}W=\\{0\\}\\), äquivalent dazu, dass W keinen Eigenvektor des selbstadjungierten H enthält. Für H=0 und W≠0 scheitert sie, während die Produkt-Purifikation E-08 gilt."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": []
+    },
+    {
+      "id": "V-01",
+      "title": "Exakte induzierte Präparation und komplexe Konjugationen",
+      "proof_status": "PROVEN",
+      "origin": "PAPER/CHAT",
+      "document_anchor": "V-01",
+      "statement_latex": "Zusätzlich zu S seien normierte lokale Randvektoren ω(x) und Phasen βₓ vorgegeben. Setze\n\\[\nR=\\sum_x|x\\rangle\\langle\\omega(x)|,\\qquad RR^*=I_V,\\quad R^*R=\\Pi_\\omega,\n\\]\n\\[\nv(x)=S(x)\\omega(x),\\quad\n\\theta(x)=\\sum_{z\\sim x}\\overline{\\omega_x(z)}v_z(x)|z\\rangle,\n\\quad s_x=\\|\\theta(x)\\|^2=\\sum_{z\\sim x}|\\omega_x(z)|^2|v_z(x)|^2\\le1,\n\\]\n\\[\n\\chi(x)=\\theta(x)+e^{i\\beta_x}\\sqrt{1-s_x}|x\\rangle,\n\\quad G(x)=|\\chi(x)\\rangle\\langle x|,\n\\quad\\Psi(\\rho)=\\sum_xG(x)\\rho G(x)^*.\n\\]\nHier ist \\(\\omega_x(z)\\) die Komponente des Randvektors **am Knoten z** in Richtung des Nachbarn x. Der Balken ist wesentlich. Die rohe Kompression \\(\\widetilde\\Phi=\\operatorname{Ad}_R\\circ\\Phi\\circ\\operatorname{Ad}_{R^*}\\) hat Krausoperatoren \\(|\\theta(x)\\rangle\\langle x|\\) und ist allgemein nur spurnichtvermehrend. Die konkret gewählte Ψ ist CPTP.",
+      "assumptions": "`SIMPLE_STATIC`, normierte ω, unitäre S, genau die kohärente Vervollständigung (6.15). Loopfreiheit garantiert θ(x)⊥|x〉. Multigraphen brauchen die Portsumme NEW-03.",
+      "proof": "\\(R^*|x\\rangle=\\omega(x)\\), \\(K(x)\\omega(x)=\\sum_zv_z(x)|zx\\rangle\\). Danach liefert R den Koeffizienten \\(\\langle\\omega(z)|zx\\rangle=\\overline{\\omega_x(z)}\\). Andere Eingangslabels werden annihiliert; daher ist \\(RK(x)R^*=|\\theta(x)\\rangle\\langle x|\\). Normierung von v und |ω-Komponenten|≤1 liefert s≤1. Die orthogonale Selbstkomponente stellt Norm1 her; somit \\(\\sum_xG(x)^*G(x)=I\\).",
+      "paper_and_literature_references": "(6.1)–(6.17), Definition6.1, (6.27). Die Konjugationsstriche wurden in der PDF visuell geprüft. Der gedruckte Nebensatz unter (6.14) zur Spurerhaltung der rohen Kompression ist ohne weitere Annahme zu stark; siehe AUD-02.",
+      "simulation_consequences": "Einmal v,θ,s,χ und P vorrechnen. Sparse χ hat höchstens dₓ+1 Komponenten. Sω benötigt O(Σdₓ²), nachher χ-Speicher O(m+d). Kein Edge-Kanal muss explizit gebaut werden. Nicht θ durch θ/||θ|| ersetzen und nicht die fehlende Masse durch einen separaten Krausoperator ergänzen: das wären andere Modelle. s>1 außerhalb Rundungstoleranz ist ein Fehler, kein Anlass für sqrt(abs(1−s)). Tests T25,T26,T27.",
+      "contract": {
+        "model": "induced_open_vertex_sqw",
+        "inputs": {
+          "S": "local unitaries",
+          "omega": "normalized incoming boundary kets",
+          "beta": "real phase per vertex",
+          "graph": "loopless simple graph with ordered neighbors"
+        },
+        "preconditions": [
+          "norm(omega[x])=1",
+          "same port ordering in all contractions"
+        ],
+        "outputs": {
+          "v": "S[x]@omega[x]",
+          "theta": "theta[z,x]=conj(omega[z][port_to_x])*v[port_to_z]",
+          "chi": "theta[:,x]+exp(i beta[x])*sqrt(1-norm(theta[:,x])^2)*basis_x",
+          "P": "transpose(abs(chi_columns)^2)"
+        },
+        "invariants": [
+          "theta=R U R^*",
+          "norm(chi[x])=1",
+          "P row sums=1"
+        ],
+        "reject_for": [
+          "missing conjugation",
+          "theta renormalization instead of coherent self-completion",
+          "coherent and incoherent completion conflated"
+        ]
+      },
+      "test_case_ids": [
+        "T25",
+        "T26",
+        "T27"
+      ]
+    },
+    {
+      "id": "V-02",
+      "title": "Sofortige Reinheit und exakte klassische Labelkette",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/PAPER",
+      "document_anchor": "V-02",
+      "statement_latex": "Mit \\(\\tau_x=|\\chi(x)\\rangle\\langle\\chi(x)|\\):\n\\[\nG(x)\\rho G(x)^*=\\rho_{xx}\\tau_x,\\quad \\rho_n=\\tau_{X_n}\\quad(n\\ge1),\n\\quad P_{xy}=|\\langle y|\\chi(x)\\rangle|^2.\n\\]\n\\[\nr_0(x)=\\rho_{0,xx},\\quad q_n=r_0P^{n-1},\\quad\n\\nu_n=\\sum_xq_n(x)\\delta_{\\tau_x},\\quad\n\\bar\\rho_n=\\sum_xq_n(x)\\tau_x,\\quad\n\\operatorname{diag}\\bar\\rho_n=r_0P^n.\n\\]\nDie Pfadwahrscheinlichkeit ist \\(r_0(x_1)\\prod_{j=1}^{n-1}P_{x_jx_{j+1}}\\). Anfangskohärenzen sind ab Schritt1 irrelevant.",
+      "assumptions": "V-01 oder allgemeiner ein normiertes Rank-one-Präparationsinstrument G(x)=|χ(x)〉〈x|; beliebiger reiner/gemischter Input, endlicher oder abzählbarer Raum.",
+      "proof": "Rang-eins-Ausmultiplizieren ergibt ρₓₓτₓ. Normieren liefert τₓ. Die nächste Ergebniswahrscheinlichkeit ist \\(\\langle y|\\tau_x|y\\rangle=P_{xy}\\). Summation über Pfade ergibt qₙ und νₙ. Die Diagonale jedes τₓ ist gerade die Zeile x von P; deshalb tritt beim Born-Gesetz ein zusätzliches P auf.",
+      "paper_and_literature_references": "Theorem6.2, (6.18)–(6.28). Die konkrete Trajektorieninterpretation folgt aus der gewählten Krausfamilie. Ψ ist schon in einem Schritt entanglement-breaking [EB].",
+      "simulation_consequences": "Pro Pfad ein Knotenlabel, Sampling aus einer P-Zeile. Den reinen Zustand nur bei Ausgabe rekonstruieren. Der Zustand nach X₁ ist χ(X₁), nicht |X₁〉. Gemittelter Kanal als m-Gewichte. Tests T28,T29.",
+      "contract": {
+        "model": "open_vertex_sqw",
+        "inputs": {
+          "chi": "normalized preparation columns",
+          "rho0": "arbitrary density"
+        },
+        "preconditions": [
+          "G[x]=outer(chi[x],basis_x)",
+          "n>=1"
+        ],
+        "outputs": {
+          "q1": "real(diag(rho0))",
+          "q_n": "q1 P^(n-1)",
+          "state": "VertexAtom(X_n)",
+          "mean": "sum_x q_n[x] tau_x",
+          "born_diagonal": "q_n P"
+        },
+        "invariants": [
+          "rank(conditional_state)=1",
+          "initial offdiagonals irrelevant from step1"
+        ],
+        "memory": "one vertex or exact lumped atom ID"
+      },
+      "test_case_ids": [
+        "T28",
+        "T29"
+      ]
+    },
+    {
+      "id": "V-03",
+      "title": "Doppelte Atome, Erreichbarkeit und Lumpability",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "V-03",
+      "statement_latex": "Verschiedene Labels können denselben Projektor präparieren. Aus τₓ=τ_z folgt Pₓᵧ=P_zᵧ für alle y. Für Klassen \\(\\mathcal C_i\\) identischer Atome ist\n\\[\nT_{ij}=\\sum_{y\\in\\mathcal C_j}P_{xy},\\qquad x\\in\\mathcal C_i,\n\\]\neine wohldefinierte exakte Zustandskette. Ihr Anfangsgewicht ist \\(\\widehat r_0(i)=\\sum_{x\\in\\mathcal C_i}r_0(x)\\). Bei einem festen Input sind nur die von supp(r₀) im P-Träger erreichbaren Atome relevant.",
+      "assumptions": "Exakte Projektorgleichheit, nicht nur Vektorähnlichkeit. Alle G-Präparationen bleiben normiert. Keine Orthogonalität nötig.",
+      "proof": "Pₓᵧ=〈y|τₓ|y〉 beweist identische Zeilen. Daher ist die aggregierte Zeile unabhängig vom Repräsentanten; die bedingte nächste Klassenverteilung hängt nur von der aktuellen Klasse ab. Das ist starke Lumpability. Erreichbarkeit folgt aus der Labelkette.",
+      "paper_and_literature_references": "Folgerung aus [J] (6.16), (6.18), klassische Lumpability.",
+      "simulation_consequences": "Optional weniger Atom-IDs als Vertex-IDs. Für vollständige Knotenergebnisrecords entweder Labels beibehalten oder innerhalb der Zielklasse die korrekte bedingte Labelwahl mitsampeln. Eine toleranzbasierte Zusammenlegung ist eine neue Approximation und benötigt eine eigene Fehlerschranke. Test T30.",
+      "contract": {
+        "model": "open_vertex_sqw",
+        "inputs": {
+          "tau": "preparation projectors",
+          "P": "row transition"
+        },
+        "preconditions": [
+          "exact equality for merging atoms"
+        ],
+        "outputs": {
+          "classes": "equal-projector equivalence classes",
+          "Tij": "sum_{y in class_j}P[x,y] for any x in class_i"
+        },
+        "invariants": [
+          "equal atoms imply identical P rows"
+        ],
+        "reject_for": [
+          "approximate clustering claimed exact"
+        ]
+      },
+      "test_case_ids": [
+        "T30"
+      ]
+    },
+    {
+      "id": "V-04",
+      "title": "Stationäre Korrespondenz und zeitversetzte Rekonstruktion des Gesetzes",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "V-04",
+      "statement_latex": "Definiere \\(\\mathcal R_V(\\rho)=\\operatorname{diag}\\rho\\) als Zeile, \\(\\mathcal B_V(q)=\\sum_xq_x\\tau_x\\). Dann\n\\[\n\\Psi=\\mathcal B_V\\mathcal R_V,\\quad \\mathcal R_V\\mathcal B_V(q)=qP.\n\\]\nStationäre Labelverteilungen π, invariante Zustandsmaße νπ und stationäre Dichtematrizen \\(\\bar\\rho_\\pi\\) stehen in affiner Bijektion:\n\\[\n\\pi P=\\pi\\longleftrightarrow\\nu_\\pi=\\sum_x\\pi_x\\delta_{\\tau_x}\n\\longleftrightarrow\\bar\\rho_\\pi=\\sum_x\\pi_x\\tau_x,\n\\quad\\pi=\\operatorname{diag}\\bar\\rho_\\pi.\n\\]\nDies gilt auch bei doppelten Atomen. Ferner für jedes aktuelle Gesetz:\n\\[\n\\nu_{n+1}=\\sum_x\\langle x|\\bar\\rho_n|x\\rangle\\delta_{\\tau_x}.\n\\]\nIn endlicher Dimension stimmen die nichtverschwindenden Eigenwerte einschließlich algebraischer Vielfachheiten von Ψ und P überein.",
+      "assumptions": "Endliche Dimension für die Spektralaussage. Die stationären Korrespondenzen gelten auch abzählbar, sofern stationäre ℓ¹-Verteilungen bzw. Dichteoperatoren existieren. Der Walk ist fest: verschiedene Walks können bei gleichem Mittel verschiedene Maße besitzen.",
+      "proof": "Die Faktorisierung ist V-02. Für stationäres π ist \\(\\mathcal R_V\\mathcal B_V(\\pi)=\\pi\\), also injektiv. Ist Ψρ=ρ, dann π=diagρ stationär und ρ=Bπ. Ein invariantes Maß muss das nächste Gesetz sein; dessen Gewichte erhält man durch Integration der linearen Funktionen ρₓₓ, also aus seinem Mittel. Dies beweist die Bijektion auch bei zusammenfallenden Atomen. Die Spektralgleichheit ist die endliche AB/BA-Identität; für λ≠0 transportieren die Faktoren die verallgemeinerten Eigenräume.",
+      "paper_and_literature_references": "Faktorisierung/Potenzen Theorem6.2, stationäre Mittel Korollar6.4; vollständige Maßkorrespondenz und zeitversetzte Rekonstruktion sind Chatfolgerungen.",
+      "simulation_consequences": "Stationäranalyse über m×m-P statt m²×m²-Ψ. Der aktuelle Mittelwert bestimmt die **nächste** volle Zustandsverteilung, im Allgemeinen nicht die aktuelle. Eindeutigkeit kann auch bei Reduzibilität mit nur einer geschlossenen Klasse vorliegen. Tests T29,T30,T31.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche Dimension für die Spektralaussage. Die stationären Korrespondenzen gelten auch abzählbar, sofern stationäre ℓ¹-Verteilungen bzw. Dichteoperatoren existieren. Der Walk ist fest: verschiedene Walks können bei gleichem Mittel verschiedene Maße besitzen."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Definiere \\(\\mathcal R_V(\\rho)=\\operatorname{diag}\\rho\\) als Zeile, \\(\\mathcal B_V(q)=\\sum_xq_x\\tau_x\\). Dann\n\\[\n\\Psi=\\mathcal B_V\\mathcal R_V,\\quad \\mathcal R_V\\mathcal B_V(q)=qP.\n\\]\nStationäre Labelverteilungen π, invariante Zustandsmaße νπ und stationäre Dichtematrizen \\(\\bar\\rho_\\pi\\) stehen in affiner Bijektion:\n\\[\n\\pi P=\\pi\\longleftrightarrow\\nu_\\pi=\\sum_x\\pi_x\\delta_{\\tau_x}\n\\longleftrightarrow\\bar\\rho_\\pi=\\sum_x\\pi_x\\tau_x,\n\\quad\\pi=\\operatorname{diag}\\bar\\rho_\\pi.\n\\]\nDies gilt auch bei doppelten Atomen. Ferner für jedes aktuelle Gesetz:\n\\[\n\\nu_{n+1}=\\sum_x\\langle x|\\bar\\rho_n|x\\rangle\\delta_{\\tau_x}.\n\\]\nIn endlicher Dimension stimmen die nichtverschwindenden Eigenwerte einschließlich algebraischer Vielfachheiten von Ψ und P überein."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T29",
+        "T30",
+        "T31"
+      ]
+    },
+    {
+      "id": "V-05",
+      "title": "Konvergenz, Transienten und Normvergleich",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/PAPER",
+      "document_anchor": "V-05",
+      "statement_latex": "Für stationäres π gilt\n\\[\n\\tfrac12\\|q_{n+1}-\\pi\\|_1\\le\n\\tfrac12\\|\\bar\\rho_n-\\bar\\rho_\\pi\\|_1\\le\n\\|\\nu_n-\\nu_\\pi\\|_{\\rm TV}\\le\n\\tfrac12\\|q_n-\\pi\\|_1.\n\\]\nIrreduzibilität liefert fast sichere empirische Konvergenz; zusätzliche Aperiodizität gewöhnliche exponentielle Konvergenz der Gesetze. Allgemeiner genügt eine einzige aperiodische geschlossene Klasse mit transientem Rest. Bei mehreren geschlossenen Klassen Cⱼ sind die Grenzmischgewichte\n\\[\na_j=\\sum_xr_0(x)h_j(x),\\qquad h_j(x)=\\Pr_x(\\text{Absorption in }C_j).\n\\]\nEine einzelne Trajektorie wählt eine Klasse und besitzt deren empirisches Grenzmaß.",
+      "assumptions": "Endliche Kette. In unendlicher Dimension zusätzliche Rekurrenz-/Eintrittszeitannahmen erforderlich. Der Normvergleich selbst gilt für jede vorhandene stationäre Verteilung.",
+      "proof": "Diagonalmessung kontrahiert Spurdistanz und liefert qₙ₊₁−π. Baryzentren kontrahieren TV in Spurdistanz. Das Pushforward von Labels auf Zustände kontrahiert TV. Daraus folgt die Ungleichungskette. Klassische Markov-Ergodensätze liefern Konvergenz. Die Absorptionsfunktionen lösen h=Ph auf dem transienten Teil mit entsprechenden Randwerten auf geschlossenen Klassen.",
+      "paper_and_literature_references": "Korollar6.4, Remark6.5; reduzible Gewichtung ist klassische Markovtheorie und korrigiert im DFT-Fall die gedruckten (6.67)–(6.70), siehe AUD-01.",
+      "simulation_consequences": "Transiente Initialmasse nicht entfernen. Anders als beim Edge-Walk kann die momentane Trajektorie zu einem absorbierenden reinen Zustand konvergieren. Label-CLT mit T=P,π wie E-09, bei Reduzibilität klassenweise. Gleiche Exponenten aufgrund der zeitverschobenen Schranken bedeuten nicht gleiche Vorfaktoren. Tests T31,T32.",
+      "contract": {
+        "model": "finite_open_vertex_sqw",
+        "inputs": {
+          "P": "row transition",
+          "r0": "initial label distribution"
+        },
+        "preconditions": [
+          "closed class decomposition available"
+        ],
+        "outputs": {
+          "weights": "r0 @ absorption_functions",
+          "stationary_limit": "mixture over closed aperiodic classes",
+          "empirical_limit": "class selected by each trajectory"
+        },
+        "invariants": [
+          "sum absorption probabilities=1 in finite model"
+        ],
+        "reject_for": [
+          "using initial closed-class mass when transient states exist"
+        ]
+      },
+      "test_case_ids": [
+        "T31",
+        "T32"
+      ]
+    },
+    {
+      "id": "V-06",
+      "title": "Unitalität, Phasen und Präparationssymmetrien",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "V-06",
+      "statement_latex": "In endlicher Dimension mit quadratischer Spaltenmatrix Cχ:\n\\[\n\\Psi(I)=C_\\chi C_\\chi^*,\\quad\n\\Psi\\text{ unital}\\iff C_\\chi\\text{ unitär}\\iff\\{\\chi(x)\\}\\text{ orthonormal}.\n\\]\nP bistochastisch allein genügt nicht. Für ein stationäres Ensemble:\n\\[\n\\operatorname{tr}(\\bar\\rho_\\pi^2)=\\sum_{x,y}\\pi_x\\pi_y|\\langle\\chi(x)|\\chi(y)\\rangle|^2.\n\\]\nP ist unabhängig von βₓ, die Atome und Ψ allgemein nicht. Für feste ω,β gilt aus S′(x)=S(x)Rₓ und Rₓω(x)=ω(x) dagegen Gleichheit der ganzen Präparation. Diese erste Parametrisierungsstufe ist U(dₓ)/U(dₓ−1), eine Sphäre, nicht automatisch ein projektiver Raum.",
+      "assumptions": "Endlicher Vertexraum, genau ein normierter Präparationsvektor pro Basislabel. Bei den induzierten Symmetrien ω und β unverändert.",
+      "proof": "CC*=I für eine quadratische Matrix impliziert C*C=I. Die Reinheitsformel folgt durch Ausmultiplizieren. Die Selbstkomponente von χ liegt orthogonal zu den Nachbarkomponenten, weshalb β aus Betragsquadraten verschwindet, nicht aus Offdiagonalen der Projektoren. Rₓω=ω liefert S′ω=Sω. Der Stabilisator eines normierten Vektors in U(dₓ) ist U(dₓ−1). Eine Phase von v=Sω ist relativ zur Selbstkomponente relevant, daher keine unbedingte weitere U(1)-Quotientierung.",
+      "paper_and_literature_references": "(6.10)–(6.18), Remark6.5(ii), §6.1.1. Die vollständige Klassifikation aller S mit gleichem induzierten Vertex-Kanal wurde nicht bewiesen.",
+      "simulation_consequences": "P kann bei β-Sweeps gecacht werden, χ und Observable müssen aktualisiert werden. Für uniformes ω beim α-Grover ist sogar χ unabhängig von α. Tests T25,T33,T34.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher Vertexraum, genau ein normierter Präparationsvektor pro Basislabel. Bei den induzierten Symmetrien ω und β unverändert."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "In endlicher Dimension mit quadratischer Spaltenmatrix Cχ:\n\\[\n\\Psi(I)=C_\\chi C_\\chi^*,\\quad\n\\Psi\\text{ unital}\\iff C_\\chi\\text{ unitär}\\iff\\{\\chi(x)\\}\\text{ orthonormal}.\n\\]\nP bistochastisch allein genügt nicht. Für ein stationäres Ensemble:\n\\[\n\\operatorname{tr}(\\bar\\rho_\\pi^2)=\\sum_{x,y}\\pi_x\\pi_y|\\langle\\chi(x)|\\chi(y)\\rangle|^2.\n\\]\nP ist unabhängig von βₓ, die Atome und Ψ allgemein nicht. Für feste ω,β gilt aus S′(x)=S(x)Rₓ und Rₓω(x)=ω(x) dagegen Gleichheit der ganzen Präparation. Diese erste Parametrisierungsstufe ist U(dₓ)/U(dₓ−1), eine Sphäre, nicht automatisch ein projektiver Raum."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T25",
+        "T33",
+        "T34"
+      ]
+    },
+    {
+      "id": "V-07",
+      "title": "Frameoperator, Momentenabbildung und Ensemble-Stabilisator",
+      "proof_status": "CONDITIONAL",
+      "origin": "CHAT",
+      "document_anchor": "V-07",
+      "statement_latex": "Setze \\(F_\\pi=(\\sqrt{\\pi_x}\\chi(x))_x\\). Dann\n\\[\nF_\\pi F_\\pi^*=\\bar\\rho_\\pi,\\quad\n\\operatorname{diag}(F_\\pi^*F_\\pi)=\\pi,\\quad\n\\operatorname{diag}(F_\\pi F_\\pi^*)=\\pi P.\n\\]\nStationarität ist somit \\(\\operatorname{diag}(FF^*-F^*F)=0\\), bis auf Konvention die Nullmomentenbedingung für die Toruswirkung F→DFD*. Die Zeile Pₓ,• ist die projektive Torusmomentenabbildung von [χ(x)] auf die Betragsquadrate.\n\nFür ein endliches Ensemble **verschiedener** reiner Atome mit positiven Gewichten verbinde i,j, wenn 〈χᵢ|χⱼ〉≠0. Hat dieser Überlappungsgraph c Komponenten und der Ketspann Dimension ℓ in ℂᵐ, dann\n\\[\nK_\\nu^0\\cong U(1)^c\\times U(m-\\ell)\n\\]\nfür die Identitätskomponente des unitären Ensemble-Stabilisators. Seine Orbitmannigfaltigkeit ist U(m)/Kν.",
+      "assumptions": "Endliche Dimension; allgemeine Ensemblegeometrie. Es ist nicht bewiesen, dass die gesamte induzierte SQW-Parameterfamilie ein einzelner glatter homogener oder symplektischer Quotientenraum ist.",
+      "proof": "Zeilen-/Spaltennormen ergeben die Framegleichungen. Unter DFD* hat Fᵧₓ das Gewicht αᵧ−αₓ; die quadratische Momentenabbildung ist die Differenz der entsprechenden Zeilen-/Spaltennormen [FRAME]. Stationarität entspricht zugleich Flusserhaltung Jₓᵧ=πₓPₓᵧ, nicht notwendigerweise detaillierter Balance. Eine kontinuierliche Symmetrie kann endlich viele verschiedene Atome nicht vertauschen und muss auf jedem Ket als Phase wirken. Nichtnull innere Produkte erzwingen gleiche Phasen entlang des Überlappungsgraphen; dessen Komponenten spannen orthogonale Räume auf. Auf unbenutztem Komplement bleibt U(m−ℓ) frei.",
+      "paper_and_literature_references": "[FRAME] für Momentenabbildungen; die Stationaritätsspezialisierung und Stabilisatorherleitung sind Chatfolgerungen. [ZCV] ist der orthogonale Spezialfall.",
+      "simulation_consequences": "Optionale Gauge-/Fluss-/Ensemblediagnostik. Pairwise Fidelity-Gram-Matrizen enthalten nicht die gesamte komplexe Konfiguration; Dreifachphasen können zusätzliche Informationen tragen. Kein Ersatz für den konkreten Konstruktor V-01.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche Dimension; allgemeine Ensemblegeometrie. Es ist nicht bewiesen, dass die gesamte induzierte SQW-Parameterfamilie ein einzelner glatter homogener oder symplektischer Quotientenraum ist."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Setze \\(F_\\pi=(\\sqrt{\\pi_x}\\chi(x))_x\\). Dann\n\\[\nF_\\pi F_\\pi^*=\\bar\\rho_\\pi,\\quad\n\\operatorname{diag}(F_\\pi^*F_\\pi)=\\pi,\\quad\n\\operatorname{diag}(F_\\pi F_\\pi^*)=\\pi P.\n\\]\nStationarität ist somit \\(\\operatorname{diag}(FF^*-F^*F)=0\\), bis auf Konvention die Nullmomentenbedingung für die Toruswirkung F→DFD*. Die Zeile Pₓ,• ist die projektive Torusmomentenabbildung von [χ(x)] auf die Betragsquadrate.\n\nFür ein endliches Ensemble **verschiedener** reiner Atome mit positiven Gewichten verbinde i,j, wenn 〈χᵢ|χⱼ〉≠0. Hat dieser Überlappungsgraph c Komponenten und der Ketspann Dimension ℓ in ℂᵐ, dann\n\\[\nK_\\nu^0\\cong U(1)^c\\times U(m-\\ell)\n\\]\nfür die Identitätskomponente des unitären Ensemble-Stabilisators. Seine Orbitmannigfaltigkeit ist U(m)/Kν."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": []
+    },
+    {
+      "id": "R-01",
+      "title": "Tensor-Kernel und explizite MMD-Formeln",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-01",
+      "statement_latex": "Für r≥1:\n\\[\nk_r(\\rho,\\tau)=(\\operatorname{tr}(\\rho\\tau))^r,\n\\quad\\varphi_r(\\rho)=\\rho^{\\otimes r},\\quad\nm_r(\\nu)=\\int\\rho^{\\otimes r}\\nu(d\\rho).\n\\]\nFür Atome τᵢ und Wahrscheinlichkeitszeilen q,p:\n\\[\nK^{(r)}_{ij}=|\\langle\\chi_i|\\chi_j\\rangle|^{2r},\\qquad\n\\operatorname{MMD}_{k_r}^2(\\nu_q,\\nu_p)=(q-p)K^{(r)}(q-p)^{\\mathsf T}.\n\\]\nAuf einem festen Edge-Träger K=I und MMD=||q−p||₂; somit \\(\\frac12\\mathrm{MMD}\\le\\mathrm{TV}\\le\\frac{\\sqrt d}{2}\\mathrm{MMD}\\).\nFür zwei kanonische Edge-Maße, W=U*Ũ:\n\\[\n\\operatorname{MMD}_{k_2}^2(\\nu_U,\\nu_{\\widetilde U})\n=\\frac2{d^2}\\left(d-\\sum_{e,f}|W_{ef}|^4\\right)\n=\\frac2{d^2}\\sum_x\\left(d_x-\\sum_{i,j}|(S(x)^*\\widetilde S(x))_{ij}|^4\\right).\n\\]\nSie verschwindet genau unter E-13; das Maximum ist 2(d−m)/d².",
+      "assumptions": "Endliche Atomfamilien; für globale Maßtheorie zunächst endlichdimensionaler Zustandsraum. Bei reinem Zustand repräsentieren χᵢ normierte Kets.",
+      "proof": "Die Tensor-HS-Featureform beweist Positivdefinitheit. Ausmultiplizieren des Mean-Abstands liefert die Gramformel. Für verschiedene orthonormale Basen ist \\(\\operatorname{tr}(\\sigma_e\\widetilde\\sigma_f)=|W_{ef}|^2\\); die beiden Meannormquadrate sind1/d. In einem unitären n×n-Block liegt die Summe der vierten Beträge zwischen1 undn. Oberes Ende verlangt monomiale Matrix, unteres uniformes Betragsquadrat1/n. Das beweist Verschwindungs- und Maximumscharakterisierung.",
+      "paper_and_literature_references": "Allgemeine Kernel-Mittelwerte und MMD [KME]; allgemeine äquivalente MASA-Metrik [ZCV]. Lokale SQW-Form folgt aus der Blockstruktur.",
+      "simulation_consequences": "Keine Tensorarrays erzeugen, nur Overlaps/Gram-Matrizen. Der lineare Kernel sieht beim Vergleich uniformer Edge-Ensembles stets nur I/d; auf bekanntem festen orthogonalen Träger bestimmt er dagegen alle Gewichte. Quadratischer Kernel ist nicht global charakteristisch auf beliebigen Maßen. Tests T35,T36.",
+      "contract": {
+        "model": "state_ensemble",
+        "inputs": {
+          "atoms": "pure state projectors or normalized kets",
+          "q": "weights",
+          "p": "weights",
+          "r": "positive integer"
+        },
+        "preconditions": [
+          "same atom ordering in q,p,K"
+        ],
+        "outputs": {
+          "Kij": "abs(inner(chi_i,chi_j))^(2r)",
+          "MMD2": "(q-p) @ K @ (q-p).T"
+        },
+        "invariants": [
+          "K positive semidefinite",
+          "K=I for fixed edge atom basis"
+        ]
+      },
+      "test_case_ids": [
+        "T35",
+        "T36"
+      ]
+    },
+    {
+      "id": "R-02",
+      "title": "Identifizierbarkeit durch Tensor-Momente",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-02",
+      "statement_latex": "Für s verschiedene reine Atome gilt auf bekanntem Träger K⁽ʳ⁾>0 für r≥max(1,s−1). Mit \\(b_j=\\nu(k_r(\\cdot,\\tau_j))\\) sind Gewichte q=bK⁻¹. Wenn die Kets einen ℓ-dimensionalen Raum aufspannen, genügt nach [CHEFLES] bereits r≥s−ℓ+1. Das sind hinreichende, keine allgemeinen Minimalgrade.\n\nEin Maß mit höchstens s verschiedenen reinen Atomen wird durch seinen s-ten Tensor-Moment gegenüber **allen** Wahrscheinlichkeitsmaßen auf Dichtematrizen identifiziert. Für ein orthogonales Ensemble beliebiger Gewichte genügt dafür stets der **zweite** Moment. Mit \\(\\eta=\\max_{i\\ne j}\\operatorname{tr}(\\tau_i\\tau_j)<1\\) gilt zusätzlich \\(\\lambda_{\\min}(K^{(r)})\\ge1-(s-1)\\eta^r\\).",
+      "assumptions": "Endliche reine Atomfamilie. Bekannter Träger/Gewichtsrekonstruktion und unbekannter Träger/Maßidentifikation sind unterschiedliche Probleme.",
+      "proof": "Die Polynome\n\\[\nL_j(\\rho)=\\prod_{i\\ne j}\\frac{1-\\operatorname{tr}(\\rho\\tau_i)}{1-\\operatorname{tr}(\\tau_j\\tau_i)}\n\\]\nerfüllen Lⱼ(τᵢ)=δᵢⱼ. Auf trρ=1 homogenisiert man sie auf Grad r; sie gehören dann zum Tensor-RKHS. Testen einer linearen Relation der Features gegen Lⱼ erzwingt alle Koeffizienten0. Chefles' Mehrkopien-Unabhängigkeit ist die verstärkte hinreichende Schranke; lineare Unabhängigkeit der Kets impliziert jene ihrer Projektoren.\n\nFür unbekannten Träger ist \\(F(\\rho)=\\prod_j(1-\\operatorname{tr}(\\rho\\tau_j))\\ge0\\) und verschwindet genau auf den Atomen. Gleichheit der s-ten Momente impliziert durch partielle Spuren alle niedrigeren Momente, also für den Konkurrenten ebenfalls ∫F=0. Danach bestimmen Lⱼ die Gewichte. Im orthogonalen Fall ersetzt \\(F=1-\\sum_e(\\operatorname{tr}(\\rho\\sigma_e))^2\\) das Produkt; seine Nullstellen sind genau die orthogonalen Atome, weshalb Grad2 reicht. Die Eigenwertschranke ist Gershgorin.",
+      "paper_and_literature_references": "Elementare Chatbeweise; [CHEFLES], Eq.(2.3), für die Mehrkopien-Schärfung. Keine allgemeine effiziente Inversionsmethode für unbekannten Träger bewiesen.",
+      "simulation_consequences": "Solve statt expliziter Inverse; Konditionszahl ausgeben. Höherer Grad verbessert Separation, kann Schätzfehler empfindlicher machen. Nichtorthogonalität allein bedeutet keine Singularität des linearen Projektor-Kernels. Test T36.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche reine Atomfamilie. Bekannter Träger/Gewichtsrekonstruktion und unbekannter Träger/Maßidentifikation sind unterschiedliche Probleme."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Für s verschiedene reine Atome gilt auf bekanntem Träger K⁽ʳ⁾>0 für r≥max(1,s−1). Mit \\(b_j=\\nu(k_r(\\cdot,\\tau_j))\\) sind Gewichte q=bK⁻¹. Wenn die Kets einen ℓ-dimensionalen Raum aufspannen, genügt nach [CHEFLES] bereits r≥s−ℓ+1. Das sind hinreichende, keine allgemeinen Minimalgrade.\n\nEin Maß mit höchstens s verschiedenen reinen Atomen wird durch seinen s-ten Tensor-Moment gegenüber **allen** Wahrscheinlichkeitsmaßen auf Dichtematrizen identifiziert. Für ein orthogonales Ensemble beliebiger Gewichte genügt dafür stets der **zweite** Moment. Mit \\(\\eta=\\max_{i\\ne j}\\operatorname{tr}(\\tau_i\\tau_j)<1\\) gilt zusätzlich \\(\\lambda_{\\min}(K^{(r)})\\ge1-(s-1)\\eta^r\\)."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T36"
+      ]
+    },
+    {
+      "id": "R-03",
+      "title": "MASA-Projektion, Lie-Tangentialmetrik und Torus-Twirling",
+      "proof_status": "PROVEN",
+      "origin": "CHAT/LITERATURE",
+      "document_anchor": "R-03",
+      "statement_latex": "\\[\n\\mathcal E_U(A)=\\sum_e\\operatorname{tr}(\\sigma_eA)\\sigma_e\n=U\\operatorname{Diag}(U^*AU)U^*\n\\]\nZudem ist\n\\[\n\\nu_U=\\nu_{\\widetilde U}\\iff U\\mathcal A_{\\rm diag}U^*=\\widetilde U\\mathcal A_{\\rm diag}\\widetilde U^*\n\\iff\\mathcal E_U=\\mathcal E_{\\widetilde U}.\n\\]\nDie minimalen Projektoren einer endlichdimensionalen MASA sind eindeutig bestimmt und gerade die Ensembleatome. Die Abbildung E_U ist die HS-Projektion auf die MASA \\(U\\mathcal A_{\\rm diag}U^*\\), und\n\\[\n\\mathcal E_U(A)=d\\operatorname{tr}_2[(I\\otimes A)m_2(\\nu_U)],\n\\]\n\\[\nd^2\\operatorname{MMD}_{k_2}^2\n=\\|\\mathcal E_U-\\mathcal E_{\\widetilde U}\\|_{\\rm HS,super}^2\n=\\sum_{e,f}\\|[\\sigma_e,\\widetilde\\sigma_f]\\|_{\\rm HS}^2.\n\\]\nFür X*=-X, Uₜ=Ueᵗˣ:\n\\[\n\\dot\\sigma_e=U[X,Q_e]U^*,\\quad\n\\operatorname{MMD}_{k_2}^2(\\nu_U,\\nu_{U_t})\n=\\frac{4t^2}{d^2}\\sum_{e\\ne f}|X_{ef}|^2+O(t^4).\n\\]\nDie unsichtbaren kontinuierlichen Richtungen sind die diagonalen Torusalgebren. Die Mean-Einbettung realisiert den Quotienten aus E-13 injektiv; wegen Kompaktheit ist sie ein Homöomorphismus auf ihr Bild.",
+      "assumptions": "Endlicher Edge-Walk; blockdiagonale X für lokal zulässige Variationen, allgemeine X für die globale U(d)-Geometrie.",
+      "proof": "Rang-eins-Identität σAσ=tr(σA)σ liefert Projektion und partielle Spur. Die Kreuzspur der Superprojektionen ist Σ|Wₑf|⁴. Für reine P,Q mit c=trPQ gilt ||[P,Q]||²=2(c−c²), woraus die Kommutatorformel folgt. Differenzieren liefert den Lie-Kommutator. Die Vierpotenzensumme hat führende Abnahme \\(2t^2\\sum_{e\\ne f}|X_{ef}|^2\\) und ist gerade in t, da e⁻ᵗˣ=(eᵗˣ)*; daher O(t⁴). Die Pinchings DI/DO sind Haarmittel über \\(\\sum_xe^{i\\alpha_x}P_x^I\\) bzw. \\(\\sum_xe^{i\\beta_x}P_x^O\\). Gemeinsam multiplizieren sie |xy〉 mit e^{i(αₓ+βᵧ)}; verschiedene einfache Arcs haben verschiedene Charaktere, also vollständiges Diag.",
+      "paper_and_literature_references": "[ZCV] enthält die allgemeine MASA-, Flaggen-, Distanz- und Differentialgeometrie, insbesondere Propositionen1,4,6. Die RKHS-Normierung ist unsere Verbindung dazu. [J] (4.13),(4.17) für Pinchings.",
+      "simulation_consequences": "Distanzberechnung aus lokalen relativen Unitaries, keine Supermatrix. \\(\\mathcal E_U\\) ist nicht Φ²: innen steht U*AU statt UAU*. Das uniforme Basisensemble ist ein projektives1-Design, im Allgemeinen kein2-Design. Test T35.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher Edge-Walk; blockdiagonale X für lokal zulässige Variationen, allgemeine X für die globale U(d)-Geometrie."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "\\[\n\\mathcal E_U(A)=\\sum_e\\operatorname{tr}(\\sigma_eA)\\sigma_e\n=U\\operatorname{Diag}(U^*AU)U^*\n\\]\nZudem ist\n\\[\n\\nu_U=\\nu_{\\widetilde U}\\iff U\\mathcal A_{\\rm diag}U^*=\\widetilde U\\mathcal A_{\\rm diag}\\widetilde U^*\n\\iff\\mathcal E_U=\\mathcal E_{\\widetilde U}.\n\\]\nDie minimalen Projektoren einer endlichdimensionalen MASA sind eindeutig bestimmt und gerade die Ensembleatome. Die Abbildung E_U ist die HS-Projektion auf die MASA \\(U\\mathcal A_{\\rm diag}U^*\\), und\n\\[\n\\mathcal E_U(A)=d\\operatorname{tr}_2[(I\\otimes A)m_2(\\nu_U)],\n\\]\n\\[\nd^2\\operatorname{MMD}_{k_2}^2\n=\\|\\mathcal E_U-\\mathcal E_{\\widetilde U}\\|_{\\rm HS,super}^2\n=\\sum_{e,f}\\|[\\sigma_e,\\widetilde\\sigma_f]\\|_{\\rm HS}^2.\n\\]\nFür X*=-X, Uₜ=Ueᵗˣ:\n\\[\n\\dot\\sigma_e=U[X,Q_e]U^*,\\quad\n\\operatorname{MMD}_{k_2}^2(\\nu_U,\\nu_{U_t})\n=\\frac{4t^2}{d^2}\\sum_{e\\ne f}|X_{ef}|^2+O(t^4).\n\\]\nDie unsichtbaren kontinuierlichen Richtungen sind die diagonalen Torusalgebren. Die Mean-Einbettung realisiert den Quotienten aus E-13 injektiv; wegen Kompaktheit ist sie ein Homöomorphismus auf ihr Bild."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T35"
+      ]
+    },
+    {
+      "id": "R-04",
+      "title": "Charakteristischer Allmomenten-Kernel und Ensemble-Orbits",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-04",
+      "statement_latex": "Auf dem endlichdimensionalen Dichtematrixraum ist\n\\[\nk_\\kappa(\\rho,\\tau)=e^{\\kappa(\\operatorname{tr}(\\rho\\tau)-1)},\\qquad\\kappa>0,\n\\]\ncharakteristisch, mit Featurefolge\n\\[\n\\varphi_\\kappa(\\rho)=\\bigoplus_{r\\ge0}\\sqrt{e^{-\\kappa}\\kappa^r/r!}\\,\\rho^{\\otimes r}.\n\\]\nDie unitäre Konjugationswirkung ist isometrisch im RKHS, und der Stabilisator des Mean-Embeddings ist genau der Maßstabilisator. Für ein endliches Ensemble verschiedener reiner Atome positiver Gewichte ist die Ableitung des Mean-Embeddings entlang eᵗˣ genau dann null, wenn [X,τᵢ]=0 für alle i.",
+      "assumptions": "Endliche Zustandsdimension für das kompakte Momentargument; die infinitesimale Aussage benutzt Reinheit und endlichen Träger.",
+      "proof": "Positive Exponentialkoeffizienten implizieren aus gleicher Einbettung gleiche Tensor-Momente aller Grade. Polynome trennen Dichtematrizen und sind auf dem kompakten Raum dicht in C(X); gleiche Polynommittel bestimmen das Maß. Die Kernelinvarianz folgt aus Spurinvarianz. Die Differentiation der Featurefolge ist zulässig, weil \\(\\sum_r r^2\\kappa^r/r!<\\infty\\) und die unitäre Orbitkurve beschränkte Ableitung hat. Für die Ableitung teste gegen \\(L_i(\\rho)\\operatorname{tr}(A(\\rho-\\tau_i))\\). An anderen reinen Atomen verschwinden Wert und relevante Ableitung des Faktors 1−tr(ρτⱼ); an τᵢ bleibt \\(p_i\\operatorname{tr}(A[X,\\tau_i])\\). Für alle hermiteschen A ist dies nur bei [X,τᵢ]=0 null.",
+      "paper_and_literature_references": "Allgemeine charakteristische Einbettungen [KME]; diese konkreten Tensor-/Orbitfolgerungen wurden im Chat hergeleitet.",
+      "simulation_consequences": "Nur Kernelwerte auswerten, keine unendlichen Tensorarrays. Eine interne Fidelity-Gram-Tabelle ist weniger informativ als sämtliche Kernelwerte gegen externe Referenzzustände. Beispiel: |0〉, (|0〉+|1〉)/√2, (|0〉+i|1〉)/√2 und ihre konjugierte geordnete Konfiguration haben dieselben paarweisen Fidelitys, aber Dreifachspur (1+i)/4 bzw. (1−i)/4. Eine gemeinsame unitäre Abbildung zwischen den geordneten Konfigurationen ist deshalb ausgeschlossen. Injektivität garantiert keine numerisch stabile Trägerrekonstruktion.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endliche Zustandsdimension für das kompakte Momentargument; die infinitesimale Aussage benutzt Reinheit und endlichen Träger."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Auf dem endlichdimensionalen Dichtematrixraum ist\n\\[\nk_\\kappa(\\rho,\\tau)=e^{\\kappa(\\operatorname{tr}(\\rho\\tau)-1)},\\qquad\\kappa>0,\n\\]\ncharakteristisch, mit Featurefolge\n\\[\n\\varphi_\\kappa(\\rho)=\\bigoplus_{r\\ge0}\\sqrt{e^{-\\kappa}\\kappa^r/r!}\\,\\rho^{\\otimes r}.\n\\]\nDie unitäre Konjugationswirkung ist isometrisch im RKHS, und der Stabilisator des Mean-Embeddings ist genau der Maßstabilisator. Für ein endliches Ensemble verschiedener reiner Atome positiver Gewichte ist die Ableitung des Mean-Embeddings entlang eᵗˣ genau dann null, wenn [X,τᵢ]=0 für alle i."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": []
+    },
+    {
+      "id": "R-05",
+      "title": "Höhere Momente haben dieselben nichtverschwindenden Zeitmoden",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-05",
+      "statement_latex": "Für das Vertex-Instrument definiere\n\\[\n\\mathcal B_r(q)=\\sum_xq_x\\tau_x^{\\otimes r},\\quad\n\\mathcal R_r(A)=\\operatorname{diag}(\\operatorname{tr}_{2,\\ldots,r}A),\\quad\n\\mathcal T_r=\\mathcal B_r\\mathcal R_r.\n\\]\nDann\n\\[\nm_r(\\nu_{n+1})=\\mathcal T_rm_r(\\nu_n),\\quad\n\\mathcal R_r\\mathcal B_r(q)=qP,\\quad\n\\sigma(\\mathcal T_r)\\setminus\\{0\\}=\\sigma(P)\\setminus\\{0\\}.\n\\]\nAußerdem \\(K^{(1)}-PP^{\\mathsf T}\\succeq0\\).",
+      "assumptions": "Endlicher Vertex-Walk oder allgemeines Rang-eins-Präparationsinstrument; r≥1.",
+      "proof": "Partielle Spur eines r-ten Zustandsmoments ist der erste Moment, weil trρ=1. Dieser bestimmt nach V-04 das nächste Gesetz. Die AB/BA-Identität liefert das Spektrum. K¹ ist die HS-Gram-Matrix der τₓ; PPᵀ die Gram-Matrix ihrer Diagonalen. Die Differenz ist die Gram-Matrix ihrer Offdiagonalanteile und daher positiv semidefinit.",
+      "paper_and_literature_references": "Folgerung aus [J] (6.16) und der Faktorisierung; allgemeiner Transferoperatorrahmen [TRANSFER].",
+      "simulation_consequences": "Momente über P/q statt exponentiell große Tensor-Supermatrizen propagieren. \\(\\mathbb E\\rho^{\\otimes r}\\ne(\\mathbb E\\rho)^{\\otimes r}\\); \\(\\mathcal T_r\\ne\\Psi^{\\otimes r}\\) im Allgemeinen. Test T37.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher Vertex-Walk oder allgemeines Rang-eins-Präparationsinstrument; r≥1."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Für das Vertex-Instrument definiere\n\\[\n\\mathcal B_r(q)=\\sum_xq_x\\tau_x^{\\otimes r},\\quad\n\\mathcal R_r(A)=\\operatorname{diag}(\\operatorname{tr}_{2,\\ldots,r}A),\\quad\n\\mathcal T_r=\\mathcal B_r\\mathcal R_r.\n\\]\nDann\n\\[\nm_r(\\nu_{n+1})=\\mathcal T_rm_r(\\nu_n),\\quad\n\\mathcal R_r\\mathcal B_r(q)=qP,\\quad\n\\sigma(\\mathcal T_r)\\setminus\\{0\\}=\\sigma(P)\\setminus\\{0\\}.\n\\]\nAußerdem \\(K^{(1)}-PP^{\\mathsf T}\\succeq0\\)."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T37"
+      ]
+    },
+    {
+      "id": "R-06",
+      "title": "Zweizeit-Kernel rekonstruieren den Übergangskern",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-06",
+      "statement_latex": "Für eine stationäre Zeilenkette T auf verschiedenen Atomen, positive π und K>0:\n\\[\nQ=\\operatorname{diag}(\\pi)T,\\quad\nB_{ab}=\\mathbb E_\\pi[k(\\rho_n,\\tau_a)k(\\rho_{n+1},\\tau_b)]= (KQK)_{ab}.\n\\]\nAlso Q=K⁻¹BK⁻¹, π=Zeilensummen(Q) und Tᵢⱼ=Qᵢⱼ/πᵢ. Mit A=Q−Qᵀ ist die Produktkernel-Diskrepanz zur gewöhnlichen Zeitumkehr\n\\[\n\\mathcal I_k^2=\\operatorname{tr}(A^{\\mathsf T}KAK)=\\|K^{1/2}AK^{1/2}\\|_F^2.\n\\]\nSie verschwindet genau bei detaillierter Balance.",
+      "assumptions": "Bekannte unterschiedliche Atome; positiver Gram-Rang, positive stationäre Besuchsgewichte, tatsächlich stationäre Daten. Bei Edge-Ketten ggf. zusätzlich Richtungsflip E-16, nicht bloß gewöhnliche Umkehr.",
+      "proof": "Ausmultiplizieren der Erwartung ergibt ΣπᵢTᵢⱼKᵢₐKⱼᵦ. Invertierbarkeit erlaubt Rekonstruktion. Die Produktkernel-Quadratform auf Paaren ist \\(\\sum A_{ij}A_{ab}K_{ia}K_{jb}\\), also die angegebene Norm. K>0 impliziert Null nur bei A=0. Stationarität fordert bloß gleiche Zeilen-/Spaltensummen von Q und lässt Kreisströme zu.",
+      "paper_and_literature_references": "Exakte endliche Spezialisierung von Kernelkorrelations-/Transferoperatoren [TRANSFER].",
+      "simulation_consequences": "Zweizeitdiagnostik erkennt Dynamiken, die Einzeitmaß und sogar Spektrum nicht unterscheiden. Bei singulärem K oder unbesuchten Atomen ist Rekonstruktion nur auf dem beobachtbaren Teil möglich. Löse lineare Systeme statt explizit zu invertieren. Test T38.",
+      "contract": {
+        "model": "stationary_finite_state_process",
+        "inputs": {
+          "K": "positive definite atom Gram matrix",
+          "B": "stationary two-time kernel correlation"
+        },
+        "preconditions": [
+          "all stationary pi_i>0",
+          "known distinct atoms",
+          "stationary sampling"
+        ],
+        "outputs": {
+          "Q": "solve(K, solve(K,B).T).T",
+          "pi": "row_sums(Q)",
+          "T": "Q/pi[:,None]"
+        },
+        "invariants": [
+          "Q row sums=column sums",
+          "T row stochastic"
+        ],
+        "reject_for": [
+          "inversion of singular Gram matrix"
+        ]
+      },
+      "test_case_ids": [
+        "T38"
+      ]
+    },
+    {
+      "id": "R-07",
+      "title": "Stationaritätsresiduum und Lyapunov-Kernel",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-07",
+      "statement_latex": "Für endliches irreduzibles T und K>0:\n\\[\nD_k(q)^2=q(I-T)K(I-T)^{\\mathsf T}q^{\\mathsf T},\\quad D_k(q)=0\\iff q=\\pi.\n\\]\nMit Z=(I−T+1π)⁻¹:\n\\[\n\\operatorname{MMD}_k(\\nu_q,\\nu_\\pi)\\le\\|K^{-1/2}ZK^{1/2}\\|_2D_k(q).\n\\]\nBei zusätzlicher Aperiodizität setze A=T−1π und\n\\[\nH=\\sum_{n\\ge0}A^nK(A^{\\mathsf T})^n>0,\\quad H-AHA^{\\mathsf T}=K.\n\\]\n\\[\nV(q)=(q-\\pi)H(q-\\pi)^{\\mathsf T}\n=\\sum_{n\\ge0}\\operatorname{MMD}_k^2(\\nu_{qT^n},\\nu_\\pi),\n\\quad V(qT)=V(q)-\\operatorname{MMD}_k^2(\\nu_q,\\nu_\\pi).\n\\]",
+      "assumptions": "Finite irreducible T; Aperiodizität nur für die konvergente Lyapunov-Reihe, nicht für den Residualsolve.",
+      "proof": "K>0 macht das Residuum nur bei qT=q null. Für a=q−π ist a1=0 und a(I−T+1π)=q−qT; daraus folgt die Schranke durch Einfügen von K^{±1/2}. Bei Spektralradius(A)<1 konvergiert die Reihe und teleskopiert zur Lyapunovgleichung. Da aTⁿ=aAⁿ, folgen die V-Identitäten. Mit \\(c=\\lambda_{\\min}(H^{-1/2}KH^{-1/2})>0\\) ist V(qT)≤(1−c)V(q).",
+      "paper_and_literature_references": "Endliche lineare Algebra und klassische diskrete Lyapunov-Theorie [LYAP], hier als Kernelmetrik interpretiert.",
+      "simulation_consequences": "Kleines Residuum allein ist kein Gleichgewichtsnachweis ohne Konditionsfaktor. H optional mit Lyapunovsolver statt Potenzsumme. Der Kernel H ist dynamikabhängig und nur auf dem gegebenen endlichen Träger definiert. Nicht bei Periodizität unbesehen verwenden. Test T39.",
+      "contract": {
+        "model": "finite_state_chain",
+        "inputs": {
+          "T": "irreducible row transition",
+          "K": "positive definite Gram",
+          "q": "probability row"
+        },
+        "preconditions": [
+          "aperiodicity only additionally for convergent Lyapunov series"
+        ],
+        "outputs": {
+          "residual2": "(q-qT)K(q-qT)^T",
+          "Z": "inverse(I-T+ones*pi)",
+          "H": "solution H-(T-Pi)H(T-Pi)^T=K"
+        },
+        "invariants": [
+          "V(qT)=V(q)-MMD2(q,pi)"
+        ]
+      },
+      "test_case_ids": [
+        "T39"
+      ]
+    },
+    {
+      "id": "R-08",
+      "title": "Empirische RKHS-Fluktuationen allgemeiner endlicher Ketten",
+      "proof_status": "PROVEN",
+      "origin": "CHAT",
+      "document_anchor": "R-08",
+      "statement_latex": "Im stationären Fall:\n\\[\nc_t=\\sum_{ij}\\pi_i(T^t)_{ij}K_{ij}-\\pi K\\pi^{\\mathsf T},\\qquad\n\\mathbb E\\operatorname{MMD}_k^2(\\widehat\\nu_L,\\nu_\\pi)\n=\\frac{c_0}L+\\frac2{L^2}\\sum_{t=1}^{L-1}(L-t)c_t.\n\\]\nAus \\(\\sqrt L(\\widehat q_L-\\pi)\\Rightarrow Z\\) folgt\n\\[\nL\\operatorname{MMD}_k^2(\\widehat\\nu_L,\\nu_\\pi)\\Rightarrow ZKZ^{\\mathsf T}.\n\\]\nBei irreduzibler aperiodischer Kette ist der führende erwartete Koeffizient \\(c_0+2\\sum_{t\\ge1}c_t\\); periodisch kann diese ungemittelte Korrelationsreihe divergieren, obwohl der Poisson-CLT gilt.",
+      "assumptions": "Endlicher Träger; stationärer Start für die exakte endliche Erwartungsformel, Irreduzibilität für den CLT. Keine i.i.d.-Annahme.",
+      "proof": "Mit \\(\\xi_n=\\varphi(\\rho_n)-m(\\nu_\\pi)\\) ist E〈ξ₀,ξₜ〉=cₜ. Das Quadrat der empirischen Featuresumme ergibt die Erwartungsformel. Cramér–Wold aus den skalaren Poisson-CLTs liefert den Vektorgrenzwert; stetige Abbildung z→zKzᵀ den quadratischen Grenzwert. Aperiodische endliche Ketten haben summierbare Korrelationen einschließlich Σt|cₜ|, was den O(L⁻²)-Rest ergibt.",
+      "paper_and_literature_references": "Klassische Martingal-/Markov-Grenzsätze, allgemeine Quantentrajektorienvariante [BFP].",
+      "simulation_consequences": "Fehlerbalken mit Autokorrelation berechnen. Der Grenzwert der quadrierten MMD ist eine gewichtete Chi-Quadrat-Variable, keine Gaußvariable. Der CLT ist schwache Konvergenz; diskrete finite empirische Häufigkeiten können nicht in TV gegen ein nichtdegeneriertes stetiges Gaußmaß konvergieren. Tests T17,T18,T38.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Endlicher Träger; stationärer Start für die exakte endliche Erwartungsformel, Irreduzibilität für den CLT. Keine i.i.d.-Annahme."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Im stationären Fall:\n\\[\nc_t=\\sum_{ij}\\pi_i(T^t)_{ij}K_{ij}-\\pi K\\pi^{\\mathsf T},\\qquad\n\\mathbb E\\operatorname{MMD}_k^2(\\widehat\\nu_L,\\nu_\\pi)\n=\\frac{c_0}L+\\frac2{L^2}\\sum_{t=1}^{L-1}(L-t)c_t.\n\\]\nAus \\(\\sqrt L(\\widehat q_L-\\pi)\\Rightarrow Z\\) folgt\n\\[\nL\\operatorname{MMD}_k^2(\\widehat\\nu_L,\\nu_\\pi)\\Rightarrow ZKZ^{\\mathsf T}.\n\\]\nBei irreduzibler aperiodischer Kette ist der führende erwartete Koeffizient \\(c_0+2\\sum_{t\\ge1}c_t\\); periodisch kann diese ungemittelte Korrelationsreihe divergieren, obwohl der Poisson-CLT gilt."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T17",
+        "T18",
+        "T38"
+      ]
+    },
+    {
+      "id": "NEW-01",
+      "title": "Vollständige Edge-Kanalgleichheit hat eine kleinere Gauge-Gruppe",
+      "proof_status": "PROVEN",
+      "origin": "AUDIT_NEW",
+      "document_anchor": "NEW-01",
+      "statement_latex": "Für denselben beschrifteten Graphen:\n\\[\n\\Phi_S=\\Phi_{\\widetilde S}\\iff\\widetilde S(x)=e^{i\\alpha_x}S(x)\\quad\\forall x.\n\\]\nEine Phase pro Knoten ist erlaubt, beliebige unterschiedliche Spaltenphasen im Allgemeinen nicht.",
+      "assumptions": "Vergleich als lineare Kanäle auf **allen** Eingangsoperatoren/Dichtematrizen, nicht nur auf der purifizierten Familie oder im stationären Zustand.",
+      "proof": "Beschränke A auf einen Eingangsblock x. Gleichheit beider Kanäle bedeutet Gleichheit der unitären Konjugation durch S(x) und Ŝ(x) auf der vollen Matrixalgebra. W=S*Ŝ muss mit allen Matrizen kommutieren, also skalar sein; wegen Unitarität W=e^{iα}I. Umgekehrt löschen sich diese Krausphasen in KρK* aus.",
+      "paper_and_literature_references": "Neue elementare Folgerung aus [J] (4.8),(4.12), ergänzend zu E-13/E-15. Keine Neuheitsbehauptung.",
+      "simulation_consequences": "Getrennte Äquivalenz-/Cachetypen für `same_unitary`, `same_channel`, `same_stationary_path_law`, `same_invariant_measure`, `same_transition_matrix`. Individuelle Spaltenphase kann q₂ eines kohärenten Inputs ändern. Test T40.",
+      "contract": {
+        "model": "full_open_edge_channel",
+        "inputs": {
+          "S": "family",
+          "S_tilde": "family"
+        },
+        "preconditions": [
+          "same input basis and graph",
+          "comparison on all inputs"
+        ],
+        "outputs": {
+          "equal_channel": "for all x S_tilde[x]=exp(i alpha_x) S[x]"
+        },
+        "invariants": [
+          "one phase per node, not arbitrary per column"
+        ]
+      },
+      "test_case_ids": [
+        "T40"
+      ]
+    },
+    {
+      "id": "NEW-02",
+      "title": "Exakte Kanalränge und Perturbationsschranken",
+      "proof_status": "PROVEN",
+      "origin": "AUDIT_NEW",
+      "document_anchor": "NEW-02",
+      "statement_latex": "\\[\n\\operatorname{rank}\\Phi^2=d,\\qquad\n\\operatorname{rank}\\Phi^n=\\operatorname{rank}M^{n-2}\\quad(n\\ge2).\n\\]\nFür zwei Familien auf demselben Graphen:\n\\[\n\\|U_S-U_{S'}\\|_{2\\to2}=\\sup_x\\|S(x)-S'(x)\\|_{2\\to2}=:\\delta,\n\\]\n\\[\n\\|U_S^n-U_{S'}^n\\|\\le n\\delta,\\qquad\n\\|\\Phi_S^n(\\rho)-\\Phi_{S'}^n(\\rho)\\|_1\\le2n\\delta.\n\\]",
+      "assumptions": "Endliche Dimension für Ränge. Normformeln auch auf abzählbarer direkter Summe. Feste endliche Zeit; keine stationäre Parameterstabilität ohne weitere Spektralannahmen.",
+      "proof": "\\(\\Phi^n=\\mathcal B_U M^{n-2}\\mathcal R_2\\), wobei \\(\\mathcal R_2(A)=\\operatorname{diag}(UAU^*)\\). B ist injektiv, R₂ surjektiv mit Urbild U*diag(q)U. Daher ergibt sich exakt der Zwischenrang. Für die Norm U=F⊕S verwenden. Potenzdifferenzen teleskopieren. Für Kanäle ist der Ein-Schritt-Spurnormunterschied höchstens2δ||A||₁, durch zweimalige Dreiecksungleichung bei unitärer Konjugation und Kontraktivität des Pinchings. Die Teleskopsumme der CPTP-Potenzen liefert die Schranke.",
+      "paper_and_literature_references": "Korollar4.5 für Faktorisierung. Lemma2.4 gibt eine schwächere Schranke über lokale HS-Normen; die Operatornormgleichheit folgt aus (3.11)–(3.12).",
+      "simulation_consequences": "Oracle-Tests für Ränge und endliche Robustheit. Numerical rank ist toleranzabhängig, kein stabiler Jordan-Zertifikator. Tests T15,T41.",
+      "contract": {
+        "model": "finite_open_edge_sqw",
+        "inputs": {
+          "S": "coins",
+          "S_tilde": "optional perturbation",
+          "n": "nonnegative integer"
+        },
+        "preconditions": [
+          "n>=2 for rank formula"
+        ],
+        "outputs": {
+          "rank_power": "rank(Phi^n)=rank(M^(n-2))",
+          "delta": "max_x operator_norm(S[x]-S_tilde[x])",
+          "finite_time_trace_error_bound": "2*n*delta"
+        },
+        "invariants": [
+          "rank(Phi^2)=d"
+        ],
+        "reject_for": [
+          "interpreting finite-time bound as stationary robustness"
+        ]
+      },
+      "test_case_ids": [
+        "T15",
+        "T41"
+      ]
+    },
+    {
+      "id": "NEW-03",
+      "title": "Multigraph-Porterweiterung und Gegenbeispiel zur universellen Edge-Purifikation",
+      "proof_status": "PROVEN",
+      "origin": "AUDIT_NEW",
+      "document_anchor": "NEW-03",
+      "statement_latex": "Auf einem schleifenfreien Multigraphen mit mₓᵧ parallelen Ports:\n\\[\nP_x^IP_y^O=\\sum_{\\ell=1}^{m_{xy}}Q_{xy,\\ell}=:Q^{\\rm ports}_{xy},\\quad\nK(x)K(y)=UQ^{\\rm ports}_{xy}U,\n\\quad\\operatorname{rank}(K(x)K(y))=m_{xy}.\n\\]\nUniverselle Purifikation nach zwei groben Knotenergebnissen ist daher falsch. Für die Vertex-Kompression bleibt dagegen RK(x)R*=|θ(x)〉〈x|, mit\n\\[\n\\theta_z(x)=\\sum_{\\ell:x\\leftrightarrow z}\\overline{\\omega_{(z,x,\\ell)}(z)}v_{(x,z,\\ell)}(x).\n\\]\nDie Portsumme geschieht **vor** dem Betragsquadrat; ||θ||≤1 folgt aus Kontraktivität von R.",
+      "assumptions": "Explizite Erweiterung: eindeutig identifizierte Ports und Reverse-Arc-Paarung, lokale unitäre Portmatrizen, keine Schleifen. Nicht Teil des einfachen Kernvertrags.",
+      "proof": "Beide Knotensubraumprojektoren sind in der Arc-Port-Basis diagonal; ihr Schnitt besteht aus allen parallelen Arcs. Multiplikation mit unitärem U erhält den Rang. Gegenbeispiel: zwei Knoten, zwei parallele Kanten, lokale Coins I. Ein gleichmäßiges Gemisch zweier Parallelports wechselt deterministisch zwischen Knoten und behält für immer Rang2/Reinheit1/2. Bei der Vertex-Kompression annihiliert K(x)R* weiterhin alle Basislabels außer x, weshalb nur eine nichtnull Spalte bleibt. Die Portsumme folgt direkt aus R; die loopfreie Vervollständigung ist orthogonal zum Selbstzustand.",
+      "paper_and_literature_references": "§6.2 verwendet einen Multigraphen. Diese allgemeine portweise Erweiterung wird hier explizit formuliert, nicht als bereits ausformulierter allgemeiner Satz der Quelle ausgegeben.",
+      "simulation_consequences": "E-02 automatisch nur bei einfacher Graphklasse freigeben. Multigraphen brauchen einen quantenmechanischen Edge-Fallback oder eine **anders definierte**, portauflösende Messung. Vertex-§6.2 kann über Portbackend oder direkte χ-Fixture simuliert werden. Test T24.",
+      "contract": {
+        "model": "explicit_loopless_multigraph_extension",
+        "inputs": {
+          "ports": "distinct parallel arc IDs with reverse pairing",
+          "S": "unitary port coins"
+        },
+        "preconditions": [
+          "coarse outcome is vertex only"
+        ],
+        "outputs": {
+          "two_step_product_rank": "number_parallel_ports_between_endpoints",
+          "vertex_theta": "coherent sum over parallel ports"
+        },
+        "invariants": [
+          "vertex norm(theta)<=1"
+        ],
+        "reject_for": [
+          "universal two-step edge purity"
+        ]
+      },
+      "test_case_ids": [
+        "T24"
+      ]
+    },
+    {
+      "id": "NEW-04",
+      "title": "Gewöhnliche Konvergenz bei den induzierten Grover-/DFT-Beispielen",
+      "proof_status": "PROVEN",
+      "origin": "AUDIT_NEW",
+      "document_anchor": "NEW-04",
+      "statement_latex": "Auf endlichen einfachen zusammenhängenden Graphen mit m>2 ist die uniform-ω-Grover-Vertexkette irreduzibel und aperiodisch. Jede geschlossene Klasse der DFT-Vertexkette ist ebenfalls aperiodisch. Deshalb konvergieren ihre momentanen Gesetze gewöhnlich, im DFT-Fall zur korrekten Einzugsbereichsmischung. Der Zweiknotengraph ist die periodische Ausnahme.",
+      "assumptions": "Genau die uniform-ω-Konstruktionen aus X-04; nicht alle beliebigen Vertex-Walks.",
+      "proof": "Grover hat positive Nachbarübergänge, also Irreduzibilität. Bei m>2 existiert ein Knoten höheren Grades und ein Nachbar x, bei dem ein Summand 1/d_z<1 ist; daher Pₓₓ>0. Eine Selbstschleife genügt zur Aperiodizität. DFT-Klassen sind N-Zyklen. Länge≥3 erzwingt graphische Grade≥2 und Selbstübergänge. Bei einem Zweierzyklus können unter Zusammenhang und m>2 nicht beide Endpunkte Grad1 haben, also existiert ebenfalls ein Selbstübergang. Endlicher transienter Rest wird absorbiert.",
+      "paper_and_literature_references": "Neue Folgerung aus (6.44),(6.49), Lemma6.9; stärker als eine bloße Cesàroformulierung, aber nur im angegebenen Spezialfall.",
+      "simulation_consequences": "Analytischer Klassencheck für Fixtures. Allgemeines Backend trotzdem mit SCC-/Periodenalgorithmus, nicht pauschaler Aperiodizitätsannahme. Tests T32,T34.",
+      "contract": {
+        "model": "see mathematical statement",
+        "inputs": {
+          "mathematical_parameters": "as specified in statement and assumptions"
+        },
+        "preconditions": [
+          "Genau die uniform-ω-Konstruktionen aus X-04; nicht alle beliebigen Vertex-Walks."
+        ],
+        "outputs": {
+          "expected_mathematical_relation": "Auf endlichen einfachen zusammenhängenden Graphen mit m>2 ist die uniform-ω-Grover-Vertexkette irreduzibel und aperiodisch. Jede geschlossene Klasse der DFT-Vertexkette ist ebenfalls aperiodisch. Deshalb konvergieren ihre momentanen Gesetze gewöhnlich, im DFT-Fall zur korrekten Einzugsbereichsmischung. Der Zweiknotengraph ist die periodische Ausnahme."
+        },
+        "invariants": [
+          "check all stated assumptions before applying the identity"
+        ],
+        "execution_policy": "Theoretical result or optional diagnostic; use full statement and cited proof, not an unstated generalized optimization."
+      },
+      "test_case_ids": [
+        "T32",
+        "T34"
+      ]
+    }
+  ],
+  "audit_new_results": [
+    "NEW-01",
+    "NEW-02",
+    "NEW-03",
+    "NEW-04"
+  ],
+  "corrections": [
+    {
+      "id": "AUD-01",
+      "source": "[J] (6.67)-(6.70)",
+      "issue": "Weights omit transient initial mass",
+      "replacement": "r0(C_i) for the entire functional-graph basin, generally r0 @ absorption_function_i",
+      "tests": [
+        "T32"
+      ]
+    },
+    {
+      "id": "AUD-02",
+      "source": "[J] prose below (6.14)",
+      "issue": "Only-two-vertices trace-preservation assertion overlooks zero components of v",
+      "replacement": "norm(theta_x)=1 iff each nonzero v_z(x) is supported where abs(omega_x(z))=1",
+      "tests": [
+        "T27"
+      ]
+    },
+    {
+      "id": "AUD-03",
+      "source": "[J] section6.2 and generalizations of simple-graph purification",
+      "issue": "Parallel arcs require ports and may retain mixedness",
+      "replacement": "NEW-03; do not enable E-02 automatically",
+      "tests": [
+        "T24"
+      ]
+    },
+    {
+      "id": "AUD-04",
+      "source": "[J] (4.31)",
+      "issue": "Missing first-outcome probability on right hand side",
+      "replacement": "multiply conditional branch by P1(x1), or use W_n rho0 W_n^* directly",
+      "tests": [
+        "T42"
+      ]
+    },
+    {
+      "id": "AUD-05",
+      "source": "[J] (6.10) and trajectory timing",
+      "issue": "Complex conjugation or step offset can be lost in transcription",
+      "replacement": "theta_z(x)=conj(omega_x(z))*v_z(x); exact stage conventions above",
+      "tests": [
+        "T26",
+        "T09",
+        "T29"
+      ]
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "OPEN-01",
+      "topic": "Efficient globally optimal mixing over local column permutations",
+      "proved_subcase": "finite enumeration of product_x d_x! kernels"
+    },
+    {
+      "id": "OPEN-02",
+      "topic": "Full classification of all induced nonorthogonal vertex ensembles"
+    },
+    {
+      "id": "OPEN-03",
+      "topic": "Sharp minimal tensor degree and stable reconstruction of unknown support"
+    },
+    {
+      "id": "OPEN-04",
+      "topic": "Unknown phase recovery from restricted outcome records; often nonidentifiable"
+    },
+    {
+      "id": "OPEN-05",
+      "topic": "General finite classical reduction for coarse multigraph edge measurements; universal claim false"
+    },
+    {
+      "id": "OPEN-06",
+      "topic": "Uniform infinite-graph mixing/tail control without extra assumptions"
+    },
+    {
+      "id": "OPEN-07",
+      "topic": "General Lindblad theorem obtained by replacing original screenshot Isom condition; not proved"
+    }
+  ],
+  "files": {
+    "document": "docs/mathematical_results.md",
+    "test_registry": "spec/test_cases.json",
+    "fixtures": "spec/reference_fixtures.json",
+    "regression_suite": "tests/reference_checks.py",
+    "validation": "validation_report.json"
+  },
+  "limitations": [
+    "No claim of exhaustive research novelty search.",
+    "Numerical tests are not proofs.",
+    "All probability and state reconstructions refer to the specified instrument."
+  ]
+}

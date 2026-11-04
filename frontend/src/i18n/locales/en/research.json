@@ -1,0 +1,99 @@
+{
+  "strategy": {
+    "label": "Execution strategy",
+    "optimized": "Optimized · exact Markov reduction",
+    "reference": "Reference · quantum states"
+  },
+  "initial": {
+    "vertexBasis": "Localized vertex state",
+    "mixed": "Maximally mixed state",
+    "vertex": "Vertex"
+  },
+  "playback": {
+    "play": "Play",
+    "pause": "Pause"
+  },
+  "born": {
+    "vertex": "Post-preparation vertex Born probabilities"
+  },
+  "vertex": {
+    "dynamics": "Vertex dynamics",
+    "trajectory": "Conditional trajectory",
+    "mean": "Exact mean dynamics",
+    "timing": "Xₙ is measured on the state at t = n − 1. The state at t = n is the prepared state χ(Xₙ), not the basis state |Xₙ⟩.",
+    "parameters": "Vertex boundary vectors and phases",
+    "parametersHelp": "ω(x) follows the neighbor order shown in the matrix inspector. Complex entries are [real, imaginary] pairs. β is in radians. Defaults are uniform ω and zero β. Applying parameters resets the simulation; numerical validity is checked on the next request.",
+    "omega": "Boundary vectors ω (JSON)",
+    "beta": "Phases β (JSON)",
+    "apply": "Apply parameters",
+    "jsonError": "Enter valid JSON objects for ω and β.",
+    "applied": "Parameters applied. Run or step to validate and simulate."
+  },
+  "stage": {
+    "initial": "Step 0 · initial quantum state",
+    "first_scattering": "Step 1 · first measurement and scattering",
+    "edge_atom": "Step ≥ 2 · scattered edge atom",
+    "vertex_atom": "Step ≥ 1 · prepared vertex atom",
+    "mean": "Mean quantum state",
+    "unitary": "Unitary quantum state"
+  },
+  "state": {
+    "title": "QUANTUM STATE AND MEASUREMENT STAGE",
+    "edgeMeaning": "An edge label e = (x, y) represents the coherent scattered ket ηₑ = U|xy⟩. It is not a basis-edge occupation. Conditional states from mixed input become guaranteed pure after the second observed step.",
+    "vertexMeaning": "A vertex label x represents the coherently completed ket χ(x). This is the separate induced vertex model, with a pure conditional state after the first observed step.",
+    "edgeTiming": "Before measurement: ρₙ₋₁ → after measurement: Pₓρₙ₋₁Pₓ / pₓ → after scattering: ρₙ. The displayed node colors are the Born probabilities of the current quantum state.",
+    "vertexTiming": "Before measurement: ρₙ₋₁ → observed basis label Xₙ → preparation: τₓ = |χ(x)⟩⟨χ(x)|. Preparation-label weights qₙ and next Born probabilities qₙP are different quantities.",
+    "currentAtom": "Current atom label",
+    "outcome": "Most recent outcome",
+    "label": "Preparation label",
+    "currentDensity": "Current physical density matrix at t = {{step}}",
+    "afterScattering": "State after the complete scattering/preparation step (or initial state at t = 0)",
+    "afterMeasurement": "State after measurement, before scattering/preparation",
+    "beforeScattering": "Normalized measurement branch before scattering/preparation"
+  },
+  "ensemble": {
+    "eyebrow": "INDEPENDENT TRAJECTORIES",
+    "title": "Ensemble and exact mean",
+    "help": "Uses the current graph, matrices, initial state, strategy and seed. Counts refer to independent trajectories at each time, not a time average along one path. Empirical Born probabilities average conditional states without an additional physical measurement.",
+    "count": "Number of trajectories",
+    "running": "Simulating ensemble …",
+    "run": "Run ensemble",
+    "configuration": "{{steps}} steps · seed {{seed}}",
+    "step": "Ensemble time step",
+    "bornDeviation": "Vertex Born TV deviation",
+    "labelDeviation": "Label-law TV deviation",
+    "comparison": "Post-step vertex Born probabilities: empirical versus exact",
+    "empirical": "Empirical Born probability",
+    "exact": "Exact Born probability",
+    "difference": "Difference",
+    "heatmap": "Empirical vertex heatmap over time",
+    "heatmapCaption": "Rows: time step; columns: vertex. Color encodes empirical post-step Born probability.",
+    "cell": "Step {{step}}, vertex {{vertex}}: probability {{probability}}",
+    "stateCounts": "Preparation-label counts and exact weights",
+    "vertexLabels": "Labels index χ(x); different labels may prepare identical quantum states. Counts remain label counts, without approximate atom merging.",
+    "edgeLabels": "Labels index the scattered states U|xy⟩. The label law qₙ differs from the edge Born law Mqₙ.",
+    "exactWeight": "Exact label weight",
+    "warmstart": "A fixed atom-label law is not yet available at this warmstart stage.",
+    "histories": "Selected measurement histories",
+    "path": "Trajectory {{index}}"
+  },
+  "markov": {
+    "eyebrow": "EXACT REDUCED REPRESENTATION",
+    "title": "Markov and quantum-state inspector",
+    "edgeConvention": "Column-stochastic convention: q_next = M @ q. Rows are destination atoms; columns are source atoms. q₂ retains the complete incoming coherence blocks. Dense inspection is limited to dimension 64.",
+    "vertexConvention": "Row-stochastic convention: q_next = q @ P. Rows are source labels; columns are destination labels. At step n ≥ 1, qₙ = r₀Pⁿ⁻¹; the next Born law is qₙP. Dense inspection is limited to dimension 64.",
+    "loading": "Inspecting …",
+    "inspect": "Inspect state at t = {{step}}",
+    "eligible": "Exact reduction eligible",
+    "edgeAssumptions": "Simple loopless graph · static unitaries · fully observed measurement before scattering",
+    "vertexAssumptions": "Static normalized rank-one preparation instrument · fully observed labels",
+    "ket": "Reconstructed atom ket",
+    "basis": "Quantum basis",
+    "amplitude": "Complex amplitude",
+    "transitions": "Next preparation-label probabilities",
+    "probability": "Probability",
+    "matrix": "Full reduced transition matrix",
+    "row": "P: source rows → destination columns; q_next = q @ P",
+    "column": "M: source columns → destination rows; q_next = M @ q"
+  }
+}

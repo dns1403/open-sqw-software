@@ -103,9 +103,11 @@ node node_modules/vite/bin/vite.js --host 127.0.0.1
 
 1. Select a path or cycle with three vertices and Grover or DFT scattering.
 2. Click a vertex to inspect its matrix and explicit neighbor ordering.
-3. Select a directed basis state or the coherent uniform superposition.
-4. Choose unitary evolution, the open edge walk, or a quantum trajectory, then
-   run the simulation. Inspect single steps and the history slider.
+3. Select a localized basis state, coherent uniform superposition or maximally
+   mixed state. The separate vertex mode uses a vertex-space initial state.
+4. Choose unitary evolution, the open edge mean, an edge trajectory, or the
+   induced vertex walk. Select **Optimized** or **Reference**, then run, step,
+   play/pause, reset or inspect the history slider.
 5. Switch to **DE**. The same graph, matrices, current step and computed values
    remain in place; labels and observable formatting change immediately.
 6. Reload to verify German persists, then choose **EN** and reload again to
@@ -145,7 +147,40 @@ channel: `vertex = InducedVertexWalk(walk, omega=None, beta=None)`.
 Defaults are uniform local vectors and zero phases. `boundary_operator`,
 `theta`, `chi`, `kraus_operators()`, `markov_matrix` and `evolve_density()`
 are available for research and diagnostics. This model is implemented in
-Python; its separate API and interface remain planned.
+Python and the separate **Vertex Walk** mode in the API/interface. Its controls
+accept complex boundary vectors and real phase parameters as JSON, in the
+explicit neighbor order shown by the matrix editor.
+
+Exact Markov strategies are separate from the reference:
+
+```python
+from sqw.core import EdgeReduction, OptimizedEdgeTrajectory, run_ensemble
+
+reduction = EdgeReduction(walk)
+session = OptimizedEdgeTrajectory(reduction, seed=42).start(psi0)
+first = session.step()                # only X1 is sampled
+second = session.step()               # first guaranteed scattered edge atom
+print(second.atom_id, second.ket())   # coherent U|e>, not basis ket |e>
+mean5 = list(reduction.iter_mean(psi0, 5))[-1]
+print(mean5.atom_weights, mean5.born_edges())  # q5 versus M @ q5
+ensemble = run_ensemble(walk, psi0, 10000, 20, seed=42,
+                        strategy="optimized", selected_histories=3)
+print(ensemble.frames[-1].born_vertex_total_variation)
+```
+
+`OptimizedEdgeTrajectory.run(..., initialization="direct")` samples the exact
+joint `q2` law for batch starts. `OptimizedVertexTrajectory` and `VertexReduction`
+provide the corresponding vertex-label operations. Arbitrary complex pure and
+mixed states work through the Python API and JSON `initial.vector` /
+`initial.density` fields; the browser currently offers three preset preparations.
+
+In open/trajectory/vertex modes, the **Ensemble and exact mean** panel compares
+independent-path empirical Born probabilities with the exact mean, displays
+total-variation errors, preparation-label counts, selected histories and a time
+heatmap. The **Markov and quantum-state inspector** shows selected atoms, complex
+kets, transition probabilities, explicit M/P orientation and the current density.
+Conditional paths also expose the state after measurement before scattering.
+Language switching preserves these results, parameter drafts and playback.
 
 Run the reproducible example with:
 
@@ -181,15 +216,16 @@ frontend/src/i18n/
   index.ts
   format.ts
   locales/
-    en/{app,components,errors}.json
-    de/{app,components,errors}.json
+    en/{app,components,research,errors}.json
+    de/{app,components,research,errors}.json
 ```
 
 - `app`: application layout, controls, terminology, counts and help.
 - `components`: graph interaction, matrix editor and scientific chart text.
+- `research`: exact strategies, vertex parameters, ensembles and state inspection.
 - `errors`: localized stable API error codes and request-validation messages.
 
-To add a language, copy all three English namespace files to a new language
+To add a language, copy all four English namespace files to a new language
 folder, translate their values while preserving keys and interpolation tokens,
 then import/register them in `resources` and `supportedLanguages` in `index.ts`.
 Add the locale's number-format configuration in `format.ts` if needed. Retain
@@ -205,28 +241,43 @@ message rather than exposing a missing translation key or arbitrary server text.
 
 ## Scope and remaining work
 
-Implemented: graph presets and custom graphs in the core, local matrix presets
-and complex inputs, unitary/open edge dynamics, pure/mixed reference
-trajectories, the Python vertex channel, stateless API, bilingual interactive
-interface, scientific plots and validation.
+Implemented: graph presets/custom graphs in the core, complex scattering,
+unitary/open edge dynamics, independent reference and exact optimized edge and
+vertex trajectories/means, compact ensembles, stateless API, bilingual controls,
+playback, heatmaps and quantum/Markov inspection. See the result-ID mapping below.
 
-Planned: free graph editing, vertex configuration in the API/interface, large
-trajectory ensembles in the UI, validated Markov optimizations, spectral
-analysis, stationary states, and full experiment import/export. Prepared but
-unavailable interface features remain disabled.
+Planned: stationary classes, periods and absorption probabilities; spectral/RKHS
+analysis; free graph editing and full experiment import/export. Multigraphs,
+partial observations and time-dependent coins are explicitly unsupported.
 
 Dense density-matrix methods target small reference systems. The interactive
 API limits graph size and step count; the Python library has no such UI limits
 but retains the underlying memory and runtime costs.
+The vertex reduction uses sparse chi/P after construction, but its existing
+reference-model constructor still allocates dense diagnostic arrays. The API
+is stateless and replays requested prefixes; Python online sessions avoid replay.
+
+Run the actual runtime/allocation benchmark with:
+
+```powershell
+.\.venv\Scripts\python.exe examples/benchmark_markov.py
+```
+
+See [measured benchmarks](docs/benchmarks.md) for results and memory methodology.
+The original `Material/reference_checks.py` intentionally still reproduces its
+T34 failure. `pytest tests/test_reference_handoff.py -q` runs the documented,
+independent corrected copy with unchanged assertions and tolerances.
 
 ## Documentation
 
 - [Theory and time indexing](docs/theory.md)
 - [Architecture and API contract](docs/architecture.md)
 - [Additional mathematical results](docs/mathematical_results.md)
+- [Handoff audit and T34 correction](docs/mathematical_audit.md)
+- [Measured benchmarks](docs/benchmarks.md)
 - [Roadmap](docs/roadmap.md)
 - [Development instructions](AGENTS.md)
 
-The next research step is to record the user's additional theorems with their
-hypotheses, then derive a separately selectable Markov trajectory strategy and
-validate it against the existing pure/mixed reference.
+The next research step is closed communicating classes, stationary distributions,
+periods and transient absorption probabilities, with the current exact engines
+as the dynamical foundation.

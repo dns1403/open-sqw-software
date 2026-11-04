@@ -6,12 +6,14 @@ from fastapi.responses import JSONResponse
 
 from sqw.core import (
     GraphModel, ReferenceTrajectory, ScatteringWalk, basis_state,
-    density_from_state, scattering_matrix, uniform_state, validate_scattering,
+    density_from_state, scattering_matrix, uniform_state, validate_scattering, validate_state,
+    InducedVertexWalk, EdgeReduction, VertexReduction, OptimizedEdgeTrajectory,
+    OptimizedVertexTrajectory, ReferenceVertexTrajectory, run_ensemble,
 )
 from .errors import RequestProblem, client_error, validation_issue
 from .schemas import (
     Frame, GraphRequest, GraphResponse, ScatteringRequest,
-    SimulationRequest, SimulationResponse,
+    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest,
 )
 
 app = FastAPI(title="Scattering Quantum Walk Lab", version="0.1.0")
@@ -129,32 +131,205 @@ def scattering_endpoint(request: ScatteringRequest):
         return client_error(error)
 
 
+def decode_complex(data):
+    array = np.asarray(data, dtype=float)
+    if array.ndim < 2 or array.shape[-1] != 2:
+        raise ValueError("Complex values must be [real, imaginary] pairs.")
+    return array[..., 0] + 1j * array[..., 1]
+
+
+def experiment(request):
+    edge = build_walk(request.graph, request.preset, request.seed, request.scattering)
+    vertex = request.mode == "vertex"
+    walk = edge
+    if vertex:
+        params = request.vertex_parameters
+        try:
+            omega = None if params.omega is None else {int(x): decode_complex(v) for x, v in params.omega.items()}
+            beta = None if params.beta is None else {int(x): v for x, v in params.beta.items()}
+            walk = InducedVertexWalk(edge, omega, beta)
+        except (ValueError, TypeError) as error:
+            raise RequestProblem("vertex_parameters", str(error)) from error
+    d = walk.dimension if vertex else edge.graph.dimension
+    spec = request.initial
+    try:
+        if spec.kind == "uniform":
+            state = np.ones(d, complex) / np.sqrt(d)
+        elif spec.kind == "maximally_mixed":
+            state = np.eye(d, dtype=complex) / d
+        elif spec.kind == "pure":
+            state = decode_complex(spec.vector)
+            if state.ndim != 1: raise ValueError("Expected a pure vector.")
+        elif spec.kind == "mixed":
+            state = decode_complex(spec.density)
+            if state.ndim != 2: raise ValueError("Expected a density matrix.")
+        elif vertex:
+            label = edge.graph.vertices[0] if spec.vertex is None else spec.vertex
+            if label not in edge.graph.vertex_index: raise ValueError("Unknown initial vertex.")
+            state = np.zeros(d, complex); state[edge.graph.vertex_index[label]] = 1
+        else:
+            pair = spec.edge or edge.graph.directed_edges[0]
+            if pair not in edge.graph.edge_index:
+                raise RequestProblem("invalid_edge", f"{pair!r} is not a directed edge (target, source) of this graph.", target=pair[0], source=pair[1])
+            state = basis_state(edge.graph, pair)
+        state = validate_state(state, d)
+    except RequestProblem:
+        raise
+    except (ValueError, TypeError) as error:
+        raise RequestProblem("initial_state", str(error)) from error
+    return edge, walk, state
+
+
+def reference_frame(walk, state, step, *, vertex=False, measurement=None, probabilities=None, state_kind="conditional", outcomes=()):
+    if not vertex:
+        result = frame(walk, state, step, measurement, probabilities)
+    else:
+        diagonal = abs(state) ** 2 if state.ndim == 1 else np.diag(state).real
+        result = Frame(step=step, edge_probabilities=[], vertex_probabilities=diagonal.tolist(),
+            trace=float(np.vdot(state, state).real if state.ndim == 1 else np.trace(state).real),
+            purity=1.0 if state.ndim == 1 else float(np.vdot(state, state).real),
+            measurement=measurement, measurement_probability=None if probabilities is None else float(probabilities[walk.graph.vertex_index[measurement]]),
+            measurement_probabilities=None if probabilities is None else probabilities.tolist())
+    result.state_kind = state_kind
+    result.stage = "initial" if step == 0 else "mean" if state_kind == "mean" else "unitary" if state_kind == "unitary" else "vertex_atom" if vertex else "first_scattering" if step == 1 else "edge_atom"
+    if state_kind == "conditional" and step >= (1 if vertex else 2):
+        if vertex:
+            result.atom_id = walk.graph.vertex_index[measurement]
+            result.atom_vertex = measurement
+        else:
+            result.atom_edge = (outcomes[step - 1], outcomes[step - 2])
+            result.atom_id = walk.graph.edge_index[result.atom_edge]
+    return result
+
+
+def compact_frame(state, *, vertex=False, previous=None, state_kind="conditional"):
+    weights = getattr(state, "label_weights" if vertex else "atom_weights", None)
+    measurement = getattr(state, "outcome", None)
+    atom = None if state_kind != "conditional" else (state.model.graph.vertex_index[measurement] if vertex and state.step else getattr(state, "atom_id", None))
+    return Frame(step=state.step, edge_probabilities=[] if vertex else state.born_edges().tolist(),
+        vertex_probabilities=state.born_vertices().tolist(), trace=1.0, purity=state.purity(),
+        measurement=measurement, measurement_probability=getattr(state, "selected_probability", None),
+        measurement_probabilities=None if previous is None else previous.born_vertices().tolist(),
+        stage="initial" if state.step == 0 else "mean" if state_kind == "mean" else state.stage,
+        state_kind=state_kind, atom_id=atom,
+        atom_edge=state.model.graph.directed_edges[atom] if atom is not None and not vertex else None,
+        atom_vertex=measurement if vertex and atom is not None else None,
+        state_weights=None if weights is None else weights.tolist())
+
+
+def simulate_experiment(request, *, inspect_last=False):
+    edge, walk, initial = experiment(request)
+    vertex = request.mode == "vertex"
+    conditional = request.mode == "trajectory" or (vertex and request.vertex_dynamics == "trajectory")
+    mean = request.mode == "open" or (vertex and not conditional)
+    d = walk.dimension if vertex else edge.graph.dimension
+    dense_reference = (mean or initial.ndim == 2) and (request.strategy == "reference" or request.mode == "unitary")
+    if dense_reference and d**2 * (request.steps + 1) > MAX_DENSITY_WORK:
+        raise RequestProblem("density_budget", "This dense reference run is too large for the interactive API. Reduce graph size or step count, or use the Python core.")
+    outcomes, last, reduced = [], None, None
+    if request.mode == "unitary":
+        states = walk.evolve_pure(initial, request.steps) if initial.ndim == 1 else None
+        if states is None:
+            states = [initial]
+            for _ in range(request.steps): states.append(walk.step_unitary_density(states[-1]))
+        frames = [reference_frame(walk, state, n, state_kind="unitary") for n, state in enumerate(states)]
+        last = states[-1]
+    elif request.strategy == "optimized":
+        model = VertexReduction(walk) if vertex else EdgeReduction(walk)
+        if conditional:
+            engine = OptimizedVertexTrajectory(model, seed=request.seed) if vertex else OptimizedEdgeTrajectory(model, seed=request.seed)
+            path = engine.run(initial, request.steps)
+            outcomes = list(path.outcomes)
+            frames = [compact_frame(s, vertex=vertex, previous=path.states[n - 1] if n else None) for n, s in enumerate(path.states)]
+            if inspect_last:
+                last = path.states[-1].density()
+                reduced = path.states[-1].reduced_density() if request.steps else None
+        else:
+            states = list(model.iter_mean(initial, request.steps))
+            frames = [compact_frame(s, vertex=vertex, state_kind="mean") for s in states]
+            if inspect_last: last = states[-1].density()
+    elif conditional:
+        engine = ReferenceVertexTrajectory(walk, seed=request.seed) if vertex else ReferenceTrajectory(walk, seed=request.seed)
+        path = engine.run(initial, request.steps)
+        outcomes = list(path.outcomes)
+        frames = [reference_frame(walk, s, n, vertex=vertex,
+            measurement=outcomes[n - 1] if n else None, probabilities=path.probabilities[n - 1] if n else None,
+            outcomes=outcomes) for n, s in enumerate(path.states)]
+        if inspect_last:
+            last = path.states[-1]
+            reduced = path.reduced_states[-1] if request.steps else None
+    else:
+        state = density_from_state(initial) if initial.ndim == 1 else initial
+        frames = [reference_frame(walk, state, 0, vertex=vertex, state_kind="mean")]
+        for n in range(1, request.steps + 1):
+            state = walk.apply_channel(state)
+            frames.append(reference_frame(walk, state, n, vertex=vertex, state_kind="mean"))
+        if inspect_last: last = state
+    response = SimulationResponse(graph=describe(edge), mode=request.mode, frames=frames, outcomes=outcomes,
+        strategy="reference" if request.mode == "unitary" else request.strategy, model="vertex" if vertex else "edge")
+    return response, walk, last, reduced
+
+
 @app.post("/api/simulate", response_model=SimulationResponse)
 def simulate(request: SimulationRequest):
     try:
-        walk = build_walk(request.graph, request.preset, request.seed, request.scattering)
-        if request.mode == "open" and walk.graph.dimension**2 * (request.steps + 1) > MAX_DENSITY_WORK:
-            raise RequestProblem("density_budget", "This dense reference run is too large for the interactive API. Reduce graph size or step count, or use the Python core.")
-        if request.initial.kind == "uniform":
-            initial = uniform_state(walk.graph)
-        else:
-            edge = request.initial.edge or walk.graph.directed_edges[0]
-            if edge not in walk.graph.edge_index:
-                raise RequestProblem("invalid_edge", f"{edge!r} is not a directed edge (target, source) of this graph.", target=edge[0], source=edge[1])
-            initial = basis_state(walk.graph, edge)
-        outcomes = []
-        if request.mode == "trajectory":
-            trajectory = ReferenceTrajectory(walk, seed=request.seed).run(initial, request.steps)
-            outcomes = list(trajectory.outcomes)
-            frames = [frame(walk, trajectory.states[0], 0)]
-            frames.extend(frame(walk, state, t, outcomes[t - 1], trajectory.probabilities[t - 1]) for t, state in enumerate(trajectory.states[1:], 1))
-        else:
-            state = density_from_state(initial) if request.mode == "open" else initial
-            frames = [frame(walk, state, 0)]
-            advance = walk.step_density if request.mode == "open" else walk.step_pure
-            for t in range(1, request.steps + 1):
-                state = advance(state)
-                frames.append(frame(walk, state, t))
-        return SimulationResponse(graph=describe(walk), mode=request.mode, frames=frames, outcomes=outcomes)
+        return simulate_experiment(request)[0]
+    except (ValueError, TypeError, KeyError) as error:
+        return client_error(error)
+
+
+def json_arrays(value):
+    """Serialize result dataclasses and numerical arrays at the API boundary."""
+    from dataclasses import fields, is_dataclass
+    if isinstance(value, np.ndarray): return value.tolist()
+    if isinstance(value, np.generic): return value.item()
+    if is_dataclass(value): return {f.name: json_arrays(getattr(value, f.name)) for f in fields(value)}
+    if isinstance(value, dict): return {k: json_arrays(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)): return [json_arrays(v) for v in value]
+    return value
+
+
+@app.post("/api/ensemble")
+def ensemble(request: EnsembleRequest):
+    try:
+        edge, walk, initial = experiment(request)
+        d = walk.dimension if request.mode == "vertex" else walk.graph.dimension
+        work = request.trajectories * max(1, request.steps)
+        if work > 10_000_000 or (request.strategy == "reference" and work * d**2 > 50_000_000):
+            raise RequestProblem("ensemble_budget", "Requested ensemble exceeds the local interactive work budget.")
+        if request.selected_histories > request.trajectories:
+            raise RequestProblem("ensemble_histories", "Selected history count exceeds trajectory count.")
+        result = run_ensemble(walk, initial, request.trajectories, request.steps, seed=request.seed,
+            strategy=request.strategy, statistics=request.statistics, selected_histories=request.selected_histories)
+        return json_arrays(result)
+    except (ValueError, TypeError, KeyError) as error:
+        return client_error(error)
+
+
+@app.post("/api/analysis")
+def analysis(request: AnalysisRequest):
+    try:
+        edge, selected_walk, _ = experiment(request)
+        diagnostic_dimension = selected_walk.dimension if request.mode == "vertex" else edge.graph.dimension
+        if diagnostic_dimension > 64:
+            raise RequestProblem("analysis_budget", "Dense state/transition inspection is limited to dimension 64; use the Python API for larger diagnostics.")
+        result, walk, current, reduced = simulate_experiment(request, inspect_last=True)
+        vertex = request.mode == "vertex"
+        model = VertexReduction(walk) if vertex else EdgeReduction(walk)
+        atom = request.atom_id
+        if atom >= model.dimension:
+            raise RequestProblem("atom_id", "Atom ID is outside the model basis.")
+        label = model.graph.vertices[atom] if vertex else atom
+        matrix = model.transition_matrix()
+        ket = model.atom_ket(label)
+        rho = density_from_state(current) if current.ndim == 1 else current
+        projected = None if reduced is None else density_from_state(reduced) if reduced.ndim == 1 else reduced
+        return {"model": result.model, "orientation": "row" if vertex else "column",
+            "state_step": request.steps, "stage": result.frames[-1].stage,
+            "current_density": encode_matrix(rho), "after_measurement_density": None if projected is None else encode_matrix(projected),
+            "atom_id": atom, "atom_labels": list(model.graph.vertices) if vertex else list(model.graph.directed_edges),
+            "atom_ket": encode_matrix(ket), "transition_matrix": matrix.tolist(),
+            "next_atom_probabilities": (matrix[atom] if vertex else matrix[:, atom]).tolist(),
+            "eligible": model.eligibility.eligible, "assumptions": "SIMPLE_STATIC" if not vertex else "STATIC_RANK_ONE_PREPARATION"}
     except (ValueError, TypeError, KeyError) as error:
         return client_error(error)

@@ -1,0 +1,99 @@
+{
+  "strategy": {
+    "label": "Ausführungsstrategie",
+    "optimized": "Optimiert · exakte Markovreduktion",
+    "reference": "Referenz · Quantenzustände"
+  },
+  "initial": {
+    "vertexBasis": "Lokalisierter Knotenzustand",
+    "mixed": "Maximal gemischter Zustand",
+    "vertex": "Knoten"
+  },
+  "playback": {
+    "play": "Abspielen",
+    "pause": "Pausieren"
+  },
+  "born": {
+    "vertex": "Knoten-Born-Wahrscheinlichkeiten nach Präparation"
+  },
+  "vertex": {
+    "dynamics": "Vertex-Dynamik",
+    "trajectory": "Bedingte Trajektorie",
+    "mean": "Exakte mittlere Dynamik",
+    "timing": "Xₙ wird am Zustand bei t = n − 1 gemessen. Bei t = n liegt der präparierte Zustand χ(Xₙ) vor, nicht der Basiszustand |Xₙ⟩.",
+    "parameters": "Vertex-Randvektoren und Phasen",
+    "parametersHelp": "ω(x) folgt der Nachbarreihenfolge im Matrixinspektor. Komplexe Einträge sind Paare [Realteil, Imaginärteil]. β wird in Radiant angegeben. Standard: uniforme ω und β = 0. Übernehmen setzt die Simulation zurück; die numerische Gültigkeit wird bei der nächsten Anfrage geprüft.",
+    "omega": "Randvektoren ω (JSON)",
+    "beta": "Phasen β (JSON)",
+    "apply": "Parameter übernehmen",
+    "jsonError": "Gültige JSON-Objekte für ω und β eingeben.",
+    "applied": "Parameter übernommen. Zum Prüfen und Simulieren starten oder einen Schritt ausführen."
+  },
+  "stage": {
+    "initial": "Schritt 0 · Anfangszustand",
+    "first_scattering": "Schritt 1 · erste Messung und Streuung",
+    "edge_atom": "Schritt ≥ 2 · gestreutes Kantenatom",
+    "vertex_atom": "Schritt ≥ 1 · präpariertes Knotenatom",
+    "mean": "Mittlerer Quantenzustand",
+    "unitary": "Unitärer Quantenzustand"
+  },
+  "state": {
+    "title": "QUANTENZUSTAND UND MESSSTUFE",
+    "edgeMeaning": "Ein Kantenlabel e = (x, y) repräsentiert den kohärent gestreuten Ket ηₑ = U|xy⟩, keine Besetzung eines Kantenbasiszustands. Bedingte Zustände aus gemischtem Input sind nach dem zweiten vollständig beobachteten Schritt garantiert rein.",
+    "vertexMeaning": "Ein Knotenlabel x repräsentiert den kohärent vervollständigten Ket χ(x). Dies ist das separate induzierte Vertex-Modell; der bedingte Zustand ist nach dem ersten beobachteten Schritt rein.",
+    "edgeTiming": "Vor Messung: ρₙ₋₁ → nach Messung: Pₓρₙ₋₁Pₓ / pₓ → nach Streuung: ρₙ. Die Knotenfarben zeigen die Born-Wahrscheinlichkeiten des aktuellen Quantenzustands.",
+    "vertexTiming": "Vor Messung: ρₙ₋₁ → beobachtetes Basislabel Xₙ → Präparation: τₓ = |χ(x)⟩⟨χ(x)|. Präparationsgewichte qₙ und nächste Born-Wahrscheinlichkeiten qₙP sind verschiedene Größen.",
+    "currentAtom": "Aktuelles Atomlabel",
+    "outcome": "Letztes Messergebnis",
+    "label": "Präparationslabel",
+    "currentDensity": "Aktuelle physikalische Dichtematrix bei t = {{step}}",
+    "afterScattering": "Zustand nach dem vollständigen Streu-/Präparationsschritt (bei t = 0: Anfangszustand)",
+    "afterMeasurement": "Zustand nach Messung, vor Streuung/Präparation",
+    "beforeScattering": "Normierter Messzweig vor Streuung/Präparation"
+  },
+  "ensemble": {
+    "eyebrow": "UNABHÄNGIGE TRAJEKTORIEN",
+    "title": "Ensemble und exaktes Mittel",
+    "help": "Verwendet aktuellen Graphen, Matrizen, Anfangszustand, Strategie und Seed. Gezählt werden unabhängige Trajektorien zu jedem Zeitpunkt, keine Zeitmittel eines einzelnen Pfads. Empirische Born-Wahrscheinlichkeiten mitteln bedingte Zustände ohne zusätzliche physikalische Messung.",
+    "count": "Anzahl Trajektorien",
+    "running": "Ensemble wird simuliert …",
+    "run": "Ensemble starten",
+    "configuration": "{{steps}} Schritte · Seed {{seed}}",
+    "step": "Ensemble-Zeitschritt",
+    "bornDeviation": "TV-Abweichung der Knoten-Born-Verteilung",
+    "labelDeviation": "TV-Abweichung des Labelgesetzes",
+    "comparison": "Knoten-Born-Wahrscheinlichkeiten nach dem Schritt: empirisch und exakt",
+    "empirical": "Empirische Born-Wahrscheinlichkeit",
+    "exact": "Exakte Born-Wahrscheinlichkeit",
+    "difference": "Differenz",
+    "heatmap": "Empirische Knoten-Heatmap im Zeitverlauf",
+    "heatmapCaption": "Zeilen: Zeitschritt; Spalten: Knoten. Die Farbe zeigt die empirische Born-Wahrscheinlichkeit nach dem Schritt.",
+    "cell": "Schritt {{step}}, Knoten {{vertex}}: Wahrscheinlichkeit {{probability}}",
+    "stateCounts": "Präparationslabel: Häufigkeiten und exakte Gewichte",
+    "vertexLabels": "Labels bezeichnen χ(x); verschiedene Labels können denselben Quantenzustand präparieren. Angezeigt werden Labelhäufigkeiten, ohne näherungsweises Zusammenlegen von Atomen.",
+    "edgeLabels": "Labels bezeichnen gestreute Zustände U|xy⟩. Das Labelgesetz qₙ unterscheidet sich vom Kanten-Born-Gesetz Mqₙ.",
+    "exactWeight": "Exaktes Labelgewicht",
+    "warmstart": "In dieser Initialisierungsstufe liegt noch kein Gesetz auf der festen Atomfamilie vor.",
+    "histories": "Ausgewählte Messverläufe",
+    "path": "Trajektorie {{index}}"
+  },
+  "markov": {
+    "eyebrow": "EXAKTE REDUZIERTE DARSTELLUNG",
+    "title": "Markov- und Quantenzustandsinspektor",
+    "edgeConvention": "Spaltenstochastische Konvention: q_next = M @ q. Zeilen sind Zielatome, Spalten Ausgangsatome. q₂ enthält die vollständigen eingehenden Kohärenzblöcke. Dichte Analyse bis Dimension 64.",
+    "vertexConvention": "Zeilenstochastische Konvention: q_next = q @ P. Zeilen sind Ausgangslabels, Spalten Ziellabels. Bei Schritt n ≥ 1 gilt qₙ = r₀Pⁿ⁻¹; das nächste Born-Gesetz ist qₙP. Dichte Analyse bis Dimension 64.",
+    "loading": "Analyse läuft …",
+    "inspect": "Zustand bei t = {{step}} untersuchen",
+    "eligible": "Exakte Reduktion zulässig",
+    "edgeAssumptions": "Einfacher schleifenfreier Graph · statische unitäre Matrizen · vollständig beobachtete Messung vor Streuung",
+    "vertexAssumptions": "Statisches normiertes Rang-eins-Präparationsinstrument · vollständig beobachtete Labels",
+    "ket": "Rekonstruierter Atom-Ket",
+    "basis": "Quantenbasis",
+    "amplitude": "Komplexe Amplitude",
+    "transitions": "Nächste Präparationslabel-Wahrscheinlichkeiten",
+    "probability": "Wahrscheinlichkeit",
+    "matrix": "Vollständige reduzierte Übergangsmatrix",
+    "row": "P: Ausgangszeilen → Zielspalten; q_next = q @ P",
+    "column": "M: Ausgangsspalten → Zielzeilen; q_next = M @ q"
+  }
+}

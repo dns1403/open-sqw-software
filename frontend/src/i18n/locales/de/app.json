@@ -7,63 +7,121 @@
     "title": "Quantum-Walk-Explorer",
     "tagline": "Lokales Scattering. Globale Dynamik.",
     "research": "FORSCHUNGSUMGEBUNG",
-    "edgeWalks": "EDGE WALKS",
+    "edgeWalks": "EDGE & VERTEX WALKS",
     "reference": "Theoretische Grundlage"
   },
-  "language": { "label": "Sprache der Oberfläche", "switchTo": "Zu {{language}} wechseln" },
-  "experiment": { "configure": "EXPERIMENT KONFIGURIEREN", "local": "Lokal · Referenzverfahren" },
+  "language": {
+    "label": "Sprache der Oberfläche",
+    "switchTo": "Zu {{language}} wechseln"
+  },
+  "experiment": {
+    "configure": "EXPERIMENT KONFIGURIEREN",
+    "local": "Lokal · Referenzverfahren"
+  },
   "graph": {
-    "title": "Graph", "topology": "Topologie", "size": "Anzahl Knoten",
-    "includesCenter": "inkl. Zentrum", "sizeRange": "{{min}}–{{max}}",
-    "vertices_one": "{{count}} Knoten", "vertices_other": "{{count}} Knoten",
-    "edges_one": "{{count}} Kante", "edges_other": "{{count}} Kanten", "unknownEdges": "— Kanten",
-    "directedEdges_one": "{{count}} gerichtete Kante", "directedEdges_other": "{{count}} gerichtete Kanten",
-    "presets": { "path": "Pfad", "cycle": "Kreis", "complete": "Vollständiger Graph", "star": "Stern" },
+    "title": "Graph",
+    "topology": "Topologie",
+    "size": "Anzahl Knoten",
+    "includesCenter": "inkl. Zentrum",
+    "sizeRange": "{{min}}–{{max}}",
+    "vertices_one": "{{count}} Knoten",
+    "vertices_other": "{{count}} Knoten",
+    "edges_one": "{{count}} Kante",
+    "edges_other": "{{count}} Kanten",
+    "unknownEdges": "— Kanten",
+    "directedEdges_one": "{{count}} gerichtete Kante",
+    "directedEdges_other": "{{count}} gerichtete Kanten",
+    "presets": {
+      "path": "Pfad",
+      "cycle": "Kreis",
+      "complete": "Vollständiger Graph",
+      "star": "Stern"
+    },
     "globalScattering": "Scattering an allen Knoten",
     "matrixHint": "Lokale Matrizen im Inspektor bearbeiten. Änderungen an Topologie, globalem Preset oder Seed setzen sie zurück.",
-    "space": "KONFIGURATIONSRAUM", "loading": "Graph wird geladen", "preparing": "Graph wird vorbereitet …",
-    "startBackend": "Backend starten, um den Graphen zu laden.", "selectedVertex": "Gewählter Knoten",
+    "space": "KONFIGURATIONSRAUM",
+    "loading": "Graph wird geladen",
+    "preparing": "Graph wird vorbereitet …",
+    "startBackend": "Backend starten, um den Graphen zu laden.",
+    "selectedVertex": "Gewählter Knoten",
     "incomingMarginal": "Eingehende Knotenmarginale"
   },
   "initial": {
-    "title": "Anfangszustand", "preparation": "Präparation", "basis": "Lokalisierter Kantenzustand",
-    "uniform": "Gleichförmige Superposition", "directedEdge": "Gerichtete Kante |xy⟩",
+    "title": "Anfangszustand",
+    "preparation": "Präparation",
+    "basis": "Lokalisierter Kantenzustand",
+    "uniform": "Gleichförmige Superposition",
+    "directedEdge": "Gerichtete Kante |xy⟩",
     "convention": "|xy⟩ zeigt von y nach x. Die erste Koordinate ist der Zielknoten."
   },
   "simulation": {
-    "title": "Simulation", "steps": "Schritte", "seed": "Seed", "run": "Simulation starten",
-    "computing": "Berechne …", "reset": "Auf Anfangszustand zurücksetzen", "controls": "Simulationssteuerung",
-    "previous": "Vorheriger Schritt", "step": "Einzelschritt", "timeline": "Zeitachse",
-    "stepCount_one": "{{count}} Schritt", "stepCount_other": "{{count}} Schritte"
+    "title": "Simulation",
+    "steps": "Schritte",
+    "seed": "Seed",
+    "run": "Simulation starten",
+    "computing": "Berechne …",
+    "reset": "Auf Anfangszustand zurücksetzen",
+    "controls": "Simulationssteuerung",
+    "previous": "Vorheriger Schritt",
+    "step": "Einzelschritt",
+    "timeline": "Zeitachse",
+    "stepCount_one": "{{count}} Schritt",
+    "stepCount_other": "{{count}} Schritte"
   },
   "modes": {
-    "label": "Walk-Modus", "unitary": "Unitär", "open": "Offen", "trajectory": "Trajektorie",
-    "unitaryFull": "Unitärer Scattering Quantum Walk", "openFull": "Offener Scattering Edge Walk",
-    "trajectoryFull": "Quantentrajektorie", "vertex": "Vertex Walk", "planned": "UI GEPLANT",
-    "vertexHint": "Der induzierte offene Vertex Walk ist im Python-Kern implementiert; API und Oberfläche sind geplant."
+    "label": "Walk-Modus",
+    "unitary": "Unitär",
+    "open": "Offen",
+    "trajectory": "Trajektorie",
+    "unitaryFull": "Unitärer Scattering Quantum Walk",
+    "openFull": "Offener Scattering Edge Walk",
+    "trajectoryFull": "Quantentrajektorie",
+    "vertex": "Vertex Walk",
+    "planned": "UI GEPLANT",
+    "vertexHint": "Der induzierte offene Vertex Walk ist im Python-Kern implementiert; API und Oberfläche sind geplant.",
+    "vertexFull": "Induzierter offener Vertex Walk"
   },
-  "error": { "heading": "Anfrage nicht ausgeführt", "retry": "Erneut verbinden" },
+  "error": {
+    "heading": "Anfrage nicht ausgeführt",
+    "retry": "Erneut verbinden"
+  },
   "metrics": {
-    "model": "MODELL", "hilbertSpace": "HILBERTRAUM", "time": "ZEITSCHRITT",
-    "ofSteps": "von {{count}}", "purity": "REINHEIT tr(ρ²)", "pure": "Reiner Zustand", "mixed": "Gemischter Zustand"
+    "model": "MODELL",
+    "hilbertSpace": "HILBERTRAUM",
+    "time": "ZEITSCHRITT",
+    "ofSteps": "von {{count}}",
+    "purity": "REINHEIT tr(ρ²)",
+    "pure": "Reiner Zustand",
+    "mixed": "Gemischter Zustand"
   },
   "inspector": {
-    "operator": "LOKALER OPERATOR", "matrix": "Scatteringmatrix", "vertex": "Knoten",
-    "degree": "Grad {{degree}}", "empty": "Wähle nach dem Laden einen Knoten im Graphen aus."
+    "operator": "LOKALER OPERATOR",
+    "matrix": "Scatteringmatrix",
+    "vertex": "Knoten",
+    "degree": "Grad {{degree}}",
+    "empty": "Wähle nach dem Laden einen Knoten im Graphen aus."
   },
   "distribution": {
-    "observable": "OBSERVABLE", "title": "Wahrscheinlichkeitsverteilung", "vertices": "Knoten",
-    "edges": "Kanten", "vertexLabel": "Knoten {{vertex}}", "edgeLabel": "Kante {{source}} → {{target}}",
+    "observable": "OBSERVABLE",
+    "title": "Wahrscheinlichkeitsverteilung",
+    "vertices": "Knoten",
+    "edges": "Kanten",
+    "vertexLabel": "Knoten {{vertex}}",
+    "edgeLabel": "Kante {{source}} → {{target}}",
     "empty": "Die Verteilung erscheint mit dem Graphen."
   },
   "dynamics": {
-    "label": "DYNAMIK", "title": "Zeitentwicklung", "states_one": "{{count}} Zustand",
-    "states_other": "{{count}} Zustände", "emptyTitle": "Die Dynamik beginnt mit einem Schritt.",
+    "label": "DYNAMIK",
+    "title": "Zeitentwicklung",
+    "states_one": "{{count}} Zustand",
+    "states_other": "{{count}} Zustände",
+    "emptyTitle": "Die Dynamik beginnt mit einem Schritt.",
     "emptyRun": "Starte eine Simulation oder gehe einzeln vor.",
     "emptyHistory": "Alle Zustände bleiben auf der Zeitachse verfügbar."
   },
   "trajectory": {
-    "log": "MESSPROTOKOLL", "title": "Bedingte Quantentrajektorie",
+    "log": "MESSPROTOKOLL",
+    "title": "Bedingte Quantentrajektorie",
     "timing": "xₙ wird im Zustand bei t = n − 1 gemessen. Der angezeigte Zustand bei t = n liegt nach Reduktion und Scattering vor.",
     "conditionalProbability": "Bedingte Wahrscheinlichkeit: {{probability}}",
     "probabilities": "Messwahrscheinlichkeiten vor dem aktuellen Schritt:",
