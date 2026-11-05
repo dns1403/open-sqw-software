@@ -26,6 +26,11 @@
 - Atomic tested local commits, analytical variance regressions and reproducible
   seeded long-trajectory benchmarking (E-09; scalar part of R-08).
 
+- Interactive custom simple graphs, independent preset copies, arbitrary
+  validated unitary cells and JSON, U(1) phases, explicit port-change review,
+  pure/mixed initial states and validated version-one experiment import/export.
+  All existing engines and scientific eligibility checks are reused.
+
 ## Next: support sensitivity and finite-atomic MMD
 
 Compare support thresholds and preserve genuine rare transitions before
@@ -33,14 +38,15 @@ interpreting nearly reducible long-time statistics. Add finite-atomic Gram
 diagnostics and MMD (E-10/R-01/R-08), with explicit stationary initialization for
 finite-length identities, periodicity and duplicate-atom qualifications.
 Do not claim characteristic kernels for arbitrary measures. Sparse Vertex
-construction and experiment import/export remain useful engineering priorities.
+construction, draft autosave/undo and backend cancellation remain useful
+engineering priorities. Versioned experiment import/export is implemented.
 
 ## Subsequent priorities and dependencies
 
 1. **Scale and reproducibility:** sparse vertex construction; sampled-substream
-   metadata; request cancellation within long backend jobs; versioned experiment
-   import/export; custom initial-state editor; graph editing with explicit port
-   migration. Current stateless playback replays prefixes.
+   metadata; request cancellation within long backend jobs; draft autosave/undo
+   and explicit port permutation migration beyond canonical v1 ordering.
+   Current stateless playback replays prefixes.
 2. **Spectral analysis:** E-08/E-11/E-12, U-02/U-03, NEW-02. Build on class/period
    diagnostics; use sparse operators, distinguish channel zero modes from
    nonzero Markov modes and cite the paper's spectral-mapping hypotheses.

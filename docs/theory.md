@@ -328,3 +328,24 @@ It never changes any equation, basis entry, scattering matrix, numerical state,
 random seed, transition probability or model identifier described above. Matrix
 JSON retains its standard numeric syntax in both languages. Selecting a language
 does not run a simulation or change an existing trajectory.
+
+## Custom graph input semantics
+
+The browser's undirected edge is one connection {x,y}; the Hilbert space contains
+both |xy> and |yx>. Stable numeric IDs define canonical sorted vertices and
+neighbors. Display labels, layout coordinates and selection have no role in
+U_S or any channel. The local convention remains S_zy(x): outgoing row z,
+incoming column y (Joye Section 2, equations (2.4)--(2.7)).
+
+Editing a neighbor set changes the physical port basis even when its cardinality
+is unchanged. Retaining old numerical entries does not make them a valid matrix
+for the new port assignment: the editor requires an explicit new application.
+The same rule applies to omega. Pure/mixed initial-state coordinates require an
+unchanged complete ordered basis, or explicit revalidation for the new one.
+A surviving labeled basis state can remain valid independently of other edges.
+
+Unitarity is checked with max_ij |(S†S-I)_ij| <= 1e-10, not a display-rounded
+matrix norm. Permutation presets are column permutations of Identity; arbitrary
+U(1) phases are accepted by the same validator. No new reduction or asymptotic
+claim is introduced. All eligibility/support/Poisson qualifications above apply
+unchanged to custom graphs and reloaded experiments.

@@ -1,8 +1,123 @@
-# Validation record — 4 November 2026
+# Validation record — 5 November 2026
 
 Environment: Windows, Python 3.12.14, Node.js 24.22.1. Resolved Python
 dependencies are recorded in `requirements-tested.txt`; frontend dependencies
 are recorded in `frontend/pnpm-lock.yaml`.
+
+## Phase 5: custom graphs, scattering editors and experiment files
+
+Implemented in the existing checkout and existing Cytoscape interface. All four
+preset families (path, cycle, complete, star) remain available. Custom graphs
+use the same unitary, open Edge, trajectory, induced Vertex, ensemble, Markov,
+stationary and statistics engines. No separate custom-graph simulator was added.
+See [the user guide and JSON contract](custom_graphs.md) for the complete feature
+scope, port-change policy, seed semantics and remaining limits.
+
+### Executed automated checks
+
+The Phase-4 baseline was 360 Python and 44 frontend tests. Final Phase-5 checks:
+
+- `python -m pytest -q`: **418 passed**, **5.78 s**; 58 custom API/input/example
+  cases added. The existing 42 independent mathematical checks remain unchanged.
+- `pnpm test`: **77 passed**, **8 files**, **5.49 s**; 25 draft/parser cases and
+  8 integrated editor/file workflows added. The previous interface fixture was
+  extended for the new individual matrix-validation route; assertions were not
+  weakened. HTML dialog top-layer behavior is mocked only in jsdom.
+- `pnpm build`: passed, **93 modules**, **3.28 s**. The existing Plotly chunk
+  warning remains (1129.65 kB minified); Starlette's existing httpx deprecation
+  warning also remains. No new runtime dependency was installed.
+- `git diff --check`: passed. The four Material SHA-256 hashes and reference PDF
+  match the audit. `tests/test_reference_handoff.py` is identical to Phase 4.
+
+Backend tests compare each existing preset with an explicitly encoded equivalent
+custom graph in every model. They check noncontiguous IDs, physical U columns,
+complex U(1) phases, reference/optimized means, all research endpoints, graph and
+matrix cache changes, complete documents, invalid imports, arbitrary pure/mixed
+initial states, and the downloaded browser example's actual seeded measurement
+sequence. The frontend tests cover canvas callbacks and list controls, graph
+constraints, equal-degree port changes, unaffected data, complex parsing and
+unitarity, initial basis changes, parameter drafts, language changes, preset
+reuse, modal import cancellation, downloads, null server defaults and the full
+uint32 seed range. Invalid numeric tokens are not silently joined by removing
+internal whitespace.
+
+### Actual browser workflow, 5 November 2026
+
+Live local FastAPI/Vite application, controlled through the in-app browser with
+real Cytoscape and Plotly. These checks were performed, not inferred from jsdom:
+
+| Requested step | Observed result |
+| --- | --- |
+| 1. Open application | Existing Cycle/DFT example loaded. |
+| 2. Select Custom Graph | Empty draft visible; Run disabled. |
+| 3. Create A, B, C | Three canvas clicks created stable IDs 0, 1, 2. |
+| 4. Connect A-B and B-C | Two-click mode highlighted/named the first endpoint and created two undirected edges, four directed states. |
+| 5. Hadamard at B | Accepted degree-2 matrix, residual about 2.22e-16. |
+| 6. Degree-one matrices | Cell editor accepted i at A; Identity applied at C. |
+| 7. Initial state | Selected \|1,0>, the physical arc 0 to 1. |
+| 8. Unitary walk | 12 steps completed; displayed purity 1.0000. |
+| 9. Open Edge walk | 12 optimized steps completed; displayed purity 0.5000. |
+| 10. Quantum trajectory | Seed 42 produced outcomes 1,0,1,2,1,2,1,2,1,0,1,2. |
+| 11. Markov dynamics | Atom reconstruction preserved i; long-time analysis found one period-2 closed class and four stationary weights 0.25. Numerical support qualifications remained visible. |
+| 12. Export | Browser downloaded sqw-experiment.json after validation. |
+| 13. Import | Downloaded file loaded successfully with all ports, matrices and active controls. |
+| 14. Numerical comparison | Rerun had identical displayed 12-outcome record and both inspected density tables; backend round-trip tests additionally compare full numerical JSON. |
+| 15. German/English | Graph, matrices and t=12 record preserved; displayed labels translated. |
+| 16. Existing preset | Cycle with six vertices simulated successfully again. |
+| 17. Modified preset copy | Independent custom copy accepted an extra 0-2 connection. Only vertices 0 and 2 required new degree-3 matrices; explicit replacement restored simulation. |
+
+Additional live checks: a 100-path ensemble; 2000-observation statistics with
+empirical mean 0.254 and stationary class mean 0.25; induced Vertex trajectory
+and mean evolution (latter purity 0.7776 at t=12); node dragging and renaming
+without losing t=12; fitting; deletion with confirmation; and list-based creation
+and connection at **390 x 844**. Measured page width was 375 px versus a 390 px
+viewport (no horizontal page overflow). The temporary viewport was reset.
+Final captured browser error logs were empty.
+
+A native browser confirmation blocked an intermediate embedded-browser test.
+It was replaced with an accessible application dialog. Accepting a preset-copy
+replacement and vertex deletion then worked through the real dialog; import
+cancellation/replacement also has frontend regression coverage. A tall sidebar
+initially centered the main workspace vertically; the layout was corrected and
+rechecked. These were implementation findings, not unresolved blockers.
+
+The actual exported file is [examples/custom_path_phase.json](../examples/custom_path_phase.json).
+The local full-page proof screenshot is `tmp/phase5-custom-graph.png` (generated,
+not committed). Browser checks are recorded manual integration checks; this
+phase does not add a standalone browser CI runner or claim load testing.
+
+### Changed files and mathematical boundaries
+
+| Area | Files |
+| --- | --- |
+| API and presets | `backend/sqw/api/{schemas,app}.py`, `backend/sqw/core/scattering.py` |
+| New draft/editor modules | `frontend/src/{customGraph,matrixValidation}.ts`; `CustomGraphTools.tsx`, `InitialStateInput.tsx`, `ExperimentFiles.tsx`, `ConfirmationDialog.tsx` |
+| Existing interface integration | `frontend/src/{App,GraphView,MatrixEditor,ResearchPanels}.tsx`, `types.ts`, `api.ts`, `styles.css` |
+| EN/DE | Matching `frontend/src/i18n/locales/{en,de}/{app,components,errors}.json` |
+| New regressions | `tests/test_custom_graph_api.py`, `frontend/src/__tests__/customGraph.test.ts`, `customWorkflow.test.tsx` |
+| Existing test adapters | `frontend/src/__tests__/{interface.test.tsx,setup.ts}` |
+| Example and documentation | `examples/custom_path_phase.json`, `AGENTS.md`, `README.md`, `docs/{custom_graphs,architecture,theory,roadmap,validation}.md` |
+
+`|xy>` remains y to x; outgoing rows/incoming columns use canonical stored
+neighbors. Changed neighbor sets retain old matrices/omega and require explicit
+application, including equal-degree changes. No layout/label operation changes
+operators. Edge M remains column-stochastic with atoms from t=2; Vertex P
+remains row-stochastic with atoms from t=1. Full coherence, support/absorption
+rules, phase-sensitive atom reconstruction and class-conditional Poisson/CLT
+qualifications are unchanged. Numerical checks are not new proofs.
+
+Version-one files save valid custom experiments, active initial state and main
+controls; they omit unapplied drafts, inactive alternate initial states,
+secondary analysis controls/results and playback histories. Limits remain
+32 vertices/128 undirected edges, canonical ID port ordering, 2 MB browser
+imports and the existing scientific work budgets. No autosave or undo/redo.
+The next editor step is draft autosave/undo with preserved physical bindings;
+research extensions remain subject to the existing roadmap contracts.
+
+Local milestones: `22fda6a` (custom API/documents), `1036e17` (port-bound draft
+model), `730ac00` (integrated editor/files), `e478eb4` (accessible confirmations
+and draft preservation), `e34bbb4` (browser example/input regressions), followed
+by the documentation milestone. No remote push or history rewrite was performed.
 
 ## Phase 4: Poisson equations and trajectory uncertainty
 
@@ -372,8 +487,8 @@ errors. The API documentation and technical project documentation are English.
 
 At the end of the earlier i18n pass, the induced vertex channel was Python-only
 and its UI control was disabled. That historical limitation and missing playback
-are superseded by the exact-Markov pass above. Full experiment persistence
-remains planned.
+are superseded by the exact-Markov pass above. Versioned custom experiment
+files are implemented in Phase 5; automatic draft/session persistence is not.
 
 The development sandbox initially blocked local socket pairs and loopback
 connections. Python tests and preview servers ran with approved local network

@@ -112,12 +112,40 @@ node node_modules/vite/bin/vite.js --host 127.0.0.1
    remain in place; labels and observable formatting change immediately.
 6. Reload to verify German persists, then choose **EN** and reload again to
    verify the English preference. Reloading itself starts a fresh experiment;
-   only the language preference is persisted at present.
+   only the language preference is stored automatically. Export/import retains custom experiments.
 
-Custom matrix entries use `[real, imaginary]` pairs with standard JSON decimal
-points in both languages. Invalid dimensions and nonunitary matrices are
+Custom matrix entries accept real numbers, `a+bi`, and `[real, imaginary]` JSON
+pairs with standard decimal points in both languages. Invalid dimensions and nonunitary matrices are
 rejected. Hadamard is defined only for degree 2; on a path it can be applied
 locally at an interior vertex while endpoints keep their 1×1 matrices.
+
+## Draw and save a custom graph
+
+Select **Custom Graph** to draw vertices and connect pairs on the existing
+canvas. **Select / Move**, **Add Vertex**, **Add Edge**, and **Delete** separate
+editing actions. List-based controls support keyboard and narrow screens.
+Labels can change without changing numeric IDs; dragging only changes layout.
+**Customize this graph** makes an independent copy of any existing preset.
+Switching back to a preset preserves the custom draft for the current page.
+
+A finished graph must be connected, simple, loopless, and have at least two
+vertices. Incomplete drafts are allowed, but simulations and analyses are
+blocked until the graph, matrices, active initial state, and applicable Vertex
+parameters are valid. Neighbor changes retain old scientific entries and ask
+for explicit review; unaffected matrices survive. A typed matrix is checked
+locally and by the same backend validator before it is applied.
+
+**Export Experiment** downloads version-one JSON with IDs, labels, positions,
+explicit ports, complex matrices, omega/beta, the active initial state and main
+simulation controls. **Import Experiment** validates before replacing anything;
+existing custom data requires confirmation. Export valid experiments before
+closing/reloading; there is no automatic draft persistence.
+
+Try [the browser-tested three-vertex example](examples/custom_path_phase.json):
+Hadamard at B, U(1) phase i at A, Identity at C, initial |1,0>, seed 42.
+It works with the existing unitary/open/trajectory/Vertex engines and all
+research panels. See [the editor and JSON guide](docs/custom_graphs.md) for
+port semantics, seed behavior, limits and a complete click-through recipe.
 
 ## Use without the web application
 
@@ -172,7 +200,8 @@ print(ensemble.frames[-1].born_vertex_total_variation)
 joint `q2` law for batch starts. `OptimizedVertexTrajectory` and `VertexReduction`
 provide the corresponding vertex-label operations. Arbitrary complex pure and
 mixed states work through the Python API and JSON `initial.vector` /
-`initial.density` fields; the browser currently offers three preset preparations.
+`initial.density` fields; the browser includes both JSON editors alongside the
+three preset preparations, with explicit basis review after graph changes.
 
 In open/trajectory/vertex modes, the **Ensemble and exact mean** panel compares
 independent-path empirical Born probabilities with the exact mean, displays
@@ -274,15 +303,16 @@ message rather than exposing a missing translation key or arbitrary server text.
 
 ## Scope and remaining work
 
-Implemented: graph presets/custom graphs in the core, complex scattering,
+Implemented: reusable graph presets and interactive custom graphs, complex scattering,
 unitary/open edge dynamics, independent reference and exact optimized edge and
 vertex trajectories/means, compact ensembles, stateless API, bilingual controls,
 playback, heatmaps, quantum/Markov inspection, stationary families, periods,
 absorption, long-time analysis, centered Poisson solvers and classwise trajectory
-uncertainty. See the result-ID mapping below.
+uncertainty, pure/mixed initial-state editors, and validated experiment files.
+See the result-ID mapping below.
 
-Planned: finite-atomic MMD and spectral/RKHS analysis; free graph editing and
-full experiment import/export. Multigraphs,
+Planned: finite-atomic MMD and spectral/RKHS analysis, draft autosave/undo and
+backend job cancellation. Multigraphs,
 partial observations and time-dependent coins are explicitly unsupported.
 
 Dense density-matrix methods target small reference systems. The interactive

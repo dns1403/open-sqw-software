@@ -245,3 +245,43 @@ Sparse LU can have fill-in. Small-class condition estimates cost dense cubic
 work (dimension <=128); larger classes omit that estimate. Sampling retains
 O(d + displayed points) state after constructing transition tables. The existing
 Vertex constructor still has its documented dense diagnostic allocations.
+
+## Custom graph editor and experiment files
+
+`customGraph.ts` owns the pure draft operations, deterministic graph projection,
+port-bound matrix records, omega bindings, physical-basis-bound initial states,
+and versioned document conversion. `matrixValidation.ts` provides a restricted
+complex grammar (no expression evaluation), dimension checks and the same
+max-entry unitarity residual/tolerance as the core. The server remains the
+final validator for physical inputs.
+
+`GraphView.tsx` extends the existing Cytoscape canvas with optional edit callbacks
+and stored positions. `CustomGraphTools.tsx` supplies explicit modes, list-based
+connections, deletion and rename controls. `MatrixEditor.tsx` adds per-cell
+complex input and residuals to its existing JSON editor. `InitialStateInput.tsx`
+exposes pure/mixed input with ordered labels. `ExperimentFiles.tsx` validates
+before import/replacement or download; `ConfirmationDialog.tsx` uses an accessible
+app-owned modal, avoiding native dialogs that block embedded browser control.
+All new strings live in `components.editor`, existing app keys and errors.
+
+`App.tsx` keeps custom and preset data independent. It binds each accepted matrix
+to its exact physical ports; unapplied text is separately retained. Editing
+layout/labels does not change experiment payloads. Scientific edits clear
+histories and invalidate serialized experiment keys consumed by research panels.
+Pending validation/import locks editor operations. Physical basis states bind
+to actual vertex/arc labels; arbitrary vectors/densities bind to the complete
+ordered basis and require explicit review when it changes.
+
+`GraphSpec(kind='custom')` passes through the same `build_walk` and all existing
+engines. Neighbor lists are checked against canonical sorted IDs. The versioned
+`ExperimentDocument` adds presentation metadata around `SimulationRequest`;
+`POST /api/experiments/validate` validates both physical and presentation data,
+including inactive saved omega/beta. Absent server parameters (`null`) are
+converted to automatic defaults in the draft rather than manual zero vectors.
+`POST /api/scattering/validate` validates one local matrix while other vertices
+are unfinished. Neither endpoint adds an alternate simulator or relaxes
+stationary/Poisson eligibility, support policy, memory budgets or time indexing.
+
+See [custom graphs](custom_graphs.md) for schema, migration policy and persistence
+scope. JSON v1 intentionally rejects noncanonical port permutations. Session
+state and secondary analysis controls are not a new server-side storage model.

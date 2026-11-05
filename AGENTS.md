@@ -21,6 +21,10 @@
 - Verify Poisson centering, residuals and variance identities. Preserve positive tiny variances; a zero asymptotic variance does not imply zero finite-time error. CLT intervals are pointwise asymptotic approximations, exclude transient bias and are suppressed for unstable solves or unresolved support approximations.
 - Cache phase-sensitive atom observables using beta as well as complex omega/coins. Sampling must use original reduced transitions and compact labels, with explicit t=2/t=1 starts and separate scattering/trajectory seeds. Analytic atom expectations introduce no additional measurements.
 
+- Custom graph IDs are stable; display labels/layout never enter operators. JSON v1 stores canonical ascending-ID neighbor order and rejects any different order rather than silently relabeling ports.
+- Graph edits retain surviving matrices and manual omega with their original port bindings. Changed neighbors require explicit review even when the degree is unchanged. Pure/mixed states bind to the ordered physical basis. Incompatible or unapplied drafts block dependent simulations/exports.
+- Validate experiment documents before replacing a draft; accepted matrix entries are authoritative, preset tags informational. Keep current graph presets reusable and custom copies independent. Browser persistence is explicit export/import, not automatic draft storage.
+
 ## Development
 - Work in this checkout; preserve user-provided research and files.
 - Python package metadata is at the repository root. Use `python -m pytest` for mathematical/API tests and `npm run build` in `frontend` for TypeScript/build verification.
