@@ -125,3 +125,34 @@ def test_structure_and_matrix_edits_invalidate_cached_markov_operators():
     spec=path_spec(); spec['edges'].append([2,17]); spec['neighbors']={'2':[9,17],'9':[2,17],'17':[2,9]}
     changed=build_walk(GraphSpec(**spec),'dft',42)
     assert stationary_model(changed).chain is not first.chain
+
+@pytest.mark.parametrize('matrix', [np.array([[1j]]),np.array([[np.exp(.345j)]]),scattering_matrix('random',5,np.random.default_rng(19))])
+def test_individual_matrix_validation_preserves_arbitrary_complex_unitary(matrix):
+    response=client.post('/api/scattering/validate',json={'degree':len(matrix),'matrix':encode(matrix)})
+    assert response.status_code==200,response.text
+    assert response.json()['matrix']==encode(matrix)
+    assert response.json()['residual']<=1e-10
+
+
+@pytest.mark.parametrize('degree,matrix', [(2,[[[1,0]]]),(1,[[[1.01,0]]]),(1,[[[1e308,0]]]),(1,[[['NaN',0]]]),(0,[])])
+def test_individual_matrix_validation_rejects_invalid_input_without_projection(degree,matrix):
+    response=client.post('/api/scattering/validate',json={'degree':degree,'matrix':matrix})
+    assert response.status_code==422,response.text
+
+
+@pytest.mark.parametrize('mode', ['unitary','open','trajectory','vertex'])
+@pytest.mark.parametrize('kind', ['pure','mixed'])
+def test_custom_initial_states_and_document_roundtrip_in_all_models(mode,kind):
+    dimension=3 if mode=='vertex' else 4
+    vector=np.arange(1,dimension+1,dtype=complex)*np.exp(1j*np.arange(dimension))
+    vector/=np.linalg.norm(vector)
+    rho=.8*np.outer(vector,vector.conj())+.2*np.eye(dimension)/dimension
+    initial={'kind':kind,**({'vector':encode(vector)} if kind=='pure' else {'density':encode(rho)})}
+    doc=document()
+    doc['experiment'].update(mode=mode,initial=initial)
+    validated=client.post('/api/experiments/validate',json=doc)
+    assert validated.status_code==200,validated.text
+    before=client.post('/api/simulate',json=doc['experiment'])
+    after=client.post('/api/simulate',json=validated.json()['document']['experiment'])
+    assert before.status_code==after.status_code==200,after.text
+    assert before.json()==after.json()

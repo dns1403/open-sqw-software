@@ -4,7 +4,8 @@
     "grover": "Grover",
     "identity": "Identität",
     "hadamard": "Hadamard · d = 2",
-    "random": "Zufällig unitär"
+    "random": "Zufällig unitär",
+    "permutation": "Permutation"
   },
   "graph": {
     "accessibleDescription": "Interaktiver Graph. Knoten anklicken oder über die Knotenauswahl wählen.",
@@ -25,8 +26,14 @@
     "errors": {
       "json": "Gültiges JSON mit Paaren [Realteil, Imaginärteil] eingeben. Zahlen verwenden in beiden Sprachen einen Dezimalpunkt.",
       "shape": "Erwartet: {{degree}} × {{degree}} Einträge, jeweils ein endliches Paar [Realteil, Imaginärteil].",
-      "apply": "Die Matrix konnte nicht übernommen werden. Einträge prüfen und erneut versuchen."
-    }
+      "apply": "Die Matrix konnte nicht übernommen werden. Einträge prüfen und erneut versuchen.",
+      "complex": "Endliche Zahlen, a+bi oder [Realteil, Imaginärteil]-Paare eingeben.",
+      "unitary": "Die Matrix ist innerhalb der Toleranz 1e-10 nicht unitär."
+    },
+    "cell": "Ausgehend {{z}}, eingehend {{y}}",
+    "inputHelp": "Reelle Zahlen, a+bi oder JSON-Paare [Realteil, Imaginärteil] eingeben. Dezimalpunkte verwenden.",
+    "valid": "Gültige unitäre Matrix",
+    "notUnitary": "Matrix ist nicht unitär"
   },
   "plot": {
     "timeAxisCaption": "Horizontale Achse: Zeitschritt t",
@@ -36,5 +43,79 @@
     "legendTip": "In der Legende doppelklicken, um eine einzelne Kurve anzuzeigen",
     "distributionAccessibleDescription": "Wahrscheinlichkeitsverteilung",
     "historyAccessibleDescription": "Zeitliche Entwicklung der Knotenwahrscheinlichkeiten"
+  },
+  "editor": {
+    "customize": "Graph anpassen",
+    "draftHelp": "Eigener Entwurf · Änderungen bleiben beim Wechsel zu Vorlagen erhalten. Zum dauerhaften Speichern exportieren.",
+    "tools": "Werkzeuge zur Graphbearbeitung",
+    "edgeStart": "Verbindung ab {{vertex}}. Wähle den zweiten Knoten.",
+    "addNow": "Knoten ohne Zeichenfläche hinzufügen",
+    "keyboardTools": "Verbinden und Auswählen über Listen",
+    "from": "Erster Endpunkt",
+    "to": "Zweiter Endpunkt",
+    "choose": "Auswählen …",
+    "connect": "Knoten verbinden",
+    "selectedEdge": "Ausgewählte ungerichtete Kante",
+    "deleteVertex": "Ausgewählten Knoten löschen",
+    "deleteEdge": "Ausgewählte Kante löschen",
+    "clear": "Auf leeren Graphen zurücksetzen",
+    "clearConfirm": "Den gesamten eigenen Entwurf einschließlich aller Matrizen und Anfangszustände löschen?",
+    "deleteVertexConfirm": "{{vertex}}, die angrenzenden Kanten und die zugehörigen wissenschaftlichen Daten löschen? Daten verbleibender Knoten werden zur Prüfung erhalten.",
+    "matrixAttention": "Matrizen prüfen: {{vertices}}.",
+    "parameterAttention": "Randvektoren / Phasen prüfen: {{vertices}}.",
+    "structureReady": "Graph und Streumatrizen sind bereit.",
+    "displayLabel": "Anzeigename · feste ID {{id}}",
+    "rename": "Umbenennen",
+    "discardPresetDraft": "Nicht angewendete Matrixänderungen dieser Vorlage verwerfen?",
+    "replaceDraft": "Den bestehenden eigenen Entwurf ersetzen? Exportiere ihn vorher, wenn du ihn behalten möchtest.",
+    "replaceMatrices": "Alle Matrizen durch die gewählte Vorlage in der aktuellen Nachbarreihenfolge ersetzen?",
+    "copyConfirm": "Diese Matrix auf {{count}} Knoten in deren angezeigter Portreihenfolge kopieren? Bestehende Matrizen werden ersetzt.",
+    "applyAll": "Vorlage auf alle Knoten anwenden",
+    "matrixReview": "Matrix prüfen. Aktuelle Ports: [{{ports}}]. Eine gültige Matrix anwenden oder ausdrücklich eine Vorlage wählen.",
+    "retainedMatrix": "Erhaltene Matrix · bisherige Ports [{{ports}}]",
+    "identity": "Matrix auf Identität setzen",
+    "copyFrom": "Von Knoten gleichen Grades kopieren",
+    "applySameDegree": "Auf alle anderen Knoten gleichen Grades kopieren",
+    "seedHelp": "Zufalls- und Permutationsvorlagen verwenden Seed {{seed}}. Für alle Knoten wird Seed + Position in der sortierten ID-Liste verwendet.",
+    "initialReview": "Wähle oder bestätige den Anfangszustand für die aktuelle Basis. Bisherige Einträge bleiben erhalten.",
+    "pureState": "Eigener reiner Zustand",
+    "mixedState": "Eigene Dichtematrix",
+    "stateHelp": "Dimension {{dimension}}. JSON verwendet endliche [Realteil, Imaginärteil]-Paare und Dezimalpunkte. Keine automatische Normierung.",
+    "basisOrder": "Geordnete physikalische Basis",
+    "pureJSON": "Zustandsvektor als JSON",
+    "mixedJSON": "Dichtematrix als JSON",
+    "stateTemplate": "Entwurf durch gültige Vorlage ersetzen",
+    "applyInitial": "Anfangszustand prüfen und verwenden",
+    "files": "Experimentdatei",
+    "export": "Experiment exportieren",
+    "import": "Experiment importieren",
+    "importFile": "Experimentdatei als JSON",
+    "filesHelp": "Zum Export ist ein gültiges eigenes Experiment erforderlich. JSON v1 enthält Positionen, Ports, komplexe Matrizen und den aktiven Anfangszustand.",
+    "imported": "Experiment importiert und geprüft.",
+    "exported": "Geprüftes Experiment heruntergeladen.",
+    "cancelled": "Import abgebrochen; bisheriger Entwurf erhalten.",
+    "endpoints": "Ungerichtete Verbindung: {{a}} ↔ {{b}}. Beide orientierten Kanten gehören zur Edge-Walk-Basis.",
+    "undirected": "Zeichne eine ungerichtete Verbindung. Der Edge Walk verwendet zwei orientierte Kanten je Verbindung.",
+    "modes": {
+      "select": "Auswählen / Verschieben",
+      "addVertex": "Knoten hinzufügen",
+      "addEdge": "Kante hinzufügen",
+      "delete": "Löschen",
+      "selectHelp": "Knoten oder Kante auswählen. Knoten zum Anordnen ziehen.",
+      "addVertexHelp": "Zum Platzieren eines Knotens auf die leere Zeichenfläche klicken.",
+      "addEdgeHelp": "Zwei verschiedene Knoten anklicken, um sie zu verbinden.",
+      "deleteHelp": "Kante zum Löschen anklicken; beim Löschen eines Knotens ist eine Bestätigung erforderlich."
+    },
+    "problems": {
+      "minimum": "Mindestens zwei Knoten hinzufügen und verbinden.",
+      "disconnected": "Der Graph ist nicht zusammenhängend. Vor der Simulation alle Komponenten verbinden.",
+      "limit": "Der Editor unterstützt höchstens 32 Knoten und 128 ungerichtete Kanten.",
+      "position": "Knotenpositionen müssen endlich sein.",
+      "loop": "Schleifen sind nicht erlaubt. Einen anderen zweiten Knoten wählen.",
+      "duplicate": "Diese ungerichtete Kante existiert bereits.",
+      "endpoint": "Zwei vorhandene Knoten wählen.",
+      "label": "Einen nicht leeren Namen mit höchstens 64 Zeichen verwenden.",
+      "unitary": "Eine unitäre Matrix des aktuellen Grades anwenden."
+    }
   }
 }

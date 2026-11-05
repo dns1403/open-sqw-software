@@ -12,7 +12,7 @@ from sqw.core import (
 )
 from .errors import RequestProblem, client_error, validation_issue
 from .schemas import (
-    Frame, GraphRequest, GraphResponse, ScatteringRequest,
+    Frame, GraphRequest, GraphResponse, ScatteringRequest, ScatteringValidationRequest,
     SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest, StationaryRequest, StatisticsRequest, ExperimentDocument,
 )
 from .stationary_cache import stationary_model
@@ -171,6 +171,16 @@ def decode_complex(data):
     if array.ndim < 2 or array.shape[-1] != 2:
         raise ValueError("Complex values must be [real, imaginary] pairs.")
     return array[..., 0] + 1j * array[..., 1]
+
+
+@app.post('/api/scattering/validate')
+def validate_matrix(request: ScatteringValidationRequest):
+    try:
+        matrix = validate_scattering(decode_complex(request.matrix), request.degree)
+        return {'matrix': encode_matrix(matrix),
+                'residual': float(np.max(abs(matrix.conj().T @ matrix - np.eye(request.degree))))}
+    except (ValueError, TypeError) as error:
+        return client_error(RequestProblem('custom_matrix', str(error)))
 
 
 def experiment(request):

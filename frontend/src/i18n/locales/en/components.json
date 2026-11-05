@@ -4,7 +4,8 @@
     "grover": "Grover",
     "identity": "Identity",
     "hadamard": "Hadamard · d = 2",
-    "random": "Random unitary"
+    "random": "Random unitary",
+    "permutation": "Permutation"
   },
   "graph": {
     "accessibleDescription": "Interactive graph. Select a vertex by clicking it or using the vertex selector.",
@@ -25,8 +26,14 @@
     "errors": {
       "json": "Enter valid JSON using [real part, imaginary part] pairs. Numeric entries use a decimal point in both languages.",
       "shape": "Expected {{degree}} × {{degree}} entries, each a finite [real part, imaginary part] pair.",
-      "apply": "The matrix could not be applied. Check the entries and try again."
-    }
+      "apply": "The matrix could not be applied. Check the entries and try again.",
+      "complex": "Enter finite numbers, a+bi, or [real, imaginary] pairs.",
+      "unitary": "The matrix is not unitary within tolerance 1e-10."
+    },
+    "cell": "Outgoing {{z}}, incoming {{y}}",
+    "inputHelp": "Enter real numbers, a+bi, or [real, imaginary] JSON pairs. Use decimal points.",
+    "valid": "Valid unitary matrix",
+    "notUnitary": "Matrix is not unitary"
   },
   "plot": {
     "timeAxisCaption": "Horizontal axis: time step t",
@@ -36,5 +43,79 @@
     "legendTip": "Double-click on legend to isolate one trace",
     "distributionAccessibleDescription": "Probability distribution",
     "historyAccessibleDescription": "Vertex probabilities over time"
+  },
+  "editor": {
+    "customize": "Customize this graph",
+    "draftHelp": "Custom draft · Changes stay here while you try other presets. Export to keep them after closing this page.",
+    "tools": "Graph editing tools",
+    "edgeStart": "Connecting from {{vertex}}. Choose the second vertex.",
+    "addNow": "Add vertex without canvas",
+    "keyboardTools": "Connect and select using lists",
+    "from": "First endpoint",
+    "to": "Second endpoint",
+    "choose": "Choose …",
+    "connect": "Connect vertices",
+    "selectedEdge": "Selected undirected edge",
+    "deleteVertex": "Delete selected vertex",
+    "deleteEdge": "Delete selected edge",
+    "clear": "Reset to empty graph",
+    "clearConfirm": "Delete the entire custom draft, including all matrices and initial states?",
+    "deleteVertexConfirm": "Delete {{vertex}}, its incident edges and its scientific data? Data at surviving vertices is retained for review.",
+    "matrixAttention": "Matrices need attention: {{vertices}}.",
+    "parameterAttention": "Review boundary vectors / phases: {{vertices}}.",
+    "structureReady": "Graph and scattering matrices are ready.",
+    "displayLabel": "Display label · stable ID {{id}}",
+    "rename": "Rename",
+    "discardPresetDraft": "Discard unapplied matrix edits on this preset?",
+    "replaceDraft": "Replace the existing custom draft? Export it first if you want to keep it.",
+    "replaceMatrices": "Replace every matrix with the selected preset in its current neighbor order?",
+    "copyConfirm": "Copy this matrix to {{count}} vertices in their displayed port order? Existing matrices will be replaced.",
+    "applyAll": "Apply preset to all vertices",
+    "matrixReview": "Matrix needs attention. Current ports: [{{ports}}]. Apply a valid matrix or choose a preset explicitly.",
+    "retainedMatrix": "Retained matrix · previous ports [{{ports}}]",
+    "identity": "Reset matrix to Identity",
+    "copyFrom": "Copy from vertex of same degree",
+    "applySameDegree": "Copy to all other vertices of same degree",
+    "seedHelp": "Random and permutation presets use seed {{seed}}. Applying to all uses seed + vertex position in sorted ID order.",
+    "initialReview": "Choose or explicitly validate the initial state for the current basis. Existing entries are retained.",
+    "pureState": "Custom pure state",
+    "mixedState": "Custom density matrix",
+    "stateHelp": "Dimension {{dimension}}. JSON uses finite [real, imaginary] pairs and a decimal point. No automatic normalization.",
+    "basisOrder": "Ordered physical basis",
+    "pureJSON": "State vector JSON",
+    "mixedJSON": "Density matrix JSON",
+    "stateTemplate": "Replace draft with valid template",
+    "applyInitial": "Validate & use initial state",
+    "files": "Experiment file",
+    "export": "Export Experiment",
+    "import": "Import Experiment",
+    "importFile": "Experiment JSON file",
+    "filesHelp": "Export requires a valid custom experiment. JSON v1 includes positions, ports, complex matrices and the active initial state.",
+    "imported": "Experiment imported and validated.",
+    "exported": "Validated experiment downloaded.",
+    "cancelled": "Import cancelled; existing draft retained.",
+    "endpoints": "Undirected connection: {{a}} ↔ {{b}}. Both oriented arcs belong to the Edge Walk basis.",
+    "undirected": "Draw one undirected connection. The Edge Walk uses two oriented arcs per connection.",
+    "modes": {
+      "select": "Select / Move",
+      "addVertex": "Add Vertex",
+      "addEdge": "Add Edge",
+      "delete": "Delete",
+      "selectHelp": "Select a vertex or edge. Drag vertices to arrange them.",
+      "addVertexHelp": "Click empty canvas to place a vertex.",
+      "addEdgeHelp": "Click two distinct vertices to connect them.",
+      "deleteHelp": "Click an edge to delete it, or a vertex to review its deletion."
+    },
+    "problems": {
+      "minimum": "Add at least two vertices and connect them.",
+      "disconnected": "The graph is disconnected. Connect all components before simulating.",
+      "limit": "The editor supports at most 32 vertices and 128 undirected edges.",
+      "position": "Vertex positions must be finite.",
+      "loop": "Self-loops are not allowed. Choose a different second vertex.",
+      "duplicate": "This undirected edge already exists.",
+      "endpoint": "Choose two existing vertices.",
+      "label": "Use a nonempty label of at most 64 characters.",
+      "unitary": "Apply a unitary matrix of the current degree."
+    }
   }
 }

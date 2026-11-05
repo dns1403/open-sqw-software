@@ -85,6 +85,7 @@ beforeEach(async () => {
     const body = JSON.parse(String(options.body));
     requests.push({ route: url, body: structuredClone(body) });
     if (url === '/api/graph') return { ok: true, status: 200, json: async () => graphFixture(body.kind, body.size) };
+    if (url === '/api/scattering/validate') return { ok: true, status: 200, json: async () => ({matrix:body.matrix,residual:0}) };
     if (url === '/api/simulate') {
       if (rejectSimulation) return { ok: false, status: 422, json: async () => ({ detail: 'Backend diagnostic', code: 'matrix_not_unitary', params: { vertex: 1 } }) };
       const request = body as SimulationRequest;

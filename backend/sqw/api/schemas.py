@@ -45,6 +45,11 @@ class ScatteringRequest(StrictModel):
     seed: int = Field(default=42, ge=0, le=2**32 - 1, strict=True)
 
 
+class ScatteringValidationRequest(StrictModel):
+    degree: int = Field(ge=1, le=31, strict=True)
+    matrix: ComplexMatrix
+
+
 class InitialState(StrictModel):
     kind: Literal["basis", "uniform", "pure", "mixed", "maximally_mixed"] = "basis"
     edge: tuple[VertexLabel, VertexLabel] | None = None

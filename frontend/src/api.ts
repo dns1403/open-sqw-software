@@ -13,6 +13,7 @@ export class ApiError extends Error {
 }
 
 const errorKeys = new Set([
+  'custom_graph', 'graph_ports', 'custom_matrix', 'experiment_document', 'experiment_size',
   'network', 'invalid_response', 'invalid_experiment', 'cycle_size', 'edge_limit',
   'matrix_vertices', 'matrix_shape', 'matrix_dimension', 'matrix_not_unitary',
   'hadamard_degree', 'density_budget', 'invalid_edge', 'initial_state', 'vertex_parameters',
@@ -23,7 +24,7 @@ const validationKeys = new Set([
   'integer', 'finite_number', 'minimum', 'maximum', 'required', 'unexpected_field',
   'unsupported_value', 'invalid_json', 'invalid_structure', 'invalid',
 ]);
-const fieldKeys = new Set(['graph', 'kind', 'size', 'preset', 'seed', 'degree', 'scattering', 'mode', 'initial', 'edge', 'steps', 'strategy', 'trajectories', 'statistics', 'selected_histories', 'vertex_parameters', 'omega', 'beta', 'atom_id', 'vertex', 'vector', 'density', 'vertex_dynamics', 'analysis_steps', 'support_atol', 'include_density', 'stationary_class', 'observable', 'index', 'second', 'matrix', 'values', 'samples', 'burn_in', 'trajectory_seed', 'initialization', 'confidence']);
+const fieldKeys = new Set(['vertices', 'edges', 'neighbors', 'format', 'version', 'experiment', 'matrix_presets', 'position', 'label', 'id', 'graph', 'kind', 'size', 'preset', 'seed', 'degree', 'scattering', 'mode', 'initial', 'edge', 'steps', 'strategy', 'trajectories', 'statistics', 'selected_histories', 'vertex_parameters', 'omega', 'beta', 'atom_id', 'vertex', 'vector', 'density', 'vertex_dynamics', 'analysis_steps', 'support_atol', 'include_density', 'stationary_class', 'observable', 'index', 'second', 'matrix', 'values', 'samples', 'burn_in', 'trajectory_seed', 'initialization', 'confidence']);
 
 export function formatError(error: unknown, t: TFunction): string {
   if (!(error instanceof ApiError)) return t('errors:unexpected');

@@ -35,7 +35,8 @@
       "path": "Pfad",
       "cycle": "Kreis",
       "complete": "Vollständiger Graph",
-      "star": "Stern"
+      "star": "Stern",
+      "custom": "Eigener Graph"
     },
     "globalScattering": "Scattering an allen Knoten",
     "matrixHint": "Lokale Matrizen im Inspektor bearbeiten. Änderungen an Topologie, globalem Preset oder Seed setzen sie zurück.",

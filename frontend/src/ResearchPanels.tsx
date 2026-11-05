@@ -16,22 +16,30 @@ export function DensityTable({ matrix, labels, caption }: { matrix: Matrix; labe
   </table></div>;
 }
 
-export function VertexControls({ graph, parameters = {}, busy, onApply }: { graph: GraphData; parameters?: VertexParameters; busy: boolean; onApply: (params: VertexParameters) => void }) {
+export function VertexControls({ graph, parameters = {}, busy, onApply, draft, onDraft }: { graph: GraphData; parameters?: VertexParameters; busy: boolean; onApply: (params: VertexParameters) => void | boolean | Promise<boolean>; draft?:{omega:string;beta:string};onDraft?:(draft:{omega:string;beta:string})=>void }) {
   const { t } = useTranslation('research');
   const [omega, setOmega] = useState(() => JSON.stringify(parameters.omega ?? Object.fromEntries(graph.vertices.map((x) => [x, graph.neighbors[x].map(() => [1 / Math.sqrt(graph.neighbors[x].length), 0])])), null, 2));
   const [beta, setBeta] = useState(() => JSON.stringify(parameters.beta ?? Object.fromEntries(graph.vertices.map((x) => [x, 0])), null, 2));
   const [invalid, setInvalid] = useState(false);
   const [applied, setApplied] = useState(false);
+  const dirty=useRef(false);
+  const configuration=JSON.stringify([graph.neighbors,parameters]);
+  useEffect(()=>{
+    if(dirty.current)return;
+    setOmega(JSON.stringify(parameters.omega??Object.fromEntries(graph.vertices.map(x=>[x,graph.neighbors[x].map(()=>[1/Math.sqrt(graph.neighbors[x].length),0])])),null,2));
+    setBeta(JSON.stringify(parameters.beta??Object.fromEntries(graph.vertices.map(x=>[x,0])),null,2));
+    setApplied(false);
+  },[configuration]);
   return <section className="panel research-panel"><details><summary>{t('vertex.parameters')}</summary>
     <p className="muted small">{t('vertex.parametersHelp')}</p><div className="research-columns">
-      <label>{t('vertex.omega')}<textarea aria-label={t('vertex.omega')} value={omega} disabled={busy} spellCheck={false} onChange={(e) => { setOmega(e.target.value); setApplied(false); }} /></label>
-      <label>{t('vertex.beta')}<textarea aria-label={t('vertex.beta')} value={beta} disabled={busy} spellCheck={false} onChange={(e) => { setBeta(e.target.value); setApplied(false); }} /></label>
+      <label>{t('vertex.omega')}<textarea aria-label={t('vertex.omega')} value={draft?.omega??omega} disabled={busy} spellCheck={false} onChange={(e) => {dirty.current=true; setOmega(e.target.value);onDraft?.({omega:e.target.value,beta:draft?.beta??beta}); setApplied(false); }} /></label>
+      <label>{t('vertex.beta')}<textarea aria-label={t('vertex.beta')} value={draft?.beta??beta} disabled={busy} spellCheck={false} onChange={(e) => {dirty.current=true; setBeta(e.target.value);onDraft?.({omega:draft?.omega??omega,beta:e.target.value}); setApplied(false); }} /></label>
     </div>
-    <button className="secondary-button" disabled={busy} onClick={() => {
+    <button className="secondary-button" disabled={busy} onClick={async () => {
       try {
-        const w: unknown = JSON.parse(omega), b: unknown = JSON.parse(beta);
+        const w: unknown = JSON.parse(draft?.omega??omega), b: unknown = JSON.parse(draft?.beta??beta);
         if (!w || !b || typeof w !== 'object' || typeof b !== 'object' || Array.isArray(w) || Array.isArray(b)) throw new Error();
-        onApply({ omega: w as VertexParameters['omega'], beta: b as VertexParameters['beta'] }); setInvalid(false); setApplied(true);
+        const accepted=await onApply({ omega: w as VertexParameters['omega'], beta: b as VertexParameters['beta'] }); setInvalid(false); setApplied(accepted!==false);if(accepted!==false)dirty.current=false;
       } catch { setInvalid(true); }
     }}>{t('vertex.apply')}</button>
     {invalid && <p role="alert">{t('vertex.jsonError')}</p>}{applied && <p role="status">{t('vertex.applied')}</p>}

@@ -86,8 +86,8 @@ export function setMatrix(draft:CustomGraphDraft,id:number,matrix:Matrix,preset:
 export function parameterProblems(draft:CustomGraphDraft,graph=draftGraph(draft)):number[] {
   return graph.vertices.filter(x=>{
     const w=draft.parameters.omega?.[x];
-    return (draft.parameters.omega!==undefined && (!w || !samePorts(draft.omegaPorts[x],graph.neighbors[x]) || w.length!==graph.neighbors[x].length))
-      || (draft.parameters.beta!==undefined && !Number.isFinite(draft.parameters.beta[x]));
+    return (draft.parameters.omega!=null && (!w || !samePorts(draft.omegaPorts[x],graph.neighbors[x]) || w.length!==graph.neighbors[x].length))
+      || (draft.parameters.beta!=null && !Number.isFinite(draft.parameters.beta[x]));
   });
 }
 export function initialReady(bound:BoundInitial,graph:GraphData,vertex:boolean):boolean {
@@ -100,7 +100,7 @@ export function customCopy(graph:GraphData,preset:Preset,parameters:VertexParame
   draft.vertices=graph.vertices.map((id,i)=>({id,label:String(id),position:[250+150*Math.cos(2*Math.PI*i/graph.vertices.length),200+150*Math.sin(2*Math.PI*i/graph.vertices.length)]}));
   draft.edges=structuredClone(graph.edges);draft.nextId=Math.max(...graph.vertices)+1;
   draft.matrices=Object.fromEntries(graph.vertices.map(x=>[x,{matrix:structuredClone(graph.scattering[x]),ports:[...graph.neighbors[x]],preset}]));
-  draft.parameters=structuredClone(parameters);draft.omegaPorts=structuredClone(graph.neighbors);
+  draft.parameters=structuredClone({...(parameters.omega?{omega:parameters.omega}:{}),...(parameters.beta?{beta:parameters.beta}:{})});draft.omegaPorts=structuredClone(graph.neighbors);
   if(initial)draft.initials[vertex?'vertex':'edge']={state:structuredClone(initial),basis:basisKey(graph,vertex)};
   return draft;
 }

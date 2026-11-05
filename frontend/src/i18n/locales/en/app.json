@@ -35,7 +35,8 @@
       "path": "Path",
       "cycle": "Cycle",
       "complete": "Complete graph",
-      "star": "Star"
+      "star": "Star",
+      "custom": "Custom Graph"
     },
     "globalScattering": "Scattering at all vertices",
     "matrixHint": "Edit local matrices in the inspector. Changing the topology, global preset, or seed resets them.",
