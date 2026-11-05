@@ -156,3 +156,16 @@ def test_custom_initial_states_and_document_roundtrip_in_all_models(mode,kind):
     after=client.post('/api/simulate',json=validated.json()['document']['experiment'])
     assert before.status_code==after.status_code==200,after.text
     assert before.json()==after.json()
+
+
+def test_browser_exported_example_is_an_importable_reproducible_experiment():
+    import json
+    from pathlib import Path
+    doc=json.loads((Path(__file__).parents[1]/'examples/custom_path_phase.json').read_text())
+    response=client.post('/api/experiments/validate',json=doc)
+    assert response.status_code==200,response.text
+    assert response.json()['graph']['dimension']==4
+    assert response.json()['document']['experiment']['scattering']['0']==[[[0,1]]]
+    simulated=client.post('/api/simulate',json=response.json()['document']['experiment'])
+    assert simulated.status_code==200,simulated.text
+    assert simulated.json()['outcomes']==[1,0,1,2,1,2,1,2,1,0,1,2]

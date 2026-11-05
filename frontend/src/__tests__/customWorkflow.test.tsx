@@ -125,7 +125,7 @@ describe('custom graph workflow',()=>{
     const d=customCopy(g,'identity',{}, {kind:'basis',edge:[0,1]});
     const doc=toDocument(d,{graph:{kind:'path',size:2},preset:'identity',scattering:g.scattering,mode:'unitary',initial:{kind:'basis',edge:[0,1]},steps:8,seed:71});
     // Pydantic includes null for absent optional scientific parameters.
-    (doc.experiment as any).vertex_parameters={omega:null,beta:null};
+    (doc.experiment as any).vertex_parameters={omega:null,beta:null};doc.experiment.seed=4294967295;
     upload(fileFor(doc));await screen.findByRole('dialog',{name:'Confirm change'});
     expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(6);
     click('Keep current data');await screen.findByText('Import cancelled; existing draft retained.');
@@ -133,7 +133,8 @@ describe('custom graph workflow',()=>{
     upload(fileFor(doc));await screen.findByRole('dialog',{name:'Confirm change'});click('Confirm change');
     await screen.findByText('Experiment imported and validated.');await ready();
     expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(2);
-    expect(screen.getByTitle('0 + (1)i')).toBeInTheDocument();expect(field('seed').value).toBe('71');
+    expect(screen.getByTitle('0 + (1)i')).toBeInTheDocument();expect(field('seed').value).toBe('4294967295');
+    fireEvent.blur(field('seed'));fireEvent.click(run());await ready();expect(requests.at(-1)!.body.seed).toBe(4294967295);
   });
 
   it('rejects malformed imports without replacing the current custom experiment',async()=>{

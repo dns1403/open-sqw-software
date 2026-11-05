@@ -7,13 +7,13 @@ export function parseComplex(value: unknown): Complex {
   if (Array.isArray(value) && value.length===2 && value.every(x=>typeof x==='number' && Number.isFinite(x))) return [value[0],value[1]];
   if (typeof value==='number' && Number.isFinite(value)) return [value,0];
   if (typeof value!=='string') throw new Error('complex');
-  const s=value.replace(/\s/g,'').replace(/−/g,'-');
+  const s=value.trim().replace(/−/g,'-');
   if (realRegex.test(s) && Number.isFinite(Number(s))) return [Number(s),0];
   if (!s.endsWith('i')) throw new Error('complex');
-  const body=s.slice(0,-1);
+  const body=s.slice(0,-1).trim();
   const split=Array.from(body).findIndex((c,i)=>i>0 && (c==='+'||c==='-') && !/[eE]/.test(body[i-1]));
-  const real=split<0?'0':body.slice(0,split), imag=split<0?body:body.slice(split);
-  const coefficient=imag===''||imag==='+'?'1':imag==='-'?'-1':imag;
+  const real=split<0?'0':body.slice(0,split).trim(), imag=(split<0?body:body.slice(split)).trim();
+  const coefficient=imag===''||imag==='+'?'1':imag==='-'?'-1':imag.replace(/^([+-])\s+/, '$1');
   if (!realRegex.test(real) || !realRegex.test(coefficient)) throw new Error('complex');
   const result:Complex=[Number(real),Number(coefficient)];
   if (!result.every(Number.isFinite)) throw new Error('complex');

@@ -1,0 +1,122 @@
+{
+  "format": "sqw-experiment",
+  "version": 1,
+  "experiment": {
+    "graph": {
+      "kind": "custom",
+      "size": 3,
+      "vertices": [
+        0,
+        1,
+        2
+      ],
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "neighbors": {
+        "0": [
+          1
+        ],
+        "1": [
+          0,
+          2
+        ],
+        "2": [
+          1
+        ]
+      }
+    },
+    "scattering": {
+      "0": [
+        [
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "1": [
+        [
+          [
+            0.7071067811865475,
+            0
+          ],
+          [
+            0.7071067811865475,
+            0
+          ]
+        ],
+        [
+          [
+            0.7071067811865475,
+            0
+          ],
+          [
+            -0.7071067811865475,
+            0
+          ]
+        ]
+      ],
+      "2": [
+        [
+          [
+            1,
+            0
+          ]
+        ]
+      ]
+    },
+    "preset": "dft",
+    "mode": "trajectory",
+    "initial": {
+      "kind": "basis",
+      "edge": [
+        1,
+        0
+      ]
+    },
+    "steps": 12,
+    "seed": 42,
+    "strategy": "optimized",
+    "vertex_dynamics": "trajectory",
+    "vertex_parameters": {}
+  },
+  "vertices": [
+    {
+      "id": 0,
+      "label": "A",
+      "position": [
+        111.93221159665899,
+        119.92736956784891
+      ]
+    },
+    {
+      "id": 1,
+      "label": "B",
+      "position": [
+        251.84747609248274,
+        179.8910543517734
+      ]
+    },
+    {
+      "id": 2,
+      "label": "C",
+      "position": [
+        386.7657668563128,
+        119.92736956784891
+      ]
+    }
+  ],
+  "matrix_presets": {
+    "0": null,
+    "1": "hadamard",
+    "2": "identity"
+  }
+}

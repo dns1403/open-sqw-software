@@ -68,6 +68,11 @@ describe('graph draft operations and scientific bindings',()=>{
   });
 });
 describe('safe complex matrix inputs',()=>{
+  it('accepts spacing around complex operators without joining broken numeric tokens',()=>{
+    expect(parseComplex(' 0.5 + 0.5i ')).toEqual([.5,.5]);
+    expect(parseComplex('− 1i')).toEqual([0,-1]);
+    for(const invalid of ['0 1','0 .5+0.5i','1e -3i','0 1i'])expect(()=>parseComplex(invalid)).toThrow();
+  });
   it.each([['0.5',[.5,0]],['-0.5',[-.5,0]],['0.5+0.5i',[.5,.5]],['-0.70710678i',[0,-.70710678]],['1',[1,0]],['-i',[0,-1]],['1e-3-2e-4i',[.001,-.0002]]])('parses %s without expression evaluation',(text,expected)=>expect(parseComplex(text)).toEqual(expected));
   it.each(['NaN','Infinity','Math.sin(1)','1/2','alert(1)','1++2i'])('rejects invalid input %s',value=>expect(()=>parseComplex(value)).toThrow());
   it('validates complex U(1), Hadamard, dimensions and nonunitarity at the core tolerance',()=>{
