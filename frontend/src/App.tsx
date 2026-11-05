@@ -12,6 +12,7 @@ import StatisticsPanel from './StatisticsPanel';
 import CustomGraphTools, { VertexName } from './CustomGraphTools';
 import InitialStateInput from './InitialStateInput';
 import ExperimentFiles from './ExperimentFiles';
+import ConfirmationDialog, { useConfirmation } from './ConfirmationDialog';
 import { addEdge,addVertex,basisKey,customCopy,customSpec,draftGraph,emptyCustomGraph,fromDocument,graphProblems,initialReady,matrixProblem,moveVertex,parameterProblems,removeEdge,removeVertex,renameVertex,setMatrix,toDocument } from './customGraph';
 import type { BoundInitial,CustomGraphDraft,EditMode,ExperimentDocument } from './customGraph';
 import { ApiError } from './api';
@@ -25,6 +26,7 @@ const modes: { key: Mode; symbol: string }[] = [
 
 export default function App() {
   const { t, i18n } = useTranslation('app');
+  const {confirm,confirmation,finish}=useConfirmation();
   const language = i18n.resolvedLanguage ?? 'en';
   const number = (value: number, digits = 4) => formatNumber(value, language, digits);
   const [kind, setKind] = useState<GraphKind>('cycle');
@@ -165,22 +167,22 @@ export default function App() {
   function attempt(operation:()=>void) {try{operation();setEditorError(null);}catch(reason){setEditorError(reason instanceof Error?reason.message:'endpoint');}}
   function createVertex(position:[number,number]) {attempt(()=>{const next=addVertex(custom,position);edit(next);setSelected(next.vertices.at(-1)!.id);setSelectedEdge(null);});}
   function connect(a:number,b:number) {attempt(()=>{edit(addEdge(custom,a,b));setEdgeStart(null);setSelectedEdge([Math.min(a,b),Math.max(a,b)]);});}
-  function deleteNode(id=selected) {if(window.confirm(t('components:editor.deleteVertexConfirm',{vertex:vertexLabel(id)}))){edit(removeVertex(custom,id));setSelected(custom.vertices.find(v=>v.id!==id)?.id??-1);setSelectedEdge(null);setEdgeStart(null);}}
+  async function deleteNode(id=selected) {if(await confirm('deleteVertexConfirm',{vertex:vertexLabel(id)})){edit(removeVertex(custom,id));setSelected(custom.vertices.find(v=>v.id!==id)?.id??-1);setSelectedEdge(null);setEdgeStart(null);}}
   function deleteConnection(edge=selectedEdge) {if(edge){edit(removeEdge(custom,...edge));setSelectedEdge(null);setEdgeStart(null);}}
   function selectNode(id:number) {
     setSelected(id);setSelectedEdge(null);
     if(editMode==='addEdge'){if(edgeStart===null)setEdgeStart(id);else connect(edgeStart,id);}
     if(editMode==='delete')deleteNode(id);
   }
-  function switchTopology(next:GraphKind) {
-    if(kind!=='custom'&&Object.keys(presetDrafts).length&&!window.confirm(t('components:editor.discardPresetDraft')))return;
+  async function switchTopology(next:GraphKind) {
+    if(kind!=='custom'&&Object.keys(presetDrafts).length&&!await confirm('discardPresetDraft'))return;
     reset();setKind(next);setSelectedEdge(null);setEdgeStart(null);setEditMode('select');setEditorError(null);
     if(next==='custom')setSelected(custom.vertices[0]?.id??-1);
     else {if(next!=='cycle'&&preset==='hadamard')setPreset('dft');if(next==='cycle'&&size<3)setSize(3);}
   }
-  function customize() {
+  async function customize() {
     if(!graph)return;
-    if(custom.vertices.length&&!window.confirm(t('components:editor.replaceDraft')))return;
+    if(custom.vertices.length&&!await confirm('replaceDraft'))return;
     const next=customCopy(graph,preset,vertexParameters,initial,vertexMode);
     for(const x of graph.vertices)next.matrices[x].preset=presetTags[x]??null;
     if(!stateReady)next.initials[slot].basis='';
@@ -189,7 +191,7 @@ export default function App() {
   }
   async function applyAllPreset() {
     if(!graph||locked||graph.vertices.some(x=>graph.neighbors[x].length===0))return;
-    if(!window.confirm(t('components:editor.replaceMatrices')))return;
+    if(!await confirm('replaceMatrices'))return;
     setBusy(true);setError(null);
     try {
       const generated=await Promise.all(graph.vertices.map(async(x,i)=>[x,(await post<{matrix:Matrix}>('scattering',{preset,degree:graph.neighbors[x].length,seed:(seed+i)>>>0})).matrix] as const));
@@ -198,9 +200,9 @@ export default function App() {
   }
   async function copyMatrix(source:number,targets:number[]) {
     if(!graph||!graph.scattering[source])return;
-    if(!window.confirm(t('components:editor.copyConfirm',{count:targets.length})))return;
+    if(!await confirm('copyConfirm',{count:targets.length}))return;
     if(kind==='custom'){let next=custom;for(const x of targets)next=setMatrix(next,x,graph.scattering[source]);edit(next);}
-    else {const scattering={...graph.scattering};for(const x of targets)scattering[x]=structuredClone(graph.scattering[source]);setPresetGraph({...graph,scattering});setPresetTags(d=>({...d,...Object.fromEntries(targets.map(x=>[x,null]))}));reset();}
+    else {const scattering={...graph.scattering};for(const x of targets)scattering[x]=structuredClone(graph.scattering[source]);setPresetGraph({...graph,scattering});setPresetTags(d=>({...d,...Object.fromEntries(targets.map(x=>[x,null]))}));setPresetDrafts(d=>Object.fromEntries(Object.entries(d).filter(([key])=>!targets.includes(Number(key)))));reset();}
   }
   function matrixDraft(value:string|undefined) {
     if(kind==='custom')setCustom(d=>{const drafts={...d.matrixDrafts};if(value===undefined)delete drafts[selected];else drafts[selected]=value;return {...d,matrixDrafts:drafts};});
@@ -229,8 +231,8 @@ export default function App() {
       setVertexDrafts(d=>{const next={...d};delete next[vertexDraftKey];return next;});reset();return true;
     }catch(reason){setError(reason);return false;}finally{setBusy(false);}
   }
-  function importDocument(document:ExperimentDocument,data:GraphData) {
-    if(custom.vertices.length&&!window.confirm(t('components:editor.replaceDraft')))return false;
+  async function importDocument(document:ExperimentDocument,data:GraphData) {
+    if(custom.vertices.length&&!await confirm('replaceDraft'))return false;
     const exp=document.experiment;reset();setCustom(fromDocument(document,data));setKind('custom');setMode(exp.mode);setDistribution('vertex');setPreset(exp.preset);setSeed(exp.seed);setSeedDraft(String(exp.seed));setSteps(exp.steps);setStrategy(exp.strategy??'optimized');setVertexDynamics(exp.vertex_dynamics??'trajectory');setSelected(data.vertices[0]);setSelectedEdge(null);setEdgeStart(null);setEditMode('select');setInitialDrafts(d=>Object.fromEntries(Object.entries(d).filter(([key])=>!key.startsWith('custom-'))));setVertexDrafts(d=>{const next={...d};delete next.custom;return next;});setImportRevision(n=>n+1);return true;
   }
 
@@ -242,6 +244,7 @@ export default function App() {
   }, [playing, locked, cursor, maxStep, steps, graph, mode, strategy, canSimulate]);
 
   return <div className="app-shell">
+    <ConfirmationDialog confirmation={confirmation} finish={finish} />
     <aside className="sidebar">
       <div className="brand"><div className="brand-mark"><span /><span /><span /><span /></div><div>{t('brand.lineOne')}<span>{t('brand.lineTwo')}</span></div></div>
       <div className="sidebar-caption">{t('experiment.configure')}</div>
@@ -256,7 +259,7 @@ export default function App() {
           {Array.from({ length: kind === 'cycle' ? 10 : 11 }, (_, i) => i + (kind === 'cycle' ? 3 : 2)).map((n) => <option key={n} value={n}>{t('graph.vertices', { count: n })}</option>)}
         </select><button className="reset-button" disabled={locked||!graph||Object.keys(presetDrafts).length>0} onClick={customize}>{t('components:editor.customize')}</button></>}
         {kind==='custom' && <CustomGraphTools draft={custom} graph={customGraph} mode={editMode} setMode={value=>{setEditMode(value);setEdgeStart(null);setEditorError(null);}} busy={locked} selected={selected} edge={selectedEdge} edgeStart={edgeStart} error={editorError}
-          addNow={()=>createVertex([120+(custom.vertices.length%4)*110,110+Math.floor(custom.vertices.length/4)*90])} connect={connect} selectEdge={setSelectedEdge} deleteVertex={()=>deleteNode()} deleteEdge={()=>deleteConnection()} clear={()=>{if(window.confirm(t('components:editor.clearConfirm'))){edit(emptyCustomGraph());setVertexDrafts(d=>{const next={...d};delete next.custom;return next;});setImportRevision(n=>n+1);setSelected(-1);setSelectedEdge(null);setEdgeStart(null);setInitialDrafts({});}}} />}
+          addNow={()=>createVertex([120+(custom.vertices.length%4)*110,110+Math.floor(custom.vertices.length/4)*90])} connect={connect} selectEdge={setSelectedEdge} deleteVertex={()=>deleteNode()} deleteEdge={()=>deleteConnection()} clear={async()=>{if(await confirm('clearConfirm')){edit(emptyCustomGraph());setVertexDrafts(d=>{const next={...d};delete next.custom;return next;});setImportRevision(n=>n+1);setSelected(-1);setSelectedEdge(null);setEdgeStart(null);setInitialDrafts({});}}} />}
         <label htmlFor="global-preset">{t('graph.globalScattering')}</label>
         <select id="global-preset" value={preset} disabled={locked} onChange={(event) => setPreset(event.target.value as Preset)}>
           {presets.map((item) => <option key={item.value} value={item.value} disabled={item.value === 'hadamard' && (kind==='custom'?customGraph.vertices.some(x=>customGraph.neighbors[x].length!==2):kind !== 'cycle')}>{t(item.labelKey, { ns: 'components' })}</option>)}
@@ -322,8 +325,8 @@ export default function App() {
             {custom.matrices[selected]&&matrixProblem(custom,selected)==='changedPorts'&&<details><summary>{t('components:editor.retainedMatrix',{ports:custom.matrices[selected].ports.join(', ')})}</summary><pre className="record-line">{JSON.stringify(custom.matrices[selected].matrix,null,2)}</pre></details>}</>}
           {graph&&graph.vertices.includes(selected) ? <MatrixEditor vertex={selected} neighbors={currentNeighbors} matrix={kind==='custom'&&matrixProblem(custom,selected)==='changedPorts'?emptyMatrix:graph.scattering[String(selected)]??emptyMatrix} busy={locked} onApply={applyMatrix} onPreset={(value) => void nodePreset(value)} draftValue={kind==='custom'?custom.matrixDrafts[selected]:presetDrafts[selected]} onDraftChange={matrixDraft} /> : <p className="muted">{t('inspector.empty')}</p>}
           {graph&&currentNeighbors.length>0&&<div className="matrix-extra"><button className="text-button" disabled={locked} onClick={()=>void nodePreset('identity')}>{t('components:editor.identity')}</button>
-            <label>{t('components:editor.copyFrom')}<select value="" disabled={locked} onChange={e=>void copyMatrix(Number(e.target.value),[selected])}><option value="">{t('components:editor.choose')}</option>{graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length&&(kind!=='custom'||!matrixProblem(custom,x))).map(x=><option key={x} value={x}>{vertexLabel(x)}</option>)}</select></label>
-            <button className="text-button" disabled={locked||(kind==='custom'&&!!matrixProblem(custom,selected))} onClick={()=>void copyMatrix(selected,graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length))}>{t('components:editor.applySameDegree')}</button><p className="muted small">{t('components:editor.seedHelp',{seed})}</p></div>}
+            <label>{t('components:editor.copyFrom')}<select value="" disabled={locked} onChange={e=>void copyMatrix(Number(e.target.value),[selected])}><option value="">{t('components:editor.choose')}</option>{graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length&&(kind==='custom'?!matrixProblem(custom,x):presetDrafts[x]===undefined)).map(x=><option key={x} value={x}>{vertexLabel(x)}</option>)}</select></label>
+            <button className="text-button" disabled={locked||(kind==='custom'?!!matrixProblem(custom,selected):presetDrafts[selected]!==undefined)} onClick={()=>void copyMatrix(selected,graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length))}>{t('components:editor.applySameDegree')}</button><p className="muted small">{t('components:editor.seedHelp',{seed})}</p></div>}
           <div className="operator-formula">U<sub>S</sub> |xy⟩ = ∑<sub>z∼x</sub> S<sub>zy</sub>(x) |zx⟩</div>
         </section>
 
@@ -342,7 +345,7 @@ export default function App() {
       {(mode === 'trajectory' || (mode === 'vertex' && vertexDynamics === 'trajectory')) && <section className="panel trajectory-panel"><div className="panel-header"><div><div className="eyebrow">{t('trajectory.log')}</div><h2>{t('trajectory.title')}</h2></div><span className="pill">{t('simulation.seed')} {seed}</span></div><p className="muted small">{t(mode === 'vertex' ? 'research:vertex.timing' : 'trajectory.timing')}</p>
         {simulation && cursor > 0 ? <><div className="outcome-list">{simulation.frames.slice(1, cursor + 1).map((item) => <button key={item.step} className={item.step === cursor ? 'outcome active' : 'outcome'} onClick={() => setCursor(item.step)} title={t('trajectory.conditionalProbability', { probability: item.measurement_probability === null ? '—' : number(item.measurement_probability, 6) })}><small>n = {item.step}</small><strong>x = {item.measurement}</strong><span>p = {item.measurement_probability === null ? '—' : number(item.measurement_probability, 3)}</span></button>)}</div><p className="small muted">{t('trajectory.probabilities')} {frame?.measurement_probabilities?.map((p, i) => `x=${graph?.vertices[i]}: ${number(p)}`).join(' · ')}</p></> : <p className="muted">{t('trajectory.empty')}</p>}
       </section>}
-      {mode === 'vertex' && graph && <VertexControls key={`${kind}/${size}/${importRevision}`} graph={graph} draft={vertexDrafts[vertexDraftKey]} onDraft={draft=>{setVertexDrafts(d=>({...d,[vertexDraftKey]:draft}));reset();}} parameters={effectiveParameters} busy={locked||!topologyReady||!matricesReady} onApply={applyParameters} />}
+      {mode === 'vertex' && graph && <VertexControls key={`${kind}/${size}/${importRevision}`} graph={graph} previousPorts={kind==='custom'?custom.omegaPorts:graph.neighbors} draft={vertexDrafts[vertexDraftKey]} onDraft={draft=>{setVertexDrafts(d=>({...d,[vertexDraftKey]:draft}));reset();}} parameters={effectiveParameters} busy={locked||!topologyReady||!matricesReady} onApply={applyParameters} />}
       {(mode === 'trajectory' || mode === 'vertex' || mode === 'open') && graph && frame && canSimulate && <ResearchPanels
         graph={graph} experiment={payload(steps)} cursor={cursor} frame={frame} />}
       {mode !== 'unitary' && graph && canSimulate && <><nav className="research-navigation" aria-label={t('statistics:navigation')}><a href="#trajectory-statistics">{t('statistics:title')} ↓</a></nav><StationaryPanel experiment={payload(steps)} /><StatisticsPanel experiment={payload(steps)} graph={graph} /></>}

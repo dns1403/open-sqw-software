@@ -12,3 +12,7 @@ class TestResizeObserver {
 
 vi.stubGlobal('ResizeObserver', TestResizeObserver);
 afterEach(() => cleanup());
+
+// jsdom has no top layer; mirror the open state for app-owned confirmation tests.
+HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };

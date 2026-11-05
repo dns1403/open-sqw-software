@@ -116,6 +116,11 @@
       "endpoint": "Choose two existing vertices.",
       "label": "Use a nonempty label of at most 64 characters.",
       "unitary": "Apply a unitary matrix of the current degree."
-    }
+    },
+    "confirmTitle": "Confirm change",
+    "cancelChange": "Keep current data",
+    "confirmChange": "Confirm change",
+    "pendingParameters": "Unapplied boundary-vector / phase entries are retained. Validate and apply them before running the Vertex Walk or exporting.",
+    "omegaPorts": "Omega at {{vertex}} was entered for ports [{{old}}]; current ports are [{{current}}]. Review the entries before explicitly applying them in the new order."
   }
 }

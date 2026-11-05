@@ -16,7 +16,7 @@ export function DensityTable({ matrix, labels, caption }: { matrix: Matrix; labe
   </table></div>;
 }
 
-export function VertexControls({ graph, parameters = {}, busy, onApply, draft, onDraft }: { graph: GraphData; parameters?: VertexParameters; busy: boolean; onApply: (params: VertexParameters) => void | boolean | Promise<boolean>; draft?:{omega:string;beta:string};onDraft?:(draft:{omega:string;beta:string})=>void }) {
+export function VertexControls({ graph, parameters = {}, busy, onApply, draft, onDraft, previousPorts }: { graph: GraphData; parameters?: VertexParameters; busy: boolean; onApply: (params: VertexParameters) => void | boolean | Promise<boolean>; previousPorts?:Record<string,number[]>;draft?:{omega:string;beta:string};onDraft?:(draft:{omega:string;beta:string})=>void }) {
   const { t } = useTranslation('research');
   const [omega, setOmega] = useState(() => JSON.stringify(parameters.omega ?? Object.fromEntries(graph.vertices.map((x) => [x, graph.neighbors[x].map(() => [1 / Math.sqrt(graph.neighbors[x].length), 0])])), null, 2));
   const [beta, setBeta] = useState(() => JSON.stringify(parameters.beta ?? Object.fromEntries(graph.vertices.map((x) => [x, 0])), null, 2));
@@ -31,7 +31,10 @@ export function VertexControls({ graph, parameters = {}, busy, onApply, draft, o
     setApplied(false);
   },[configuration]);
   return <section className="panel research-panel"><details><summary>{t('vertex.parameters')}</summary>
-    <p className="muted small">{t('vertex.parametersHelp')}</p><div className="research-columns">
+    <p className="muted small">{t('vertex.parametersHelp')}</p>
+    {draft&&<p className="support-notice">{t('components:editor.pendingParameters')}</p>}
+    {previousPorts&&parameters.omega&&graph.vertices.filter(x=>JSON.stringify(previousPorts?.[x])!==JSON.stringify(graph.neighbors[x])).map(x=><p className="support-notice" key={x}>{t('components:editor.omegaPorts',{vertex:x,old:previousPorts?.[x]?.join(', ')??'∅',current:graph.neighbors[x].join(', ')})}</p>)}
+    <div className="research-columns">
       <label>{t('vertex.omega')}<textarea aria-label={t('vertex.omega')} value={draft?.omega??omega} disabled={busy} spellCheck={false} onChange={(e) => {dirty.current=true; setOmega(e.target.value);onDraft?.({omega:e.target.value,beta:draft?.beta??beta}); setApplied(false); }} /></label>
       <label>{t('vertex.beta')}<textarea aria-label={t('vertex.beta')} value={draft?.beta??beta} disabled={busy} spellCheck={false} onChange={(e) => {dirty.current=true; setBeta(e.target.value);onDraft?.({omega:draft?.omega??omega,beta:e.target.value}); setApplied(false); }} /></label>
     </div>

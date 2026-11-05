@@ -116,6 +116,11 @@
       "endpoint": "Zwei vorhandene Knoten wählen.",
       "label": "Einen nicht leeren Namen mit höchstens 64 Zeichen verwenden.",
       "unitary": "Eine unitäre Matrix des aktuellen Grades anwenden."
-    }
+    },
+    "confirmTitle": "Änderung bestätigen",
+    "cancelChange": "Bisherige Daten behalten",
+    "confirmChange": "Änderung bestätigen",
+    "pendingParameters": "Nicht angewendete Randvektor-/Phaseneinträge bleiben erhalten. Vor einem Vertex Walk oder Export prüfen und anwenden.",
+    "omegaPorts": "Omega bei {{vertex}} wurde für Ports [{{old}}] eingegeben; aktuell gelten [{{current}}]. Die Einträge vor dem ausdrücklichen Anwenden in der neuen Reihenfolge prüfen."
   }
 }

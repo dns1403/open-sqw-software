@@ -38,7 +38,6 @@ function fileFor(value:unknown){const file=new File(['payload'],'experiment.json
 
 beforeEach(async()=>{
   await setLanguage('en');requests.length=0;canvas.draw.mockClear();
-  vi.spyOn(window,'confirm').mockReturnValue(true);
   vi.stubGlobal('fetch',vi.fn(async(url:string,options:RequestInit)=>{
     const body=JSON.parse(String(options.body));requests.push({route:url,body:structuredClone(body)});
     let result:any;
@@ -97,7 +96,7 @@ describe('custom graph workflow',()=>{
     change('initial-kind','uniform');await ready();
     change('graph-kind','cycle');await ready();expect((field('initial-edge') as unknown as HTMLSelectElement).options).toHaveLength(6);
     change('graph-kind','custom');await ready();expect(Array.from((field('initial-edge') as unknown as HTMLSelectElement).options).filter(o=>o.value!=='-1')).toHaveLength(4);
-    vi.mocked(window.confirm).mockReturnValue(false);click('Delete selected vertex');expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(3);
+    click('Delete selected vertex');click('Keep current data');expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(3);
   });
 
   it('retains unapplied vertex parameter drafts across model changes and blocks vertex runs until validation',async()=>{
@@ -118,6 +117,23 @@ describe('custom graph workflow',()=>{
     await choosePreset(0,'identity');await choosePreset(1,'identity');expect(run()).toBeDisabled();
     expect(JSON.parse(field('initial-json').value)).toHaveLength(6);expect(screen.getByText(/Dimension 4\./)).toBeInTheDocument();
     click('Replace draft with valid template');click('Validate & use initial state');await ready();expect(requests.at(-1)!.body.initial.density).toHaveLength(4);
+  });
+
+  it('keeps the existing draft until import confirmation and accepts server defaults without inventing manual parameters',async()=>{
+    await launch();click('Customize this graph');
+    const g=graph({kind:'path',size:2});g.scattering['0']=[[[0,1]]];
+    const d=customCopy(g,'identity',{}, {kind:'basis',edge:[0,1]});
+    const doc=toDocument(d,{graph:{kind:'path',size:2},preset:'identity',scattering:g.scattering,mode:'unitary',initial:{kind:'basis',edge:[0,1]},steps:8,seed:71});
+    // Pydantic includes null for absent optional scientific parameters.
+    (doc.experiment as any).vertex_parameters={omega:null,beta:null};
+    upload(fileFor(doc));await screen.findByRole('dialog',{name:'Confirm change'});
+    expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(6);
+    click('Keep current data');await screen.findByText('Import cancelled; existing draft retained.');
+    expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(6);
+    upload(fileFor(doc));await screen.findByRole('dialog',{name:'Confirm change'});click('Confirm change');
+    await screen.findByText('Experiment imported and validated.');await ready();
+    expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(2);
+    expect(screen.getByTitle('0 + (1)i')).toBeInTheDocument();expect(field('seed').value).toBe('71');
   });
 
   it('rejects malformed imports without replacing the current custom experiment',async()=>{

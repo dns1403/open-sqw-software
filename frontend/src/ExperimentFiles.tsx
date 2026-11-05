@@ -5,7 +5,7 @@ import type { ExperimentDocument } from './customGraph';
 import type { GraphData } from './types';
 
 export default function ExperimentFiles({exportDocument,onImport,canExport,busy,onBusy}:{
-  exportDocument:()=>ExperimentDocument;onImport:(document:ExperimentDocument,graph:GraphData)=>boolean;canExport:boolean;busy:boolean;onBusy:(value:boolean)=>void;
+  exportDocument:()=>ExperimentDocument;onImport:(document:ExperimentDocument,graph:GraphData)=>boolean|Promise<boolean>;canExport:boolean;busy:boolean;onBusy:(value:boolean)=>void;
 }) {
   const {t}=useTranslation('components'),input=useRef<HTMLInputElement>(null);
   const [working,setWorking]=useState(false),[error,setError]=useState<unknown>(null),[status,setStatus]=useState<string|null>(null);
@@ -15,7 +15,7 @@ export default function ExperimentFiles({exportDocument,onImport,canExport,busy,
       if(file.size>2_000_000)throw new ApiError('experiment_size');
       let raw:unknown;try{raw=JSON.parse(await file.text());}catch{throw new ApiError('experiment_document');}
       const validated=await post<{document:ExperimentDocument;graph:GraphData}>('experiments/validate',raw);
-      setStatus(onImport(validated.document,validated.graph)?'imported':'cancelled');
+      setStatus(await onImport(validated.document,validated.graph)?'imported':'cancelled');
     } catch(reason){setError(reason);} finally{setWorking(false);onBusy(false);if(input.current)input.current.value='';}
   }
   async function save() {
