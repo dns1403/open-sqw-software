@@ -13,7 +13,7 @@ from sqw.core import (
 from .errors import RequestProblem, client_error, validation_issue
 from .schemas import (
     Frame, GraphRequest, GraphResponse, ScatteringRequest,
-    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest, StationaryRequest, StatisticsRequest,
+    SimulationRequest, SimulationResponse, EnsembleRequest, AnalysisRequest, StationaryRequest, StatisticsRequest, ExperimentDocument,
 )
 from .stationary_cache import stationary_model
 from .statistics_cache import statistics_model
@@ -58,7 +58,16 @@ def preset_matrix(preset, degree, rng, vertex=None):
 def build_walk(spec, preset, seed, supplied=None) -> ScatteringWalk:
     if spec.kind == "cycle" and spec.size < 3:
         raise RequestProblem("cycle_size", "A simple cycle requires at least 3 vertices.")
-    graph = GraphModel.preset(spec.kind, spec.size)
+    if spec.kind == 'custom':
+        try:
+            graph = GraphModel.from_edges(spec.vertices, spec.edges)
+        except ValueError as error:
+            raise RequestProblem('custom_graph', str(error)) from error
+        expected_ports = {str(x): list(graph.neighbors[x]) for x in graph.vertices}
+        if spec.neighbors != expected_ports:
+            raise RequestProblem('graph_ports', 'Neighbor ordering must explicitly match ascending stable vertex IDs. No matrix is silently permuted.')
+    else:
+        graph = GraphModel.preset(spec.kind, spec.size)
     if graph.dimension > MAX_EDGE_DIMENSION:
         raise RequestProblem("edge_limit", f"Interactive API supports at most {MAX_EDGE_DIMENSION} directed edges; use the Python core for larger graphs.", limit=MAX_EDGE_DIMENSION)
     if supplied is None:
@@ -114,6 +123,30 @@ def frame(walk, state, step, measurement=None, probabilities=None) -> Frame:
 @app.get("/api/health")
 def health():
     return {"status": "ok", "version": "0.1.0"}
+
+
+@app.post('/api/experiments/validate')
+def validate_experiment_document(document: ExperimentDocument):
+    """Validate the complete imported experiment before the browser replaces state."""
+    try:
+        request = document.experiment
+        if request.graph.kind != 'custom' or request.scattering is None:
+            raise RequestProblem('experiment_document', 'Saved experiments require an explicit custom graph and every scattering matrix.')
+        edge, walk, initial = experiment(request)
+        ids = [v.id for v in document.vertices]
+        if len(set(ids)) != len(ids) or set(ids) != set(edge.graph.vertices):
+            raise RequestProblem('experiment_document', 'Presentation vertices must match the graph exactly.')
+        if any(not v.label.strip() for v in document.vertices) or set(document.matrix_presets) != {str(x) for x in ids}:
+            raise RequestProblem('experiment_document', 'Each vertex needs a display label and a matrix preset or null.')
+        # Vertex parameters remain scientific data even when importing Edge mode.
+        if request.mode != 'vertex' and (request.vertex_parameters.omega is not None or request.vertex_parameters.beta is not None):
+            params = request.vertex_parameters
+            InducedVertexWalk(edge,
+                None if params.omega is None else {int(x):decode_complex(v) for x,v in params.omega.items()},
+                None if params.beta is None else {int(x):v for x,v in params.beta.items()})
+        return {'document': document.model_dump(), 'graph': describe(edge)}
+    except (ValueError, TypeError, KeyError) as error:
+        return client_error(error if isinstance(error, RequestProblem) else RequestProblem('experiment_document', str(error)))
 
 
 @app.post("/api/graph", response_model=GraphResponse)

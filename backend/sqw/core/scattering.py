@@ -54,6 +54,11 @@ def scattering_matrix(kind: str, degree: int, rng: np.random.Generator | None = 
         nonzero = np.abs(diagonal) > 0
         phases[nonzero] = diagonal[nonzero] / np.abs(diagonal[nonzero])
         matrix = q * phases
+    elif kind == "permutation":
+        generator = np.random.default_rng() if rng is None else rng
+        if not isinstance(generator, np.random.Generator):
+            raise ValueError("rng must be a NumPy Generator.")
+        matrix = np.eye(degree, dtype=complex)[:, generator.permutation(degree)]
     else:
-        raise ValueError(f"Unknown scattering preset {kind!r}; use identity, grover, hadamard, dft, or random.")
+        raise ValueError(f"Unknown scattering preset {kind!r}; use identity, grover, hadamard, dft, random, or permutation.")
     return validate_scattering(matrix, degree)

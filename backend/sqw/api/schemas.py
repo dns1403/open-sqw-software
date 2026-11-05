@@ -1,13 +1,13 @@
 """Version-one JSON contract. Complex scalars are [real, imaginary] pairs."""
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 FiniteFloat = Annotated[float, Field(strict=True, allow_inf_nan=False)]
 VertexLabel = Annotated[int, Field(strict=True)]
 ComplexScalar = tuple[FiniteFloat, FiniteFloat]
 ComplexMatrix = list[list[ComplexScalar]]
-Preset = Literal["identity", "grover", "hadamard", "dft", "random"]
+Preset = Literal["identity", "grover", "hadamard", "dft", "random", "permutation"]
 
 
 class StrictModel(BaseModel):
@@ -15,8 +15,23 @@ class StrictModel(BaseModel):
 
 
 class GraphSpec(StrictModel):
-    kind: Literal["path", "cycle", "complete", "star"] = "cycle"
+    kind: Literal["path", "cycle", "complete", "star", "custom"] = "cycle"
     size: int = Field(default=6, ge=2, le=32, strict=True)
+    vertices: list[Annotated[int, Field(strict=True, ge=0, le=2**31-1)]] | None = Field(default=None, max_length=32)
+    edges: list[tuple[VertexLabel, VertexLabel]] | None = Field(default=None, max_length=128)
+    neighbors: dict[str, list[VertexLabel]] | None = None
+
+    @model_validator(mode='after')
+    def custom_contract(self):
+        supplied = (self.vertices, self.edges, self.neighbors)
+        if self.kind == 'custom':
+            if any(v is None for v in supplied):
+                raise ValueError('Custom graphs require vertices, edges and explicit neighbor ordering.')
+            if len(self.vertices) != self.size:
+                raise ValueError('Custom size must match the number of vertices.')
+        elif any(v is not None for v in supplied):
+            raise ValueError('Preset graphs cannot include custom graph fields.')
+        return self
 
 
 class GraphRequest(GraphSpec):
@@ -131,3 +146,17 @@ class StatisticsRequest(SimulationRequest):
     stationary_class: int = Field(default=0, ge=0, strict=True)
     confidence: FiniteFloat = Field(default=.95, gt=0, lt=1)
     support_atol: FiniteFloat = Field(default=1e-14, ge=0, le=1e-6)
+
+
+class VertexPresentation(StrictModel):
+    id: Annotated[int, Field(strict=True, ge=0, le=2**31-1)]
+    label: str = Field(min_length=1, max_length=64, strict=True)
+    position: tuple[FiniteFloat, FiniteFloat]
+
+
+class ExperimentDocument(StrictModel):
+    format: Literal['sqw-experiment']
+    version: Annotated[int, Field(strict=True, ge=1, le=1)]
+    experiment: SimulationRequest
+    vertices: list[VertexPresentation] = Field(min_length=2, max_length=32)
+    matrix_presets: dict[str, Preset | None]
