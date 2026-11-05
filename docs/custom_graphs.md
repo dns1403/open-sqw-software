@@ -34,3 +34,14 @@ Permutation scattering is a seeded permutation of Identity columns. All five
 existing families remain available; arbitrary degree-one U(1) phases use the
 same complex matrix validator. Unitarity uses max-entry absolute residual
 `max(abs(S†S-I)) <= 1e-10`, matching the existing core tolerance.
+
+The browser draft stores stable IDs, labels/positions, undirected edges and
+each accepted matrix together with the exact ports it was entered for.
+Structural edits retain surviving matrix records. A different neighbor set,
+even of the same degree, marks the matrix incompatible until explicitly
+reinitialized/applied. Renaming and dragging do not change scientific bindings.
+Manual omega vectors likewise retain their original ports. Initial vectors and
+densities bind to the full ordered physical basis; surviving basis-state labels
+remain well-defined. Invalid/unapplied matrix drafts block custom simulation.
+Deleted vertices remove their own records through an explicit delete action;
+IDs are not reused while editing. Preset copies are independent deep copies.

@@ -1,7 +1,7 @@
 export type Complex = [number, number];
 export type Matrix = Complex[][];
-export type GraphKind = 'path' | 'cycle' | 'complete' | 'star';
-export type Preset = 'identity' | 'grover' | 'hadamard' | 'dft' | 'random';
+export type GraphKind = 'path' | 'cycle' | 'complete' | 'star' | 'custom';
+export type Preset = 'identity' | 'grover' | 'hadamard' | 'dft' | 'random' | 'permutation';
 export type Mode = 'unitary' | 'open' | 'trajectory' | 'vertex';
 export type Strategy = 'reference' | 'optimized';
 export interface VertexParameters { omega?: Record<string, Complex[]>; beta?: Record<string, number>; }
@@ -36,16 +36,20 @@ export interface Simulation {
   outcomes: number[];
 }
 export interface SimulationRequest {
-  graph: { kind: GraphKind; size: number };
+  graph: { kind: GraphKind; size: number; vertices?: number[]; edges?: [number,number][]; neighbors?: Record<string,number[]> };
   scattering: Record<string, Matrix>;
   preset: Preset;
   mode: Mode;
-  initial: { kind: 'basis' | 'uniform' | 'maximally_mixed'; edge: [number, number]; vertex?: number };
+  initial: InitialStateSpec;
   steps: number;
   seed: number;
   strategy?: Strategy;
   vertex_dynamics?: 'trajectory' | 'mean';
   vertex_parameters?: VertexParameters;
+}
+export interface InitialStateSpec {
+  kind: 'basis' | 'uniform' | 'maximally_mixed' | 'pure' | 'mixed';
+  edge?: [number,number]; vertex?: number; vector?: Complex[]; density?: Matrix;
 }
 
 export interface EnsembleFrame {
