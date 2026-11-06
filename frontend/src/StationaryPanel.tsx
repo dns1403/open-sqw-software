@@ -44,7 +44,7 @@ export default function StationaryPanel({ experiment }: { experiment: Simulation
   const validTolerance = tolerance.trim() !== '' && Number.isFinite(Number(tolerance)) && Number(tolerance) >= 0 && Number(tolerance) <= 1e-6;
   return <section className="panel research-panel stationary-panel">
     <div className="eyebrow">{t('eyebrow')}</div><h2>{t('title')}</h2><p className="muted small">{t('intro')}</p>
-    <div className="stationary-controls"><label>{t('steps')}<input type="number" min="0" max="5000" value={steps} disabled={busy} onChange={(e) => { setSteps(Math.min(5000,Math.max(0,Math.trunc(Number(e.target.value))||0))); setResult(null); }} /></label>
+    <div className="stationary-controls" data-tour="stationary-run"><label>{t('steps')}<input type="number" min="0" max="5000" value={steps} disabled={busy} onChange={(e) => { setSteps(Math.min(5000,Math.max(0,Math.trunc(Number(e.target.value))||0))); setResult(null); }} /></label>
       <label>{t('tolerance')}<input type="number" min="0" max="0.000001" step="any" value={tolerance} disabled={busy} onChange={(e) => { setTolerance(e.target.value); setResult(null); }} /></label>
       <button className="secondary-button" disabled={busy || !validTolerance} onClick={() => void analyze()}>{t(busy ? 'analyzing' : 'analyze')}</button></div>
     {!validTolerance && <p role="alert" className="field-error">{t('errors:stationary_tolerance')}</p>}
@@ -60,7 +60,7 @@ export default function StationaryPanel({ experiment }: { experiment: Simulation
       <details><summary>{t('diagnostics')}</summary><p>{t('supportDetails',{count:result.support.discarded_entries,mass:scientific(result.support.discarded_max_row_mass),change:scientific(result.support.matrix_change_max_row_l1)})}</p>
         <p>{t('rowResidual')}: {scientific(result.diagnostics.row_residual)} · {t('columnResidual')}: {scientific(result.diagnostics.column_residual)} · {t('absorptionResidual')}: {scientific(result.diagnostics.absorption_raw_residual)}</p></details>
 
-      <h3>{t('classes')}</h3><div className="research-table-scroll"><table className="research-table"><thead><tr><th>{t('classes')}</th><th>{t('states')}</th><th>{t('recurrent')} / {t('transient')}</th><th>{t('period')}</th><th>{t('cyclic')}</th></tr></thead>
+      <h3 data-tour="classes">{t('classes')}</h3><div className="research-table-scroll"><table className="research-table"><thead><tr><th>{t('classes')}</th><th>{t('states')}</th><th>{t('recurrent')} / {t('transient')}</th><th>{t('period')}</th><th>{t('cyclic')}</th></tr></thead>
         <tbody>{result.classes.map((c) => <tr key={c.id}><th><span className="class-swatch" style={{background:classColor(c.id)}} />{t('class',{id:c.id+1})}</th><td>{c.states.map((id) => labels[id]).join(', ')}</td><td>{t(c.closed?'recurrent':'transient')}</td><td>{c.period ?? t('noCycle')}</td><td>{c.cyclic_subclasses.map((group) => `{${group.map((id) => labels[id]).join(', ')}}`).join(' → ') || '—'}</td></tr>)}</tbody></table></div>
 
       <h3>{t('stationaryTitle')}</h3><label className="stationary-select">{t('distribution')}<select value={stationaryClass} disabled={busy} onChange={(e) => setStationaryClass(Number(e.target.value))}><option value={-1}>{t('mixture')}</option>{result.closed_class_ids.map((id,index) => <option key={id} value={index}>{t('class',{id:id+1})}</option>)}</select></label>
@@ -73,7 +73,7 @@ export default function StationaryPanel({ experiment }: { experiment: Simulation
       <details><summary>{t('absorption')}</summary><div className="research-table-scroll"><table className="research-table"><thead><tr><th>{t('label')}</th>{result.closed_class_ids.map((id) => <th key={id}>{t('class',{id:id+1})}</th>)}</tr></thead><tbody>{result.absorption.map((row,i) => <tr key={i}><th>{labels[i]}</th>{row.map((p,j) => <td key={j}>{number(p)}</td>)}</tr>)}</tbody></table></div></details>
       <details><summary>{t('matrix')}</summary><p>{t(result.orientation==='column'?'columnConvention':'rowConvention')}</p>{result.transition_matrix ? <div className="research-table-scroll"><table className="research-table"><thead><tr><th>{result.orientation==='column'?'M':'P'}</th>{labels.map((label) => <th key={label}>{label}</th>)}</tr></thead><tbody>{result.transition_matrix.map((row,i) => <tr key={i}><th>{labels[i]}</th>{row.map((p,j) => <td key={j} title={String(p)}>{number(p,3)}</td>)}</tr>)}</tbody></table></div> : <p>{t('sparseMatrix')}</p>}</details>
 
-      <h3>{t('evolutionTitle')}</h3><p className="muted small">{t('referenceHelp')}</p>
+      <h3 data-tour="cesaro">{t('evolutionTitle')}</h3><p className="muted small">{t('referenceHelp')}</p>
       <div className="stationary-charts"><StationaryPlot result={result} selected={selected} /><StationaryPlot result={result} selected={selected} distance /></div>
       <label className="research-slider">{t('time')} · t = {frame.step}<input type="range" min="0" max={result.frames.length-1} value={cursor} onChange={(e) => setCursor(Number(e.target.value))} /></label>
       <p>{t('ordinaryTrace')} ({labels[selected]}): <strong>{number(frame.probabilities[selected])}</strong> · {t('cesaroTrace')}: <strong>{number(frame.cesaro[selected])}</strong> · {t('stationaryTrace')}: <strong>{number(result.stationary_mixture[selected])}</strong></p>

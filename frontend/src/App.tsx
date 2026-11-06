@@ -1,6 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { post, formatError } from './api';
+import { WorkspaceNavigation, Overview, LearnPanel, ContextHelp, sectionFor } from './Workspace';
+import type { Destination } from './Workspace';
+import { useOnboarding } from './onboarding';
+import StateGraph from './StateGraph';
 import LanguageSwitcher from './LanguageSwitcher';
 import { formatNumber } from './i18n/format';
 import GraphView from './GraphView';
@@ -27,13 +31,35 @@ const modes: { key: Mode; symbol: string }[] = [
 export default function App() {
   const { t, i18n } = useTranslation('app');
   const {confirm,confirmation,finish}=useConfirmation();
+  const [destination, setDestination] = useState<Destination>('overview');
+  const [analysisTab, setAnalysisTab] = useState<'inspector' | 'stationary' | 'statistics'>('inspector');
+  const section = sectionFor(destination);
+  const navigate = useCallback((next: Destination) => {
+    if (next === 'inspector' || next === 'stationary' || next === 'statistics') setAnalysisTab(next);
+    setDestination(next);
+  }, []);
+  const onboarding = useOnboarding(navigate);
+  const navigationMounted = useRef(false);
+  useEffect(() => {
+    if (!navigationMounted.current) { navigationMounted.current = true; return; }
+    if (onboarding.active) return;
+    const target = sectionFor(destination) === destination ? document.getElementById('workspace-title') : document.querySelector<HTMLElement>(`[data-destination="${destination}"]`) ?? document.getElementById('workspace-title');
+    let ancestor = target?.parentElement;
+    while (ancestor) { if (ancestor instanceof HTMLDetailsElement) ancestor.open = true; ancestor = ancestor.parentElement; }
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView?.({ block: 'start' });
+  }, [destination]);
+
   const language = i18n.resolvedLanguage ?? 'en';
   const number = (value: number, digits = 4) => formatNumber(value, language, digits);
   const [kind, setKind] = useState<GraphKind>('cycle');
-  const [size, setSize] = useState(6);
+  const example = new URLSearchParams(window.location.search).get('example') === 'first-walk';
+  const [size, setSize] = useState(example ? 3 : 6);
   const [preset, setPreset] = useState<Preset>('dft');
   const [seed, setSeed] = useState(42);
   const [seedDraft, setSeedDraft] = useState('42');
+  const seedPending = seedDraft !== String(seed);
+  function commitSeedDraft() { const next = Math.max(0, Math.min(4294967295, Math.floor(Number(seedDraft) || 0))); setSeedDraft(String(next)); setSeed(next); if(kind==='custom')reset(); }
   const [presetGraph, setPresetGraph] = useState<GraphData | null>(null);
   const [custom,setCustom]=useState<CustomGraphDraft>(emptyCustomGraph);
   const customGraph=useMemo(()=>draftGraph(custom),[custom.vertices,custom.edges,custom.matrices]);
@@ -127,7 +153,7 @@ export default function App() {
       strategy, vertex_dynamics: vertexDynamics, vertex_parameters: effectiveParameters };
   }
   async function run(count: number) {
-    if (!graph || locked || !canSimulate) return;
+    if (!graph || locked || !canSimulate || seedPending) return;
     const controller = new AbortController(); request.current?.abort(); request.current = controller;
     setBusy(true); setError(null);
     try {
@@ -243,12 +269,31 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [playing, locked, cursor, maxStep, steps, graph, mode, strategy, canSimulate]);
 
-  return <div className="app-shell">
+  return <div className="lab-shell">
+    <a className="skip-link" href="#workspace-title">{t('workspace.skipContent')}</a>
     <ConfirmationDialog confirmation={confirmation} finish={finish} />
-    <aside className="sidebar">
-      <div className="brand"><div className="brand-mark"><span /><span /><span /><span /></div><div>{t('brand.lineOne')}<span>{t('brand.lineTwo')}</span></div></div>
-      <div className="sidebar-caption">{t('experiment.configure')}</div>
-      <section className="sidebar-section">
+    <WorkspaceNavigation section={section} navigate={navigate} />
+    <main className="lab-workspace">
+      <header className="workspace-header"><div><p className="eyebrow">{t('brand.research')}</p><h1 id="workspace-title" tabIndex={-1}>{t(`workspace.nav.${section}`)}</h1></div><div className="header-actions"><LanguageSwitcher /><button className="text-button" onClick={()=>onboarding.start('intro')}>{t('workspace.startTour')}</button></div></header>
+      {example && <p className="example-banner">{t('workspace.exampleActive')}</p>}
+      <section className="experiment-summary" aria-label={t('workspace.summary')} data-tour="summary">
+        <div><span>{t('graph.title')}</span><strong>{t(`graph.presets.${kind}`)} · {graph?.vertices.length ?? '—'} V / {graph?.edges.length ?? '—'} E</strong></div>
+        <div><span>{t('metrics.model')}</span><strong>{t(`modes.${mode}`)}</strong></div>
+        <div><span>{t('workspace.matrices')}</span><strong>{t(!graph ? 'graph.loading' : matricesReady ? 'workspace.valid' : 'workspace.review')}</strong></div>
+        <div><span>{t('metrics.time')}</span><strong>t = {frame?.step ?? 0}</strong></div>
+        <div className={canSimulate && !seedPending && !locked ? 'summary-ready' : 'summary-review'}><span>{t('workspace.status')}</span><strong>{t(locked ? 'workspace.busy' : canSimulate && !seedPending ? 'workspace.ready' : 'workspace.review')}</strong></div>
+      </section>
+      <nav className="workflow-strip" aria-label={t('workspace.workflow')} data-tour="workflow">
+        {(['graph','matrices','initial','simulation','analysis'] as Destination[]).map((step,index)=> {
+          const ready = [Boolean(graph)&&topologyReady,Boolean(graph)&&matricesReady,Boolean(graph)&&stateReady&&(!vertexMode||parametersReady),Boolean(simulation),canSimulate&&mode!=='unitary'][index];
+          return <button key={step} onClick={()=>navigate(step)} aria-current={destination===step?'step':undefined}><span className={ready?'step-number ready':'step-number'}>{index+1}</span><span>{t(`workspace.steps.${step}`)}<small>{t(index===3?(ready?'workspace.resultsReady':'workspace.notRun'):index===4?(ready?'workspace.available':'workspace.prerequisites'):(ready?'workspace.configured':'workspace.review'))}</small></span><span className="workflow-arrow" aria-hidden="true">→</span></button>;
+        })}
+      </nav>
+      {error !== null && <div className="error-banner" role="alert"><strong>{t('error.heading')}</strong><span>{formatError(error, t)}</span>{!graph && !graphLoading && <button className="text-button" onClick={() => setRetry(retry + 1)}>{t('error.retry')}</button>}</div>}
+      <div hidden={section!=='overview'} data-destination="overview" tabIndex={-1}><Overview navigate={navigate} startTour={onboarding.start} tourSeen={onboarding.seen} /></div>
+      <div hidden={section!=='graph'} data-destination="graph" tabIndex={-1}>
+        <div className="section-intro"><h2>{t('workspace.graphTitle')}</h2><p>{t('workspace.graphBody')}</p></div>
+        <div className="graph-workspace"><section className="panel configuration-panel" data-tour="graph-settings">
         <h2><span>01</span> {t('graph.title')}</h2>
         <label htmlFor="graph-kind">{t('graph.topology')}</label>
         <select id="graph-kind" value={kind} disabled={locked} onChange={(event) => switchTopology(event.target.value as GraphKind)}>
@@ -260,14 +305,45 @@ export default function App() {
         </select><button className="reset-button" disabled={locked||!graph||Object.keys(presetDrafts).length>0} onClick={customize}>{t('components:editor.customize')}</button></>}
         {kind==='custom' && <CustomGraphTools draft={custom} graph={customGraph} mode={editMode} setMode={value=>{setEditMode(value);setEdgeStart(null);setEditorError(null);}} busy={locked} selected={selected} edge={selectedEdge} edgeStart={edgeStart} error={editorError}
           addNow={()=>createVertex([120+(custom.vertices.length%4)*110,110+Math.floor(custom.vertices.length/4)*90])} connect={connect} selectEdge={setSelectedEdge} deleteVertex={()=>deleteNode()} deleteEdge={()=>deleteConnection()} clear={async()=>{if(await confirm('clearConfirm')){edit(emptyCustomGraph());setVertexDrafts(d=>{const next={...d};delete next.custom;return next;});setImportRevision(n=>n+1);setSelected(-1);setSelectedEdge(null);setEdgeStart(null);setInitialDrafts({});}}} />}
-        <label htmlFor="global-preset">{t('graph.globalScattering')}</label>
+<details className="advanced-controls"><summary>{t('workspace.bulkMatrices')}</summary>        <label htmlFor="global-preset">{t('graph.globalScattering')}</label>
         <select id="global-preset" value={preset} disabled={locked} onChange={(event) => setPreset(event.target.value as Preset)}>
           {presets.map((item) => <option key={item.value} value={item.value} disabled={item.value === 'hadamard' && (kind==='custom'?customGraph.vertices.some(x=>customGraph.neighbors[x].length!==2):kind !== 'cycle')}>{t(item.labelKey, { ns: 'components' })}</option>)}
         </select>
         {kind==='custom'?<button className="reset-button" disabled={locked||!customGraph.vertices.length||customGraph.vertices.some(x=>!customGraph.neighbors[x].length||(preset==='hadamard'&&customGraph.neighbors[x].length!==2))} onClick={()=>void applyAllPreset()}>{t('components:editor.applyAll')}</button>:<p className="sidebar-hint">{t('graph.matrixHint')}</p>}
-        <ExperimentFiles canExport={kind==='custom'&&canSimulate&&parametersReady} busy={locked} onBusy={setFileBusy} exportDocument={()=>toDocument(custom,payload(steps))} onImport={importDocument} />
+</details>
       </section>
-      <section className="sidebar-section">
+<div className="graph-matrix-grid">        <section className="panel graph-panel" data-tour="graph"><div className="panel-header"><div><div className="eyebrow">{t('graph.space')}</div><h2>{t(`graph.presets.${kind}`)} <span className="subtle">/ {t('graph.vertices', { count: kind==='custom'?custom.vertices.length:size })}</span></h2></div><span className="pill">{graph ? t('graph.edges', { count: graph.edges.length }) : t('graph.unknownEdges')}</span></div>
+          {graph ? <GraphView graph={graph} probabilities={frame?.vertex_probabilities??[]} selected={selected} onSelect={(vertex) => { if (!busy) setSelected(vertex); }} editor={kind==='custom'?{
+            vertices:custom.vertices,mode:editMode,edgeStart,selectedEdge,disabled:locked,
+            onCanvas:position=>{if(editMode==='addVertex')createVertex(position);},onNode:selectNode,
+            onEdge:edge=>{setSelectedEdge(edge);if(editMode==='delete')deleteConnection(edge);},onMove:(id,position)=>edit(moveVertex(custom,id,position),false),
+          }:undefined} /> : <div className="graph-placeholder">{graphLoading ? <><span className="loading-orbit" />{t('graph.preparing')}</> : <>{t('graph.startBackend')}</>}</div>}
+          {kind==='custom'&&<p className="graph-editor-caption">{selectedEdge?t('components:editor.endpoints',{a:vertexLabel(selectedEdge[0]),b:vertexLabel(selectedEdge[1])}):t('components:editor.undirected')}</p>}
+          <div className="graph-legend"><span><i className="legend-selected" /> {t('graph.selectedVertex')}</span><span><i className="legend-gradient" /> P(x) = 0 → 1</span><span className="legend-note">{t(mode === 'vertex' ? 'research:born.vertex' : 'graph.incomingMarginal')}</span></div>
+        </section>
+
+        <section className="panel inspector-panel" data-tour="matrix" data-destination="matrices" tabIndex={-1}><div className="panel-header"><div><div className="eyebrow">{t('inspector.operator')}</div><h2>{t('inspector.matrix')} <span className="math">S(x)</span></h2></div></div>
+          <div className="node-select"><label htmlFor="selected-node">{t('inspector.vertex')}</label><select id="selected-node" value={selected} disabled={locked || !graph?.vertices.length} onChange={(event) => {setSelected(Number(event.target.value));setSelectedEdge(null);}}>{graph?.vertices.map((vertex) => <option key={vertex} value={vertex}>{vertexLabel(vertex)}</option>)}</select><span>{t('inspector.degree', { degree: currentNeighbors.length })}</span></div>
+          {kind==='custom'&&custom.vertices.some(v=>v.id===selected)&&<><VertexName id={selected} label={custom.vertices.find(v=>v.id===selected)!.label} busy={locked} onRename={label=>attempt(()=>edit(renameVertex(custom,selected,label),false))} />
+            {matrixProblem(custom,selected)&&<p className="support-notice">{t('components:editor.matrixReview',{ports:currentNeighbors.join(', ')})}</p>}
+            {custom.matrices[selected]&&matrixProblem(custom,selected)==='changedPorts'&&<details><summary>{t('components:editor.retainedMatrix',{ports:custom.matrices[selected].ports.join(', ')})}</summary><pre className="record-line">{JSON.stringify(custom.matrices[selected].matrix,null,2)}</pre></details>}</>}
+          {graph&&graph.vertices.includes(selected) ? <MatrixEditor vertex={selected} neighbors={currentNeighbors} matrix={kind==='custom'&&matrixProblem(custom,selected)==='changedPorts'?emptyMatrix:graph.scattering[String(selected)]??emptyMatrix} busy={locked} onApply={applyMatrix} onPreset={(value) => void nodePreset(value)} draftValue={kind==='custom'?custom.matrixDrafts[selected]:presetDrafts[selected]} onDraftChange={matrixDraft} /> : <p className="muted">{t('inspector.empty')}</p>}
+          {graph&&currentNeighbors.length>0&&<details className="matrix-extra"><summary>{t('workspace.matrixUtilities')}</summary><button className="text-button" disabled={locked} onClick={()=>void nodePreset('identity')}>{t('components:editor.identity')}</button>
+            <label>{t('components:editor.copyFrom')}<select value="" disabled={locked} onChange={e=>void copyMatrix(Number(e.target.value),[selected])}><option value="">{t('components:editor.choose')}</option>{graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length&&(kind==='custom'?!matrixProblem(custom,x):presetDrafts[x]===undefined)).map(x=><option key={x} value={x}>{vertexLabel(x)}</option>)}</select></label>
+            <button className="text-button" disabled={locked||(kind==='custom'?!!matrixProblem(custom,selected):presetDrafts[selected]!==undefined)} onClick={()=>void copyMatrix(selected,graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length))}>{t('components:editor.applySameDegree')}</button><p className="muted small">{t('components:editor.seedHelp',{seed})}</p></details>}
+          <ContextHelp topic="matrix" /><div className="operator-formula">U<sub>S</sub> |xy⟩ = ∑<sub>z∼x</sub> S<sub>zy</sub>(x) |zx⟩</div>
+        </section>
+
+</div></div>
+        <details className="panel advanced-panel"><summary>{t('workspace.parametersTitle')}</summary><div data-destination="parameters" data-tour="parameters" tabIndex={-1}>
+          {mode!=='vertex' && <p>{t('workspace.parametersHint')} <button className="text-button" onClick={()=>navigate('simulation')}>{t('workspace.configureMode')}</button></p>}
+      {mode === 'vertex' && graph && <VertexControls key={`${kind}/${size}/${importRevision}`} graph={graph} previousPorts={kind==='custom'?custom.omegaPorts:graph.neighbors} draft={vertexDrafts[vertexDraftKey]} onDraft={draft=>{setVertexDrafts(d=>({...d,[vertexDraftKey]:draft}));reset();}} parameters={effectiveParameters} busy={locked||!topologyReady||!matricesReady} onApply={applyParameters} />}
+</div></details>
+        <details className="panel advanced-panel"><summary>{t('workspace.filesTitle')}</summary><div data-destination="files" tabIndex={-1}>        <ExperimentFiles canExport={kind==='custom'&&canSimulate&&parametersReady&&!seedPending} busy={locked} onBusy={setFileBusy} exportDocument={()=>toDocument(custom,payload(steps))} onImport={importDocument} /></div></details>
+      </div>
+      <div hidden={section!=='simulation'} data-destination="simulation" tabIndex={-1}>
+        <div className="section-intro"><h2>{t('workspace.simulationTitle')}</h2><p>{t('workspace.simulationBody')}</p></div>
+      <div className="mode-bar" data-tour="mode" role="group" aria-label={t('modes.label')}>{modes.map((item) => <button key={item.key} className={mode === item.key ? 'mode active' : 'mode'} aria-pressed={mode === item.key} disabled={locked} onClick={() => changeMode(item.key)}><span>{item.symbol}</span>{t(`modes.${item.key}`)}</button>)}</div><div className="simulation-settings"><section className="panel configuration-panel" data-tour="initial" data-destination="initial" tabIndex={-1}>
         <h2><span>02</span> {t('initial.title')}</h2>
         <label htmlFor="initial-kind">{t('initial.preparation')}</label>
         <select id="initial-kind" value={initialKind} disabled={locked} onChange={(event) => { setInitialKind(event.target.value as InitialStateSpec['kind']); reset(); }}>
@@ -284,53 +360,22 @@ export default function App() {
         {graph&&['pure','mixed'].includes(initialKind)&&<InitialStateInput graph={graph} vertex={vertexMode} state={initial} draft={initialDraft} onDraft={text=>{setInitialDrafts(d=>({...d,[initialDraftKey]:text}));reset();}} apply={()=>void confirmInitial()} busy={locked||!topologyReady||!matricesReady|| (vertexMode&&!parametersReady)} />}
         {graph&&!stateReady&&<p className="editor-warning">{t('components:editor.initialReview')}</p>}
         {graph&&!stateReady&&!['pure','mixed'].includes(initialKind)&&<button className="reset-button" disabled={locked||!topologyReady||!matricesReady||(vertexMode&&!parametersReady)} onClick={()=>void confirmInitial()}>{t('components:editor.applyInitial')}</button>}
-      </section>
-      <section className="sidebar-section">
+<ContextHelp topic="basis" /></section>
+<section className="panel configuration-panel" data-tour="run">
         <h2><span>03</span> {t('simulation.title')}</h2>
         {mode !== 'unitary' && <><label htmlFor="strategy">{t('research:strategy.label')}</label><select id="strategy" value={strategy} disabled={locked} onChange={(event) => { setStrategy(event.target.value as Strategy); reset(); }}><option value="optimized">{t('research:strategy.optimized')}</option><option value="reference">{t('research:strategy.reference')}</option></select></>}
         {mode === 'vertex' && <><label htmlFor="vertex-dynamics">{t('research:vertex.dynamics')}</label><select id="vertex-dynamics" value={vertexDynamics} disabled={locked} onChange={(event) => { setVertexDynamics(event.target.value as 'trajectory' | 'mean'); reset(); }}><option value="trajectory">{t('research:vertex.trajectory')}</option><option value="mean">{t('research:vertex.mean')}</option></select></>}
         <div className="input-pair"><div><label htmlFor="steps">{t('simulation.steps')}</label><input id="steps" type="number" min="1" max="200" step="1" value={steps} disabled={locked} onChange={(event) => setSteps(Math.max(1, Math.min(200, Math.trunc(Number(event.target.value)) || 1)))} /></div>
-          <div><label htmlFor="seed">{t('simulation.seed')}</label><input id="seed" type="number" min="0" max="4294967295" value={seedDraft} disabled={locked} onChange={(event) => setSeedDraft(event.target.value)} onBlur={(event) => { if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.language-switcher')) return; const next = Math.max(0, Math.min(4294967295, Math.floor(Number(seedDraft) || 0))); setSeedDraft(String(next)); setSeed(next); if(kind==='custom')reset(); }} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></div>
-        <button className="run-button" disabled={locked || !canSimulate} onClick={() => void run(steps)}><span>{busy ? '◌' : '▶'}</span>{t(busy ? 'simulation.computing' : 'simulation.run')}</button>
+          <div><label htmlFor="seed">{t('simulation.seed')}</label><input id="seed" type="number" min="0" max="4294967295" value={seedDraft} disabled={locked} onChange={(event) => setSeedDraft(event.target.value)} onBlur={(event) => { if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.language-switcher, .driver-popover, #workspace-navigation, .workflow-strip, .workspace-header')) return; commitSeedDraft(); }} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></div></div>
+        {seedPending && <p className="seed-draft-notice">{t('workspace.seedDraft')} <button className="text-button" onClick={commitSeedDraft}>{t('workspace.applySeed')}</button></p>}
+        <button className="run-button" disabled={locked || !canSimulate || seedPending} onClick={() => void run(steps)}><span>{busy ? '◌' : '▶'}</span>{t(busy ? 'simulation.computing' : 'simulation.run')}</button>
         <button className="reset-button" disabled={locked || !graph} onClick={reset}>↺ {t('simulation.reset')}</button>
       </section>
-      <div className="sidebar-footer"><span className="status-dot" /> {t('experiment.local')}<span>Joye · arXiv:2409.08428v2</span></div>
-    </aside>
+</div>
+        {!canSimulate && graph && <div className="prerequisite-notice"><p>{t('workspace.inputPrerequisites')}</p><button className="text-button" onClick={()=>navigate(!topologyReady?'graph':!matricesReady?'matrices':!stateReady?'initial':'parameters')}>{t('workspace.reviewInputs')}</button></div>}
+        <div data-destination="results" data-tour="results" tabIndex={-1}>      <div className="metrics-row"><div className="metric"><span>{t('metrics.model')}</span><strong>{t(`modes.${mode}Full`)}</strong></div><div className="metric"><span>{t('metrics.hilbertSpace')}</span><strong>{graph ? `ℂ${superscript(mode === 'vertex' ? graph.vertices.length : graph.dimension)}` : '—'}<small>{graph ? t(mode === 'vertex' ? 'graph.vertices' : 'graph.directedEdges', { count: mode === 'vertex' ? graph.vertices.length : graph.dimension }) : t('graph.loading')}</small></strong></div><div className="metric"><span>{t('metrics.time')}</span><strong>t = {frame?.step ?? 0}<small>{maxStep > 0 ? t('metrics.ofSteps', { count: maxStep }) : t('initial.title')}</small></strong></div><div className="metric"><span>{t('metrics.purity')}</span><strong>{frame ? number(frame.purity) : '—'}<small>{t(frame && frame.purity > 1 - 1e-8 ? 'metrics.pure' : 'metrics.mixed')}</small></strong></div></div>      <section className="playback-bar" data-tour="playback" aria-label={t('simulation.controls')}><div className="playback-buttons"><button title={t('simulation.previous')} aria-label={t('simulation.previous')} disabled={locked || cursor === 0} onClick={() => { setPlaying(false); setCursor(cursor - 1); }}>←</button><button disabled={!canSimulate || seedPending || graphLoading || (!playing && cursor >= steps)} onClick={() => setPlaying(!playing)} aria-pressed={playing}>{t(playing ? 'research:playback.pause' : 'research:playback.play')}</button><button className="step-button" disabled={locked || !canSimulate || seedPending || cursor >= 200} onClick={singleStep}>{t('simulation.step')} <span>→</span></button></div><div className="scrubber"><label htmlFor="time-slider">{t('simulation.timeline')} <strong>t = {frame?.step ?? 0}</strong></label><input id="time-slider" type="range" min="0" max={Math.max(1, maxStep)} value={cursor} disabled={locked || maxStep === 0} onChange={(event) => { setPlaying(false); setCursor(Number(event.target.value)); }} /></div><span className="playback-end">{t('simulation.stepCount', { count: maxStep })}</span></section>
 
-    <main className="workspace">
-      <header className="page-header"><div><div className="eyebrow">{t('brand.research')} <span> / </span> {t('brand.edgeWalks')}</div><h1>{t('brand.title')}<span className="version">v0.1</span></h1><p>{t('brand.tagline')}</p></div>
-        <div className="header-actions"><LanguageSwitcher /><a className="reference-link" href="https://arxiv.org/abs/2409.08428v2" target="_blank" rel="noreferrer">{t('brand.reference')} ↗</a></div></header>
-
-      <div className="mode-bar" role="group" aria-label={t('modes.label')}>{modes.map((item) => <button key={item.key} className={mode === item.key ? 'mode active' : 'mode'} aria-pressed={mode === item.key} disabled={locked} onClick={() => changeMode(item.key)}><span>{item.symbol}</span>{t(`modes.${item.key}`)}</button>)}</div>
-
-      {error !== null && <div className="error-banner" role="alert"><strong>{t('error.heading')}</strong><span>{formatError(error, t)}</span>{!graph && !graphLoading && <button className="text-button" onClick={() => setRetry(retry + 1)}>{t('error.retry')}</button>}</div>}
-
-      <div className="metrics-row"><div className="metric"><span>{t('metrics.model')}</span><strong>{t(`modes.${mode}Full`)}</strong></div><div className="metric"><span>{t('metrics.hilbertSpace')}</span><strong>{graph ? `ℂ${superscript(mode === 'vertex' ? graph.vertices.length : graph.dimension)}` : '—'}<small>{graph ? t(mode === 'vertex' ? 'graph.vertices' : 'graph.directedEdges', { count: mode === 'vertex' ? graph.vertices.length : graph.dimension }) : t('graph.loading')}</small></strong></div><div className="metric"><span>{t('metrics.time')}</span><strong>t = {frame?.step ?? 0}<small>{maxStep > 0 ? t('metrics.ofSteps', { count: maxStep }) : t('initial.title')}</small></strong></div><div className="metric"><span>{t('metrics.purity')}</span><strong>{frame ? number(frame.purity) : '—'}<small>{t(frame && frame.purity > 1 - 1e-8 ? 'metrics.pure' : 'metrics.mixed')}</small></strong></div></div>
-
-      <div className="research-grid">
-        <section className="panel graph-panel"><div className="panel-header"><div><div className="eyebrow">{t('graph.space')}</div><h2>{t(`graph.presets.${kind}`)} <span className="subtle">/ {t('graph.vertices', { count: kind==='custom'?custom.vertices.length:size })}</span></h2></div><span className="pill">{graph ? t('graph.edges', { count: graph.edges.length }) : t('graph.unknownEdges')}</span></div>
-          {graph ? <GraphView graph={graph} probabilities={frame?.vertex_probabilities??[]} selected={selected} onSelect={(vertex) => { if (!busy) setSelected(vertex); }} editor={kind==='custom'?{
-            vertices:custom.vertices,mode:editMode,edgeStart,selectedEdge,disabled:locked,
-            onCanvas:position=>{if(editMode==='addVertex')createVertex(position);},onNode:selectNode,
-            onEdge:edge=>{setSelectedEdge(edge);if(editMode==='delete')deleteConnection(edge);},onMove:(id,position)=>edit(moveVertex(custom,id,position),false),
-          }:undefined} /> : <div className="graph-placeholder">{graphLoading ? <><span className="loading-orbit" />{t('graph.preparing')}</> : <>{t('graph.startBackend')}</>}</div>}
-          {kind==='custom'&&<p className="graph-editor-caption">{selectedEdge?t('components:editor.endpoints',{a:vertexLabel(selectedEdge[0]),b:vertexLabel(selectedEdge[1])}):t('components:editor.undirected')}</p>}
-          <div className="graph-legend"><span><i className="legend-selected" /> {t('graph.selectedVertex')}</span><span><i className="legend-gradient" /> P(x) = 0 → 1</span><span className="legend-note">{t(mode === 'vertex' ? 'research:born.vertex' : 'graph.incomingMarginal')}</span></div>
-        </section>
-
-        <section className="panel inspector-panel"><div className="panel-header"><div><div className="eyebrow">{t('inspector.operator')}</div><h2>{t('inspector.matrix')} <span className="math">S(x)</span></h2></div></div>
-          <div className="node-select"><label htmlFor="selected-node">{t('inspector.vertex')}</label><select id="selected-node" value={selected} disabled={locked || !graph?.vertices.length} onChange={(event) => {setSelected(Number(event.target.value));setSelectedEdge(null);}}>{graph?.vertices.map((vertex) => <option key={vertex} value={vertex}>{vertexLabel(vertex)}</option>)}</select><span>{t('inspector.degree', { degree: currentNeighbors.length })}</span></div>
-          {kind==='custom'&&custom.vertices.some(v=>v.id===selected)&&<><VertexName id={selected} label={custom.vertices.find(v=>v.id===selected)!.label} busy={locked} onRename={label=>attempt(()=>edit(renameVertex(custom,selected,label),false))} />
-            {matrixProblem(custom,selected)&&<p className="support-notice">{t('components:editor.matrixReview',{ports:currentNeighbors.join(', ')})}</p>}
-            {custom.matrices[selected]&&matrixProblem(custom,selected)==='changedPorts'&&<details><summary>{t('components:editor.retainedMatrix',{ports:custom.matrices[selected].ports.join(', ')})}</summary><pre className="record-line">{JSON.stringify(custom.matrices[selected].matrix,null,2)}</pre></details>}</>}
-          {graph&&graph.vertices.includes(selected) ? <MatrixEditor vertex={selected} neighbors={currentNeighbors} matrix={kind==='custom'&&matrixProblem(custom,selected)==='changedPorts'?emptyMatrix:graph.scattering[String(selected)]??emptyMatrix} busy={locked} onApply={applyMatrix} onPreset={(value) => void nodePreset(value)} draftValue={kind==='custom'?custom.matrixDrafts[selected]:presetDrafts[selected]} onDraftChange={matrixDraft} /> : <p className="muted">{t('inspector.empty')}</p>}
-          {graph&&currentNeighbors.length>0&&<div className="matrix-extra"><button className="text-button" disabled={locked} onClick={()=>void nodePreset('identity')}>{t('components:editor.identity')}</button>
-            <label>{t('components:editor.copyFrom')}<select value="" disabled={locked} onChange={e=>void copyMatrix(Number(e.target.value),[selected])}><option value="">{t('components:editor.choose')}</option>{graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length&&(kind==='custom'?!matrixProblem(custom,x):presetDrafts[x]===undefined)).map(x=><option key={x} value={x}>{vertexLabel(x)}</option>)}</select></label>
-            <button className="text-button" disabled={locked||(kind==='custom'?!!matrixProblem(custom,selected):presetDrafts[selected]!==undefined)} onClick={()=>void copyMatrix(selected,graph.vertices.filter(x=>x!==selected&&graph.neighbors[x].length===currentNeighbors.length))}>{t('components:editor.applySameDegree')}</button><p className="muted small">{t('components:editor.seedHelp',{seed})}</p></div>}
-          <div className="operator-formula">U<sub>S</sub> |xy⟩ = ∑<sub>z∼x</sub> S<sub>zy</sub>(x) |zx⟩</div>
-        </section>
-
-        <section className="panel distribution-panel"><div className="panel-header"><div><div className="eyebrow">{t('distribution.observable')}</div><h2>{t('distribution.title')}</h2></div><div className="segmented"><button className={distribution === 'vertex' ? 'active' : ''} onClick={() => setDistribution('vertex')} aria-pressed={distribution === 'vertex'}>{t('distribution.vertices')}</button><button className={distribution === 'edge' ? 'active' : ''} disabled={mode === 'vertex'} onClick={() => setDistribution('edge')} aria-pressed={distribution === 'edge'}>{t('distribution.edges')}</button></div></div>
+<div className="research-grid">{graph && frame && <StateGraph graph={graph} probabilities={frame.vertex_probabilities} vertices={kind==='custom'?custom.vertices:undefined} selected={selected} onSelect={setSelected} />}        <section className="panel distribution-panel"><div className="panel-header"><div><div className="eyebrow">{t('distribution.observable')}</div><h2>{t('distribution.title')}</h2></div><div className="segmented"><button className={distribution === 'vertex' ? 'active' : ''} onClick={() => setDistribution('vertex')} aria-pressed={distribution === 'vertex'}>{t('distribution.vertices')}</button><button className={distribution === 'edge' ? 'active' : ''} disabled={mode === 'vertex'} onClick={() => setDistribution('edge')} aria-pressed={distribution === 'edge'}>{t('distribution.edges')}</button></div></div>
           {graph && frame ? <ProbabilityPlot labels={distribution === 'vertex' ? graph.vertices.map((x) => t('distribution.vertexLabel', { vertex: x })) : graph.directed_edges.map(([x, y]) => t('distribution.edgeLabel', { source: y, target: x }))} probabilities={distribution === 'vertex' ? frame.vertex_probabilities : frame.edge_probabilities} selected={distribution === 'vertex' ? graph.vertices.indexOf(selected) : undefined} /> : <div className="chart-placeholder">{t('distribution.empty')}</div>}
           <div className="distribution-footer"><span>{distribution === 'vertex' ? (mode === 'vertex' ? 'Pₜ(x) = ⟨x|ρₜ|x⟩' : 'Pₜ(x) = ∑ᵧ∼ₓ ⟨xy|ρₜ|xy⟩') : 'Pₜ(xy) = ⟨xy|ρₜ|xy⟩'}</span><span>Σ P = {frame ? number((mode === 'vertex' ? frame.vertex_probabilities : frame.edge_probabilities).reduce((sum, p) => sum + p, 0), 6) : '—'}</span></div>
         </section>
@@ -338,17 +383,34 @@ export default function App() {
         <section className="panel time-panel"><div className="panel-header"><div><div className="eyebrow">{t('dynamics.label')}</div><h2>{t('dynamics.title')}</h2></div><span className="pill">{simulation ? t('dynamics.states', { count: maxStep + 1 }) : 't = 0'}</span></div>
           {simulation && graph ? <ProbabilityPlot labels={graph.vertices.map((x) => t('distribution.vertexLabel', { vertex: x }))} probabilities={frame?.vertex_probabilities ?? []} history={simulation.frames.map((item) => ({ step: item.step, probabilities: item.vertex_probabilities }))} /> : <div className="timeline-empty"><div className="wave-symbol">∿</div><strong>{t('dynamics.emptyTitle')}</strong><p>{t('dynamics.emptyRun')}<br />{t('dynamics.emptyHistory')}</p></div>}
         </section>
+</div></div>
       </div>
-
-      <section className="playback-bar" aria-label={t('simulation.controls')}><div className="playback-buttons"><button title={t('simulation.previous')} aria-label={t('simulation.previous')} disabled={locked || cursor === 0} onClick={() => { setPlaying(false); setCursor(cursor - 1); }}>←</button><button disabled={!canSimulate || graphLoading || (!playing && cursor >= steps)} onClick={() => setPlaying(!playing)} aria-pressed={playing}>{t(playing ? 'research:playback.pause' : 'research:playback.play')}</button><button className="step-button" disabled={locked || !canSimulate || cursor >= 200} onClick={singleStep}>{t('simulation.step')} <span>→</span></button></div><div className="scrubber"><label htmlFor="time-slider">{t('simulation.timeline')} <strong>t = {frame?.step ?? 0}</strong></label><input id="time-slider" type="range" min="0" max={Math.max(1, maxStep)} value={cursor} disabled={locked || maxStep === 0} onChange={(event) => { setPlaying(false); setCursor(Number(event.target.value)); }} /></div><span className="playback-end">{t('simulation.stepCount', { count: maxStep })}</span></section>
-
-      {(mode === 'trajectory' || (mode === 'vertex' && vertexDynamics === 'trajectory')) && <section className="panel trajectory-panel"><div className="panel-header"><div><div className="eyebrow">{t('trajectory.log')}</div><h2>{t('trajectory.title')}</h2></div><span className="pill">{t('simulation.seed')} {seed}</span></div><p className="muted small">{t(mode === 'vertex' ? 'research:vertex.timing' : 'trajectory.timing')}</p>
+      <div hidden={section!=='trajectories'} data-destination="trajectories" tabIndex={-1}>
+        <div className="section-intro"><h2>{t('workspace.trajectoryTitle')}</h2><p>{t('workspace.trajectoryBody')}</p><button className="text-button" onClick={()=>onboarding.start('trajectory')}>{t('workspace.contextTutorial')}</button></div>
+        <ContextHelp topic="trajectory" />
+        {mode!=='trajectory' && !(mode==='vertex'&&vertexDynamics==='trajectory') && <div className="prerequisite-notice"><p>{t('workspace.trajectoryPrerequisites')}</p><button className="secondary-button" onClick={()=>navigate('simulation')}>{t('workspace.configureMode')}</button></div>}
+        {!canSimulate && <p className="support-notice">{t('workspace.inputPrerequisites')}</p>}
+      {(mode === 'trajectory' || (mode === 'vertex' && vertexDynamics === 'trajectory')) && <section className="panel trajectory-panel" data-tour="record"><div className="panel-header"><div><div className="eyebrow">{t('trajectory.log')}</div><h2>{t('trajectory.title')}</h2></div><span className="pill">{t('simulation.seed')} {seed}</span></div><p className="muted small">{t(mode === 'vertex' ? 'research:vertex.timing' : 'trajectory.timing')}</p>
         {simulation && cursor > 0 ? <><div className="outcome-list">{simulation.frames.slice(1, cursor + 1).map((item) => <button key={item.step} className={item.step === cursor ? 'outcome active' : 'outcome'} onClick={() => setCursor(item.step)} title={t('trajectory.conditionalProbability', { probability: item.measurement_probability === null ? '—' : number(item.measurement_probability, 6) })}><small>n = {item.step}</small><strong>x = {item.measurement}</strong><span>p = {item.measurement_probability === null ? '—' : number(item.measurement_probability, 3)}</span></button>)}</div><p className="small muted">{t('trajectory.probabilities')} {frame?.measurement_probabilities?.map((p, i) => `x=${graph?.vertices[i]}: ${number(p)}`).join(' · ')}</p></> : <p className="muted">{t('trajectory.empty')}</p>}
       </section>}
-      {mode === 'vertex' && graph && <VertexControls key={`${kind}/${size}/${importRevision}`} graph={graph} previousPorts={kind==='custom'?custom.omegaPorts:graph.neighbors} draft={vertexDrafts[vertexDraftKey]} onDraft={draft=>{setVertexDrafts(d=>({...d,[vertexDraftKey]:draft}));reset();}} parameters={effectiveParameters} busy={locked||!topologyReady||!matricesReady} onApply={applyParameters} />}
-      {(mode === 'trajectory' || mode === 'vertex' || mode === 'open') && graph && frame && canSimulate && <ResearchPanels
-        graph={graph} experiment={payload(steps)} cursor={cursor} frame={frame} />}
-      {mode !== 'unitary' && graph && canSimulate && <><nav className="research-navigation" aria-label={t('statistics:navigation')}><a href="#trajectory-statistics">{t('statistics:title')} ↓</a></nav><StationaryPanel experiment={payload(steps)} /><StatisticsPanel experiment={payload(steps)} graph={graph} /></>}
+</div>
+      <div hidden={section!=='analysis'} data-destination="analysis" tabIndex={-1}>
+        <div className="section-intro" data-tour="analysis"><h2>{t('workspace.analysisTitle')}</h2><p>{t('workspace.analysisBody')}</p></div>
+        <nav className="analysis-tabs" aria-label={t('workspace.analysisNavigation')}>{(['inspector','stationary','statistics'] as const).map(tab=><button key={tab} aria-current={analysisTab===tab?'page':undefined} onClick={()=>navigate(tab)}>{t(`workspace.destinations.${tab}`)}</button>)}</nav>
+        <p className="analysis-purpose">{t(`workspace.analysisPurpose.${analysisTab}`)}</p>
+        {(mode==='unitary'||!canSimulate) && <div className="prerequisite-notice"><h3>{t('workspace.prerequisites')}</h3><p>{t(mode==='unitary'?'workspace.analysisPrerequisites':'workspace.inputPrerequisites')}</p><button className="secondary-button" onClick={()=>navigate('simulation')}>{t('workspace.configureMode')}</button></div>}
+        <ContextHelp topic={analysisTab==='statistics'?'variance':analysisTab==='stationary'?'stationary':'conditional'} />
+      </div>
+      <fieldset className="scientific-tools" disabled={seedPending} aria-label={t('workspace.dependentTools')}>
+      {seedPending && (section==='analysis'||section==='trajectories') && <p className="support-notice">{t('workspace.seedDraft')}</p>}
+      {(mode === 'trajectory' || mode === 'vertex' || mode === 'open') && graph && frame && canSimulate && <ResearchPanels graph={graph} experiment={payload(steps)} cursor={cursor} frame={frame} showTrajectory={section==='trajectories'} showInspector={section==='analysis'&&analysisTab==='inspector'} />}
+      <div hidden={section!=='analysis'||analysisTab!=='stationary'} data-destination="stationary" data-tour="stationary" tabIndex={-1}>
+        {mode !== 'unitary' && graph && canSimulate && <StationaryPanel experiment={payload(steps)} />}
+        <ContextHelp topic="cesaro" /><button className="text-button" onClick={()=>onboarding.start('longtime')}>{t('workspace.contextTutorial')}</button>
+      </div>
+      <div hidden={section!=='analysis'||analysisTab!=='statistics'} data-destination="statistics" tabIndex={-1}>{mode !== 'unitary' && graph && canSimulate && <StatisticsPanel experiment={payload(steps)} graph={graph} />}</div>
+      </fieldset>
+      <div hidden={section!=='learn'} data-destination="learn" tabIndex={-1}><LearnPanel startTour={onboarding.start} /></div>
       <footer className="workspace-footer"><span>|xy⟩ ≡ y → x <span>·</span> {t('footer.graphClass')}</span><span>{t('footer.distinction')}</span></footer>
     </main>
   </div>;

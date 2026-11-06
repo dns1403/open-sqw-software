@@ -49,7 +49,7 @@ export function VertexControls({ graph, parameters = {}, busy, onApply, draft, o
   </details></section>;
 }
 
-export default function ResearchPanels({ graph, experiment, cursor, frame }: { graph: GraphData; experiment: SimulationRequest; cursor: number; frame: Frame }) {
+export default function ResearchPanels({ graph, experiment, cursor, frame, showTrajectory = true, showInspector = true }: { showTrajectory?: boolean; showInspector?: boolean; graph: GraphData; experiment: SimulationRequest; cursor: number; frame: Frame }) {
   const { t, i18n } = useTranslation('research');
   const number = (v: number, digits = 4) => formatNumber(v, i18n.resolvedLanguage ?? 'en', digits);
   const vertex = experiment.mode === 'vertex';
@@ -99,7 +99,7 @@ export default function ResearchPanels({ graph, experiment, cursor, frame }: { g
   }
 
   return <>
-    <section className="panel research-panel state-summary">
+    <section className="panel research-panel state-summary" data-tour="conditional" hidden={!showTrajectory}>
       <div className="eyebrow">{t('state.title')}</div><h2>{t(`stage.${frame.stage ?? 'initial'}`)} <span className="subtle">t = {frame.step}</span></h2>
       <p>{t(vertex ? 'state.vertexMeaning' : 'state.edgeMeaning')}</p>
       {frame.atom_id != null && <p><strong>{t('state.currentAtom')}: </strong>{vertex ? frame.atom_vertex : `(${frame.atom_edge?.join(', ')})`} · {vertex ? 'χ(Xₙ)' : 'ηₑ = U|e⟩'}</p>}
@@ -107,7 +107,7 @@ export default function ResearchPanels({ graph, experiment, cursor, frame }: { g
       <p className="muted small">{t(vertex ? 'state.vertexTiming' : 'state.edgeTiming')}</p>
     </section>
 
-    <section className="panel research-panel ensemble-panel">
+    <section className="panel research-panel ensemble-panel" data-tour="ensemble" data-destination="ensemble" tabIndex={-1} hidden={!showTrajectory}>
       <div className="panel-header"><div><div className="eyebrow">{t('ensemble.eyebrow')}</div><h2>{t('ensemble.title')}</h2></div><span className="pill">{t(`strategy.${experiment.strategy ?? 'reference'}`)}</span></div>
       <p className="muted small">{t('ensemble.help')}</p>
       <div className="research-actions"><label htmlFor="trajectory-count">{t('ensemble.count')}</label><input id="trajectory-count" type="number" min="1" max="100000" value={count} disabled={ensembleBusy} onChange={(e) => { setCount(Math.max(1, Math.min(100000, Math.trunc(Number(e.target.value)) || 1))); setEnsemble(null); setEnsembleError(null); }} />
@@ -125,7 +125,7 @@ export default function ResearchPanels({ graph, experiment, cursor, frame }: { g
       </>}
     </section>
 
-    <section className="panel research-panel markov-panel"><div className="panel-header"><div><div className="eyebrow">{t('markov.eyebrow')}</div><h2>{t('markov.title')}</h2></div></div>
+    <section className="panel research-panel markov-panel" data-tour="inspector" data-destination="inspector" tabIndex={-1} hidden={!showInspector}><div className="panel-header"><div><div className="eyebrow">{t('markov.eyebrow')}</div><h2>{t('markov.title')}</h2></div></div>
       <p className="muted small">{t(vertex ? 'markov.vertexConvention' : 'markov.edgeConvention')}</p>
       <div className="research-actions"><label htmlFor="atom-select">{t('state.label')}</label><select id="atom-select" value={atom} disabled={analysisBusy} onChange={(e) => { setAtom(Number(e.target.value)); setAnalysis(null); }}>{atomLabels.map((label, i) => <option value={i} key={i}>{label}</option>)}</select><button className="secondary-button" disabled={analysisBusy} onClick={() => void inspect()}>{t(analysisBusy ? 'markov.loading' : 'markov.inspect', { step: cursor })}</button></div>
       {analysisError !== null && <p role="alert" className="field-error">{formatError(analysisError, t)}</p>}

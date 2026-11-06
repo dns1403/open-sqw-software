@@ -1,3 +1,4 @@
+import { visit } from './workspaceActions';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -98,14 +99,14 @@ beforeEach(async () => {
 
 describe('live experiment language switching', () => {
   it('preserves graph, selected matrix, initial state, seed and simulation progress without a new request', async () => {
-    render(<App />);
+    render(<App />);visit('simulation');
     await waitFor(() => expect(field<HTMLSelectElement>('initial-edge').options).toHaveLength(12));
-    await userEvent.selectOptions(field('graph-kind'), 'path');
+    visit('graph');await userEvent.selectOptions(field('graph-kind'), 'path');
     await waitFor(() => expect(field<HTMLSelectElement>('initial-edge').options).toHaveLength(10));
     await userEvent.selectOptions(field('graph-size'), '3');
     await waitFor(() => expect(field<HTMLSelectElement>('initial-edge').options).toHaveLength(4));
     await userEvent.selectOptions(field('selected-node'), '1');
-    await userEvent.selectOptions(field('initial-kind'), 'uniform');
+    visit('simulation');await userEvent.selectOptions(field('initial-kind'), 'uniform');
     fireEvent.change(field('seed'), { target: { value: '17' } });
     fireEvent.blur(field('seed'));
     await waitFor(() => expect(requests.at(-1)?.body.seed).toBe(17));
@@ -113,12 +114,12 @@ describe('live experiment language switching', () => {
     // A seed update recreates the graph by design. Select and edit afterward.
     await userEvent.selectOptions(field('selected-node'), '1');
     await userEvent.click(screen.getByRole('button', { name: /^Φ\s*Open$/ }));
-    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    if(document.getElementById('workspace-navigation'))visit('graph');await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
     const custom = '[[[1,0],[0,0]],[[0,0],[0,1]]]';
     fireEvent.change(field('matrix-json'), { target: { value: custom } });
     await userEvent.click(screen.getByRole('button', { name: 'Validate & apply matrix' }));
     await waitFor(() => expect(document.getElementById('matrix-json')).toBeNull());
-    fireEvent.change(field('steps'), { target: { value: '4' } });
+    visit('simulation');fireEvent.change(field('steps'), { target: { value: '4' } });
     await userEvent.click(button('.run-button'));
     await waitFor(() => expect(field<HTMLInputElement>('time-slider').value).toBe('4'));
     fireEvent.change(field('time-slider'), { target: { value: '2' } });
@@ -149,9 +150,9 @@ describe('live experiment language switching', () => {
   });
 
   it('retains an unsubmitted complex matrix draft while changing labels', async () => {
-    render(<App />);
+    render(<App />);visit('simulation');
     await waitFor(() => expect(button('.run-button')).toBeEnabled());
-    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    if(document.getElementById('workspace-navigation'))visit('graph');await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
     const draft = '[[[0.123456789,-0.5],[1,0]],[[0,1],[0.25,0]]]';
     fireEvent.change(field('matrix-json'), { target: { value: draft } });
     const count = requests.length;
@@ -164,7 +165,7 @@ describe('live experiment language switching', () => {
   });
 
   it('preserves an uncommitted seed draft without regenerating the experiment on switch', async () => {
-    render(<App />);
+    render(<App />);visit('simulation');
     await waitFor(() => expect(button('.run-button')).toBeEnabled());
     await userEvent.click(button('.run-button'));
     await waitFor(() => expect(field<HTMLInputElement>('time-slider').value).toBe('12'));
@@ -180,6 +181,11 @@ describe('live experiment language switching', () => {
     await switchTo('en');
     expect(field<HTMLInputElement>('seed').value).toBe('12345');
     expect(requests).toHaveLength(count);
+    // Leaving the workspace must not commit this still-unapplied seed draft.
+    await userEvent.click(screen.getByRole('navigation', { name: 'Main navigation' }).querySelectorAll('button')[1]);
+    visit('simulation');
+    expect(field<HTMLInputElement>('seed').value).toBe('12345');
+    expect(requests).toHaveLength(count);
     // A later ordinary blur still commits the draft through the original path.
     await userEvent.click(field('seed'));
     await userEvent.click(field('steps'));
@@ -187,7 +193,7 @@ describe('live experiment language switching', () => {
   });
 
   it('retranslates an existing server error without repeating the failed request', async () => {
-    render(<App />);
+    render(<App />);visit('simulation');
     await waitFor(() => expect(button('.run-button')).toBeEnabled());
     rejectSimulation = true;
     await userEvent.click(button('.run-button'));
@@ -203,7 +209,7 @@ describe('live experiment language switching', () => {
   });
 
   it('keeps an in-flight simulation alive and renders its result in the selected language', async () => {
-    render(<App />);
+    render(<App />);visit('simulation');
     await waitFor(() => expect(button('.run-button')).toBeEnabled());
     const graph = graphFixture('cycle', 6);
     let resolveReply!: (response: Response) => void;
@@ -233,7 +239,7 @@ describe('live experiment language switching', () => {
     i18n.options.saveMissing = true;
     i18n.on('missingKey', missingKey);
     try {
-      render(<App />);
+      render(<App />);visit('simulation');
       await waitFor(() => expect(button('.run-button')).toBeEnabled());
       for (const language of ['de', 'en'] as const) {
         // Native buttons support keyboard activation, not just pointer clicks.
@@ -258,7 +264,7 @@ describe('live experiment language switching', () => {
 describe('component translation and numerical invariance', () => {
   it('retranslates local validation and preserves the malformed draft', async () => {
     render(<MatrixEditor vertex={1} neighbors={[0, 2]} matrix={[[[1, 0], [0, 0]], [[0, 0], [1, 0]]]} busy={false} onApply={vi.fn()} onPreset={vi.fn()} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    if(document.getElementById('workspace-navigation'))visit('graph');await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
     fireEvent.change(field('matrix-json'), { target: { value: '{invalid' } });
     await userEvent.click(screen.getByRole('button', { name: 'Validate & apply matrix' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Enter valid JSON');

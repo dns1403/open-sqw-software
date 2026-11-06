@@ -131,5 +131,303 @@
   "footer": {
     "graphClass": "Finite, simple, connected graphs",
     "distinction": "Vertex marginal ≠ induced Vertex Walk"
+  },
+  "workspace": {
+    "menu": "Workspace menu",
+    "navigation": "Main navigation",
+    "local": "Local research workspace",
+    "persistence": "Save your work with Export Experiment.",
+    "nav": {
+      "overview": "Overview",
+      "graph": "Graph & Matrices",
+      "simulation": "Simulation",
+      "trajectories": "Quantum Trajectories",
+      "analysis": "Analysis",
+      "learn": "Learn & Help"
+    },
+    "skipContent": "Skip to workspace",
+    "summary": "Current experiment",
+    "matrices": "Matrices",
+    "valid": "Applied & valid",
+    "review": "Needs review",
+    "status": "Experiment status",
+    "ready": "Ready to simulate",
+    "busy": "Working…",
+    "workflow": "Experiment workflow",
+    "steps": {
+      "graph": "Choose graph",
+      "matrices": "Set matrices",
+      "initial": "Prepare state",
+      "simulation": "Simulate",
+      "analysis": "Analyze"
+    },
+    "resultsReady": "Results available",
+    "notRun": "Not run yet",
+    "available": "Available",
+    "configured": "Configured",
+    "prerequisites": "Prerequisites",
+    "hero": {
+      "eyebrow": "YOUR EXPERIMENT STARTS HERE",
+      "title": "Explore a walk, one question at a time.",
+      "body": "Build a graph, define local scattering, and follow quantum dynamics. Your experiment stays with you as you move between workspaces."
+    },
+    "startTour": "Start tour",
+    "restartTour": "Restart introduction",
+    "entry": {
+      "build": {
+        "title": "Build a graph",
+        "body": "Start from a preset or edit your own vertices, edges and matrices."
+      },
+      "walk": {
+        "title": "Run a simulation",
+        "body": "Choose a model and initial state, then explore each time step."
+      },
+      "trajectory": {
+        "title": "Follow a quantum trajectory",
+        "body": "Read measured outcomes and compare independent paths with the exact mean."
+      },
+      "longtime": {
+        "title": "Explore long-time dynamics",
+        "body": "Find closed classes, stationary laws and initial-dependent limits."
+      },
+      "open": {
+        "title": "Open a saved experiment",
+        "body": "Import a validated JSON document or export your custom experiment."
+      },
+      "tour": {
+        "title": "Take a guided tour",
+        "body": "Learn where things live. Optional, restartable, and safe for your work."
+      }
+    },
+    "directory": "All tools, in one place",
+    "directoryHint": "Every link opens the relevant workspace. Advanced tools remain available when their mathematical prerequisites are met.",
+    "destinations": {
+      "graph": "Graph builder",
+      "matrices": "Scattering matrices",
+      "parameters": "Vertex preparation: ω & β",
+      "files": "Experiment files",
+      "initial": "Initial state",
+      "simulation": "Models & execution",
+      "results": "Simulation results",
+      "trajectories": "Individual trajectory",
+      "ensemble": "Independent ensembles",
+      "inspector": "Markov & quantum inspector",
+      "stationary": "Long-time dynamics",
+      "statistics": "Statistics & uncertainty"
+    },
+    "features": {
+      "presets": "Path, cycle, complete graph and star presets",
+      "builder": "Custom copies; add, connect and delete vertices or edges",
+      "layout": "Stable IDs, display labels, layout and graph validation",
+      "coins": "Local and global DFT, Grover, identity, Hadamard, random and permutation presets",
+      "editing": "Complex cell / JSON editing and unitary validation",
+      "bindings": "Port review, retained matrices and copy by degree",
+      "omega": "Complex preparation amplitudes and phases",
+      "files": "Validated JSON import and explicit export",
+      "preparation": "Basis, uniform, maximally mixed, pure and density-matrix inputs",
+      "modes": "Unitary, open, trajectory and induced Vertex Walk",
+      "execution": "Exact optimized / reference execution, steps and seeds",
+      "playback": "Play / pause, single step, reset and timeline",
+      "plots": "Vertex / edge probabilities, time evolution and purity",
+      "record": "Measurement record and conditional probabilities",
+      "conditional": "Conditional quantum state and atom stage",
+      "ensemble": "Empirical Born laws versus exact means; atom counts",
+      "histories": "Ensemble timeline, heatmap and sampled histories",
+      "atoms": "Prepared atom kets, transition laws and full M / P",
+      "densities": "Current and post-measurement density matrices",
+      "classes": "Transition support, communicating classes and periods",
+      "stationary": "Stationary laws, absorption weights and quantum barycenters",
+      "cesaro": "Finite-time and Cesàro comparisons",
+      "observables": "Label, outcome, Born and coherence observables",
+      "poisson": "Classwise Poisson means, variances and residuals",
+      "uncertainty": "Sampling, warm-up, class initialization and CLT intervals"
+    },
+    "graphTitle": "Define the space and local scattering",
+    "graphBody": "Choose a graph, then select a vertex on the canvas or in the inspector to edit its matrix. Labels and layout are display-only.",
+    "bulkMatrices": "Advanced: scattering at all vertices",
+    "matrixUtilities": "Advanced: reset and copy matrices",
+    "parametersTitle": "Advanced: Vertex Walk preparation (ω, β)",
+    "parametersHint": "These parameters belong to the induced Vertex Walk. Choose that model in Simulation to edit them.",
+    "filesTitle": "Save & open experiments",
+    "simulationTitle": "Prepare, run, and inspect",
+    "simulationBody": "Select a model and prepare its state. Run the experiment, then move through the retained states on the timeline.",
+    "configureMode": "Configure in Simulation",
+    "inputPrerequisites": "Review graph connectivity, matrix port bindings, unapplied drafts, and the initial state before using this experiment.",
+    "reviewInputs": "Review required inputs",
+    "trajectoryTitle": "One observed path, many possible paths",
+    "trajectoryBody": "Read the observation record separately from the conditional quantum state. Independent ensembles compare sampled states with the exact mean.",
+    "trajectoryPrerequisites": "For an individual record, select Trajectory or Vertex Walk with trajectory dynamics, then run a simulation. Open mode also supports the independent ensemble comparison below.",
+    "contextTutorial": "Guide me through this workspace",
+    "analysisTitle": "Ask a long-time or statistical question",
+    "analysisBody": "Use the current experiment to inspect its reduced chain, stationary structure, or class-conditional fluctuations. Each tool states its assumptions.",
+    "analysisNavigation": "Analysis workspaces",
+    "analysisPrerequisites": "Exact Markov reductions apply to Open, Trajectory and Vertex Walk models with the supported instruments. Choose one in Simulation; the unitary walk has no such reduction here.",
+    "analysisPurpose": {
+      "inspector": "Inspect a prepared atom, its next transitions and the current quantum density. Uses the selected timeline step and the supported exact reduction.",
+      "stationary": "Find closed classes and periods, then combine their stationary laws using the current input's absorption probabilities. Ordinary convergence and Cesàro convergence are distinct.",
+      "statistics": "Choose a real observable and study Poisson equations within each irreducible closed class. Periodicity is allowed; multiple reachable classes do not imply one global Gaussian."
+    },
+    "learnTitle": "A guide beside your experiment",
+    "learnBody": "Tours guide real controls without changing scientific inputs automatically. Skip at any point and restart whenever you need. Your current language and experiment remain in place.",
+    "launchTutorial": "Start this tutorial",
+    "glossary": "Concepts at a glance",
+    "exampleTitle": "Practice without replacing your work",
+    "exampleBody": "Open an independent three-vertex cycle with Fourier scattering in a new tab. Your current experiment, including unapplied drafts, stays in this tab. Nothing is saved automatically.",
+    "openExample": "Open practice experiment",
+    "exampleActive": "Practice workspace · three-vertex cycle at startup. Your original experiment remains in its own tab.",
+    "tours": {
+      "intro": {
+        "title": "Find your way around",
+        "body": "Seven stops from the overview to analysis and help."
+      },
+      "walk": {
+        "title": "Your first quantum walk",
+        "body": "Choose a graph, inspect scattering, prepare a state, run and read the timeline."
+      },
+      "trajectory": {
+        "title": "Understand a quantum trajectory",
+        "body": "Follow outcomes, conditional states and ensembles without confusing their meanings."
+      },
+      "longtime": {
+        "title": "Explore long-time behavior",
+        "body": "Analyze classes, stationary laws, Cesàro means and statistical fluctuations."
+      }
+    },
+    "next": "Next",
+    "previous": "Back",
+    "finish": "Finish",
+    "skipTour": "Skip tour",
+    "tourProgress": "Step {{current}} of {{total}}",
+    "tourLanguage": {
+      "en": "Tour in English",
+      "de": "Tour in German"
+    },
+    "tourUnavailable": "This control is currently unavailable. Review the model and input prerequisites in Simulation. You can continue or restart this tutorial afterwards.",
+    "help": {
+      "basis": {
+        "title": "How do I read |xy⟩?",
+        "body": "The directed edge |xy⟩ goes from y to x. Ordered physical basis entries bind pure and mixed input states; editing a graph may require explicit review of that binding."
+      },
+      "matrix": {
+        "title": "What does the scattering matrix mean?",
+        "body": "At vertex x, rows index outgoing neighbors z and columns incoming neighbors y. S(x) must be unitary. Changing neighbors requires review even if the degree stays the same; matrix values are never silently repaired."
+      },
+      "trajectory": {
+        "title": "What is a quantum trajectory?",
+        "body": "A trajectory is a sequence of observed outcomes and conditional quantum states. Its current Born probabilities are not the outcome record, and a mean over independent trajectories is not a time average along one path."
+      },
+      "conditional": {
+        "title": "Conditional state or atom label?",
+        "body": "An edge atom labels ηₑ = U|e⟩, a coherent scattered state, not occupation of a basis edge. Edge atoms start at t = 2; vertex preparation atoms start at t = 1. The inspector distinguishes density after measurement from density after scattering."
+      },
+      "stationary": {
+        "title": "What is a stationary law?",
+        "body": "A stationary label law is invariant under the reduced Markov transition. Each closed class has its own law; absorption from the initial input determines mixture weights. Uniqueness, irreducibility and ordinary convergence are different properties. Quantum barycenters are separate outputs."
+      },
+      "cesaro": {
+        "title": "Why use a Cesàro average?",
+        "body": "A Cesàro average averages ensemble laws over time and can converge when a periodic chain keeps oscillating. It is distinct from a single-path empirical average. A periodic class removes a convergence guarantee for arbitrary inputs, not convergence for every individual input."
+      },
+      "variance": {
+        "title": "What does asymptotic variance tell me?",
+        "body": "The Poisson solution describes long-run fluctuations of a real observable within an irreducible closed class, including periodic classes. Zero asymptotic variance does not mean zero finite-time error. CLT intervals are pointwise asymptotic approximations and exclude transient bias; unstable solves or unresolved support approximations suppress them."
+      }
+    },
+    "tourSteps": {
+      "welcome": {
+        "title": "Welcome to your laboratory",
+        "body": "Start with a question or use the feature directory below. This optional tour changes only the visible workspace, never your scientific inputs."
+      },
+      "workflow": {
+        "title": "A workflow, not a wizard",
+        "body": "Graph → matrices → initial state → simulation → analysis. Status comes from your actual experiment. Every step is freely accessible, and the summary above stays current."
+      },
+      "graph": {
+        "title": "Your configuration space",
+        "body": "Select vertices on the graph to inspect their local scattering. Presets and the custom builder are beside the canvas. Dragging vertices changes only the layout."
+      },
+      "matrix": {
+        "title": "Local scattering, explicit ports",
+        "body": "Select a vertex and inspect S(x). Rows are outgoing neighbors; columns incoming neighbors. Edit complex entries or apply a preset. Validate and apply changes before simulating."
+      },
+      "run": {
+        "title": "Run the current experiment",
+        "body": "Choose the number of steps and seed, then press Run simulation. The button is enabled only when the required inputs are valid and applied. Press Next when you are ready; this tour never runs a calculation automatically."
+      },
+      "analysis": {
+        "title": "Three focused analysis tools",
+        "body": "Inspect the reduced chain, analyze long-time dynamics, or study classwise statistics. Each tab explains its inputs and assumptions. These tools require a supported open or observed model."
+      },
+      "help": {
+        "title": "Return whenever you need",
+        "body": "Restart this tour, try a focused tutorial, or expand a concept explanation. A separate practice tab lets you experiment while keeping your current work intact."
+      },
+      "preset": {
+        "title": "Choose a starting graph",
+        "body": "Choose a preset and size, or keep your current graph. Changing a preset replaces its configuration. To practice safely, finish this tour and open the separate practice experiment from Learn & Help."
+      },
+      "initial": {
+        "title": "Prepare the physical state",
+        "body": "Choose a localized basis state, uniform superposition, or mixed state. Custom pure and density inputs use the displayed ordered basis. In |xy⟩ the direction is y → x."
+      },
+      "playback": {
+        "title": "Move through retained states",
+        "body": "After a run, use the slider or Previous step to inspect a state. Play and Single step can extend the history. The selected time is shared with the quantum inspector."
+      },
+      "results": {
+        "title": "Read probabilities and dynamics",
+        "body": "Compare the current vertex or edge distribution with the time evolution. The summary reports the actual time and purity. The edge walk's vertex marginal is distinct from the induced Vertex Walk."
+      },
+      "trajectoryMode": {
+        "title": "Choose an observed model",
+        "body": "Select Trajectory, or Vertex Walk with trajectory dynamics. This is an explicit scientific change and resets incompatible results. The tour does not choose a model for you."
+      },
+      "trajectoryRun": {
+        "title": "Sample an observed path",
+        "body": "Press Run simulation to obtain a reproducible trajectory for this seed. Then continue to read its record. Later ensemble sampling uses independent paths."
+      },
+      "record": {
+        "title": "The measurement record",
+        "body": "Each entry is an observed vertex outcome with its conditional probability. Select an entry to inspect that time. The displayed state after a step includes reduction and scattering."
+      },
+      "conditional": {
+        "title": "State is not outcome",
+        "body": "The conditional state retains quantum information. An edge atom ηₑ = U|e⟩ is a coherent scattered ket, not a basis-edge occupation. Guaranteed edge atoms begin at t = 2, vertex atoms at t = 1."
+      },
+      "ensemble": {
+        "title": "Compare independent paths",
+        "body": "Run an ensemble to compare empirical Born probabilities with the exact mean. Expand atom counts, heatmaps and selected histories. Independent ensemble counts are different from a single-path time average."
+      },
+      "atoms": {
+        "title": "Inspect the reduced representation",
+        "body": "Choose a preparation label and inspect the selected time. Edge weights evolve as M @ q; vertex preparation weights as q @ P. Expand the full transition matrix and quantum densities after calculation."
+      },
+      "analysisMode": {
+        "title": "Choose a supported reduction",
+        "body": "Select Open, Trajectory or Vertex Walk and review its inputs. Finite-time simulation is optional: the analysis uses your experiment directly."
+      },
+      "stationaryRun": {
+        "title": "Analyze the transition structure",
+        "body": "Press Analyze long-time dynamics. Review the support cutoff and any removed mass: tiny genuine rates can change infinite-time limits. Numerical residuals alone do not certify asymptotic accuracy."
+      },
+      "classes": {
+        "title": "Read classes and their weights",
+        "body": "Inspect closed communicating classes and periods from transition support. Stationary laws belong to each class; absorption of the current input determines mixture weights. Uniqueness does not by itself guarantee ordinary convergence."
+      },
+      "cesaro": {
+        "title": "Separate limits from averages",
+        "body": "Compare finite-time laws and ensemble Cesàro averages in the results. Periodic classes may oscillate. Keep stationary label measures, quantum barycenters and single-path empirical means distinct."
+      },
+      "statistics": {
+        "title": "Study fluctuations within a class",
+        "body": "Choose a real observable and analyze classwise Poisson means and variances. Irreducibility within a closed class is required; aperiodicity is not. CLT intervals are asymptotic and exclude transient bias."
+      }
+    },
+    "graphPreview": "Quantum state on the graph",
+    "selectVertex": "Select vertex {{vertex}}, probability {{probability}}",
+    "graphPreviewHint": "Node colors show current Born probabilities. Select a node to keep it selected in the matrix inspector.",
+    "seedDraft": "Seed draft not applied. Apply it in Simulation to use dependent tools.",
+    "applySeed": "Apply seed",
+    "dependentTools": "Tools using the current experiment"
   }
 }

@@ -131,5 +131,303 @@
   "footer": {
     "graphClass": "Endliche, einfache, zusammenhängende Graphen",
     "distinction": "Knotenmarginale ≠ induzierter Vertex Walk"
+  },
+  "workspace": {
+    "menu": "Arbeitsbereiche",
+    "navigation": "Hauptnavigation",
+    "local": "Lokaler Forschungsarbeitsplatz",
+    "persistence": "Arbeit mit „Experiment exportieren“ speichern.",
+    "nav": {
+      "overview": "Übersicht",
+      "graph": "Graph & Matrizen",
+      "simulation": "Simulation",
+      "trajectories": "Quantentrajektorien",
+      "analysis": "Analyse",
+      "learn": "Lernen & Hilfe"
+    },
+    "skipContent": "Zum Arbeitsbereich springen",
+    "summary": "Aktuelles Experiment",
+    "matrices": "Matrizen",
+    "valid": "Übernommen & gültig",
+    "review": "Prüfung erforderlich",
+    "status": "Experimentstatus",
+    "ready": "Bereit zur Simulation",
+    "busy": "In Bearbeitung …",
+    "workflow": "Experimentablauf",
+    "steps": {
+      "graph": "Graph wählen",
+      "matrices": "Matrizen festlegen",
+      "initial": "Zustand vorbereiten",
+      "simulation": "Simulieren",
+      "analysis": "Analysieren"
+    },
+    "resultsReady": "Ergebnisse vorhanden",
+    "notRun": "Noch nicht berechnet",
+    "available": "Verfügbar",
+    "configured": "Konfiguriert",
+    "prerequisites": "Voraussetzungen",
+    "hero": {
+      "eyebrow": "HIER BEGINNT DEIN EXPERIMENT",
+      "title": "Einen Walk Schritt für Schritt verstehen.",
+      "body": "Erstelle einen Graphen, definiere lokale Streuung und untersuche die Quantendynamik. Dein Experiment bleibt beim Wechsel der Arbeitsbereiche erhalten."
+    },
+    "startTour": "Tour starten",
+    "restartTour": "Einführung neu starten",
+    "entry": {
+      "build": {
+        "title": "Graph erstellen",
+        "body": "Mit einer Vorlage beginnen oder eigene Knoten, Kanten und Matrizen bearbeiten."
+      },
+      "walk": {
+        "title": "Simulation ausführen",
+        "body": "Modell und Anfangszustand wählen und jeden Zeitschritt untersuchen."
+      },
+      "trajectory": {
+        "title": "Quantentrajektorie verfolgen",
+        "body": "Messergebnisse lesen und unabhängige Pfade mit dem exakten Mittel vergleichen."
+      },
+      "longtime": {
+        "title": "Langzeitdynamik untersuchen",
+        "body": "Geschlossene Klassen, stationäre Gesetze und anfangsabhängige Grenzwerte bestimmen."
+      },
+      "open": {
+        "title": "Gespeichertes Experiment öffnen",
+        "body": "Geprüftes JSON-Dokument importieren oder ein eigenes Experiment exportieren."
+      },
+      "tour": {
+        "title": "Geführte Tour beginnen",
+        "body": "Die Funktionen kennenlernen. Freiwillig, wiederholbar und ohne Änderungen am Experiment."
+      }
+    },
+    "directory": "Alle Werkzeuge auf einen Blick",
+    "directoryHint": "Jeder Link öffnet den passenden Arbeitsbereich. Für erweiterte Werkzeuge gelten weiterhin die mathematischen Voraussetzungen.",
+    "destinations": {
+      "graph": "Grapheditor",
+      "matrices": "Streumatrizen",
+      "parameters": "Knotenpräparation: ω & β",
+      "files": "Experimentdateien",
+      "initial": "Anfangszustand",
+      "simulation": "Modelle & Berechnung",
+      "results": "Simulationsergebnisse",
+      "trajectories": "Einzelne Trajektorie",
+      "ensemble": "Unabhängige Ensembles",
+      "inspector": "Markov- & Quanteninspektor",
+      "stationary": "Langzeitdynamik",
+      "statistics": "Statistik & Unsicherheit"
+    },
+    "features": {
+      "presets": "Vorlagen für Pfad, Kreis, vollständigen Graphen und Stern",
+      "builder": "Eigene Kopien; Knoten und Kanten hinzufügen, verbinden und löschen",
+      "layout": "Stabile IDs, Anzeigenamen, Layout und Graphprüfung",
+      "coins": "Lokale und globale DFT-, Grover-, Identitäts-, Hadamard-, Zufalls- und Permutationsmatrizen",
+      "editing": "Komplexe Zellen / JSON bearbeiten und Unitarität prüfen",
+      "bindings": "Portzuordnung prüfen, Matrizen erhalten und nach Grad kopieren",
+      "omega": "Komplexe Präparationsamplituden und Phasen",
+      "files": "Geprüfter JSON-Import und ausdrücklicher Export",
+      "preparation": "Basis-, gleichverteilte, maximal gemischte, reine und Dichtematrix-Eingaben",
+      "modes": "Unitärer und offener Walk, Trajektorie und induzierter Knoten-Walk",
+      "execution": "Exakte optimierte / Referenzberechnung, Schritte und Seeds",
+      "playback": "Wiedergabe / Pause, Einzelschritt, Zurücksetzen und Zeitachse",
+      "plots": "Knoten- / Kantenwahrscheinlichkeiten, Zeitentwicklung und Reinheit",
+      "record": "Messprotokoll und bedingte Wahrscheinlichkeiten",
+      "conditional": "Bedingter Quantenzustand und Atomphase",
+      "ensemble": "Empirische Born-Gesetze gegen exakte Mittel; Atomzählungen",
+      "histories": "Ensemble-Zeitachse, Heatmap und Beispielpfade",
+      "atoms": "Präparierte Atom-Kets, Übergangsgesetze und vollständiges M / P",
+      "densities": "Aktuelle Dichtematrix und Dichtematrix nach der Messung",
+      "classes": "Übergangsträger, kommunizierende Klassen und Perioden",
+      "stationary": "Stationäre Gesetze, Absorptionsgewichte und Quantenbaryzentren",
+      "cesaro": "Vergleiche für endliche Zeiten und Cesàro-Mittel",
+      "observables": "Label-, Ergebnis-, Born- und Kohärenzobservablen",
+      "poisson": "Klassenweise Poisson-Mittelwerte, Varianzen und Residuen",
+      "uncertainty": "Stichproben, Aufwärmphase, Klasseninitialisierung und ZGWS-Intervalle"
+    },
+    "graphTitle": "Raum und lokale Streuung festlegen",
+    "graphBody": "Wähle einen Graphen und anschließend einen Knoten im Bild oder Inspektor, um seine Matrix zu bearbeiten. Namen und Layout dienen nur der Anzeige.",
+    "bulkMatrices": "Erweitert: Streuung an allen Knoten",
+    "matrixUtilities": "Erweitert: Matrizen zurücksetzen und kopieren",
+    "parametersTitle": "Erweitert: Knoten-Walk-Präparation (ω, β)",
+    "parametersHint": "Diese Parameter gehören zum induzierten Knoten-Walk. Wähle dieses Modell unter Simulation, um sie zu bearbeiten.",
+    "filesTitle": "Experimente speichern & öffnen",
+    "simulationTitle": "Vorbereiten, berechnen und untersuchen",
+    "simulationBody": "Wähle ein Modell und bereite seinen Zustand vor. Berechne das Experiment und untersuche die gespeicherten Zustände auf der Zeitachse.",
+    "configureMode": "Unter Simulation konfigurieren",
+    "inputPrerequisites": "Prüfe Zusammenhang, Portzuordnungen der Matrizen, nicht übernommene Entwürfe und Anfangszustand, bevor du dieses Experiment verwendest.",
+    "reviewInputs": "Erforderliche Eingaben prüfen",
+    "trajectoryTitle": "Ein beobachteter Pfad, viele mögliche Pfade",
+    "trajectoryBody": "Lies das Messprotokoll getrennt vom bedingten Quantenzustand. Unabhängige Ensembles vergleichen simulierte Zustände mit dem exakten Mittel.",
+    "trajectoryPrerequisites": "Für ein einzelnes Messprotokoll wähle Trajektorie oder Knoten-Walk mit Trajektoriendynamik und berechne eine Simulation. Im offenen Modus ist der Ensemblevergleich ebenfalls verfügbar.",
+    "contextTutorial": "Durch diesen Bereich führen",
+    "analysisTitle": "Eine Langzeit- oder Statistikfrage untersuchen",
+    "analysisBody": "Untersuche die reduzierte Kette, stationäre Struktur oder klassenbedingte Schwankungen des aktuellen Experiments. Jedes Werkzeug nennt seine Voraussetzungen.",
+    "analysisNavigation": "Analysebereiche",
+    "analysisPrerequisites": "Exakte Markov-Reduktionen gelten für offene Walks, Trajektorien und Knoten-Walks mit den unterstützten Instrumenten. Wähle eines dieser Modelle unter Simulation; für den unitären Walk ist hier keine solche Reduktion verfügbar.",
+    "analysisPurpose": {
+      "inspector": "Untersuche ein präpariertes Atom, seine nächsten Übergänge und die aktuelle Quantendichte. Verwendet den ausgewählten Zeitschritt und die unterstützte exakte Reduktion.",
+      "stationary": "Bestimme geschlossene Klassen und Perioden und kombiniere ihre stationären Gesetze mit den Absorptionswahrscheinlichkeiten des aktuellen Anfangszustands. Gewöhnliche Konvergenz und Cesàro-Konvergenz sind verschieden.",
+      "statistics": "Wähle eine reelle Observable und untersuche Poisson-Gleichungen in jeder irreduziblen geschlossenen Klasse. Periodizität ist erlaubt; mehrere erreichbare Klassen ergeben nicht eine globale Gauß-Verteilung."
+    },
+    "learnTitle": "Eine Anleitung neben deinem Experiment",
+    "learnBody": "Touren führen durch echte Bedienelemente, ohne wissenschaftliche Eingaben automatisch zu ändern. Du kannst jederzeit abbrechen und neu starten. Sprache und Experiment bleiben erhalten.",
+    "launchTutorial": "Diese Anleitung starten",
+    "glossary": "Begriffe auf einen Blick",
+    "exampleTitle": "Üben, ohne die eigene Arbeit zu ersetzen",
+    "exampleBody": "Öffne einen unabhängigen Kreis mit drei Knoten und Fourier-Streuung in einem neuen Tab. Dein aktuelles Experiment einschließlich nicht übernommener Entwürfe bleibt in diesem Tab. Es wird nichts automatisch gespeichert.",
+    "openExample": "Übungsexperiment öffnen",
+    "exampleActive": "Übungsbereich · beim Start ein Kreis mit drei Knoten. Dein ursprüngliches Experiment bleibt in seinem eigenen Tab.",
+    "tours": {
+      "intro": {
+        "title": "Die Oberfläche kennenlernen",
+        "body": "Sieben Stationen von der Übersicht bis zu Analyse und Hilfe."
+      },
+      "walk": {
+        "title": "Dein erster Quanten-Walk",
+        "body": "Graph wählen, Streuung prüfen, Zustand vorbereiten, berechnen und die Zeitachse lesen."
+      },
+      "trajectory": {
+        "title": "Eine Quantentrajektorie verstehen",
+        "body": "Messergebnisse, bedingte Zustände und Ensembles in ihrer jeweiligen Bedeutung verstehen."
+      },
+      "longtime": {
+        "title": "Langzeitverhalten untersuchen",
+        "body": "Klassen, stationäre Gesetze, Cesàro-Mittel und statistische Schwankungen untersuchen."
+      }
+    },
+    "next": "Weiter",
+    "previous": "Zurück",
+    "finish": "Abschließen",
+    "skipTour": "Tour beenden",
+    "tourProgress": "Schritt {{current}} von {{total}}",
+    "tourLanguage": {
+      "en": "Tour auf Englisch",
+      "de": "Tour auf Deutsch"
+    },
+    "tourUnavailable": "Dieses Bedienelement ist derzeit nicht verfügbar. Prüfe Modell und Eingabevoraussetzungen unter Simulation. Du kannst fortfahren oder die Anleitung anschließend neu starten.",
+    "help": {
+      "basis": {
+        "title": "Wie lese ich |xy⟩?",
+        "body": "Die gerichtete Kante |xy⟩ führt von y nach x. Geordnete physikalische Basiseinträge binden reine und gemischte Anfangszustände; nach Graphänderungen kann diese Zuordnung eine ausdrückliche Prüfung erfordern."
+      },
+      "matrix": {
+        "title": "Was bedeutet die Streumatrix?",
+        "body": "Am Knoten x stehen Zeilen für ausgehende Nachbarn z und Spalten für eingehende Nachbarn y. S(x) muss unitär sein. Nachbaränderungen erfordern auch bei gleichem Grad eine Prüfung; Matrixwerte werden niemals stillschweigend korrigiert."
+      },
+      "trajectory": {
+        "title": "Was ist eine Quantentrajektorie?",
+        "body": "Eine Trajektorie ist eine Folge beobachteter Ergebnisse und bedingter Quantenzustände. Ihre aktuellen Born-Wahrscheinlichkeiten sind nicht das Messprotokoll; ein Mittel über unabhängige Trajektorien ist kein Zeitmittel entlang eines Pfades."
+      },
+      "conditional": {
+        "title": "Bedingter Zustand oder Atomlabel?",
+        "body": "Ein Kantenatom bezeichnet ηₑ = U|e⟩, einen kohärenten gestreuten Zustand, keine Besetzung einer Basiskante. Kantenatome beginnen bei t = 2, Knotenpräparationsatome bei t = 1. Der Inspektor unterscheidet Dichte nach Messung und nach Streuung."
+      },
+      "stationary": {
+        "title": "Was ist ein stationäres Gesetz?",
+        "body": "Ein stationäres Labelgesetz bleibt unter dem reduzierten Markov-Übergang invariant. Jede geschlossene Klasse hat ein eigenes Gesetz; die Absorption aus dem Anfangszustand bestimmt die Mischungsgewichte. Eindeutigkeit, Irreduzibilität und gewöhnliche Konvergenz sind verschiedene Eigenschaften. Quantenbaryzentren sind eigene Ausgaben."
+      },
+      "cesaro": {
+        "title": "Warum ein Cesàro-Mittel?",
+        "body": "Ein Cesàro-Mittel mittelt Ensemblegesetze über die Zeit und kann trotz periodischer Schwingungen konvergieren. Es unterscheidet sich vom empirischen Mittel eines einzelnen Pfades. Eine periodische Klasse hebt die Konvergenzgarantie für beliebige Eingaben auf, nicht die Konvergenz für jede einzelne Eingabe."
+      },
+      "variance": {
+        "title": "Was sagt die asymptotische Varianz aus?",
+        "body": "Die Poisson-Lösung beschreibt langfristige Schwankungen einer reellen Observablen in einer irreduziblen geschlossenen Klasse, auch bei Periodizität. Asymptotische Varianz null bedeutet nicht Fehler null bei endlicher Zeit. ZGWS-Intervalle sind punktweise asymptotische Näherungen ohne transiente Verzerrung; bei instabilen Lösungen oder ungeklärter Trägernäherung werden sie unterdrückt."
+      }
+    },
+    "tourSteps": {
+      "welcome": {
+        "title": "Willkommen im Labor",
+        "body": "Beginne mit einer Frage oder nutze das Funktionsverzeichnis. Diese freiwillige Tour ändert nur den sichtbaren Arbeitsbereich, niemals deine wissenschaftlichen Eingaben."
+      },
+      "workflow": {
+        "title": "Ein Ablauf ohne Zwang",
+        "body": "Graph → Matrizen → Anfangszustand → Simulation → Analyse. Der Status folgt deinem tatsächlichen Experiment. Jeder Schritt ist frei erreichbar; die Zusammenfassung darüber bleibt aktuell."
+      },
+      "graph": {
+        "title": "Dein Konfigurationsraum",
+        "body": "Wähle Knoten im Graphen, um ihre lokale Streuung zu prüfen. Vorlagen und Grapheditor stehen neben dem Bild. Verschieben ändert nur das Layout."
+      },
+      "matrix": {
+        "title": "Lokale Streuung mit expliziten Ports",
+        "body": "Wähle einen Knoten und prüfe S(x). Zeilen sind ausgehende, Spalten eingehende Nachbarn. Bearbeite komplexe Einträge oder verwende eine Vorlage. Prüfe und übernimm Änderungen vor der Simulation."
+      },
+      "run": {
+        "title": "Das aktuelle Experiment berechnen",
+        "body": "Wähle Schrittzahl und Seed und drücke Simulation starten. Die Taste ist nur bei gültigen, übernommenen Eingaben aktiv. Gehe anschließend weiter; die Tour startet keine Berechnung automatisch."
+      },
+      "analysis": {
+        "title": "Drei gezielte Analysewerkzeuge",
+        "body": "Untersuche die reduzierte Kette, Langzeitdynamik oder klassenweise Statistik. Jeder Bereich erklärt Eingaben und Annahmen. Diese Werkzeuge benötigen ein unterstütztes offenes oder beobachtetes Modell."
+      },
+      "help": {
+        "title": "Jederzeit wieder einsteigen",
+        "body": "Starte diese Tour neu, probiere eine gezielte Anleitung oder öffne eine Begriffserklärung. Ein eigener Übungstab erhält deine aktuelle Arbeit."
+      },
+      "preset": {
+        "title": "Einen Ausgangsgraphen wählen",
+        "body": "Wähle Vorlage und Größe oder behalte deinen Graphen. Eine Vorlagenänderung ersetzt ihre Konfiguration. Zum sicheren Üben kannst du diese Tour beenden und unter Lernen & Hilfe das separate Übungsexperiment öffnen."
+      },
+      "initial": {
+        "title": "Den physikalischen Zustand vorbereiten",
+        "body": "Wähle einen lokalisierten Basiszustand, eine gleichmäßige Superposition oder einen gemischten Zustand. Eigene reine Zustände und Dichtematrizen verwenden die angezeigte Basisreihenfolge. In |xy⟩ ist die Richtung y → x."
+      },
+      "playback": {
+        "title": "Gespeicherte Zustände durchgehen",
+        "body": "Nach einer Berechnung kannst du mit Regler oder Vorheriger Schritt einen Zustand prüfen. Wiedergabe und Einzelschritt können den Verlauf erweitern. Die gewählte Zeit gilt auch im Quanteninspektor."
+      },
+      "results": {
+        "title": "Wahrscheinlichkeiten und Dynamik lesen",
+        "body": "Vergleiche die aktuelle Knoten- oder Kantenverteilung mit der Zeitentwicklung. Die Zusammenfassung zeigt tatsächliche Zeit und Reinheit. Das Knotenrandmaß des Kanten-Walks ist vom induzierten Knoten-Walk verschieden."
+      },
+      "trajectoryMode": {
+        "title": "Ein beobachtetes Modell wählen",
+        "body": "Wähle Trajektorie oder Knoten-Walk mit Trajektoriendynamik. Diese ausdrückliche wissenschaftliche Änderung setzt inkompatible Ergebnisse zurück. Die Tour wählt kein Modell für dich."
+      },
+      "trajectoryRun": {
+        "title": "Einen beobachteten Pfad simulieren",
+        "body": "Drücke Simulation starten, um für diesen Seed eine reproduzierbare Trajektorie zu erhalten. Lies anschließend ihr Protokoll. Die spätere Ensembleberechnung verwendet unabhängige Pfade."
+      },
+      "record": {
+        "title": "Das Messprotokoll",
+        "body": "Jeder Eintrag ist ein beobachtetes Knotenergebnis mit bedingter Wahrscheinlichkeit. Wähle einen Eintrag, um seine Zeit zu prüfen. Der Zustand nach einem Schritt enthält Reduktion und Streuung."
+      },
+      "conditional": {
+        "title": "Zustand und Messergebnis unterscheiden",
+        "body": "Der bedingte Zustand enthält Quanteninformation. Ein Kantenatom ηₑ = U|e⟩ ist ein kohärenter gestreuter Ket, keine Basiskantenbesetzung. Garantierte Kantenatome beginnen bei t = 2, Knotenatome bei t = 1."
+      },
+      "ensemble": {
+        "title": "Unabhängige Pfade vergleichen",
+        "body": "Berechne ein Ensemble und vergleiche empirische Born-Wahrscheinlichkeiten mit dem exakten Mittel. Öffne Atomzählungen, Heatmaps und Beispielpfade. Unabhängige Ensemblezählungen unterscheiden sich vom Zeitmittel eines Pfades."
+      },
+      "atoms": {
+        "title": "Die reduzierte Darstellung prüfen",
+        "body": "Wähle ein Präparationslabel und prüfe den gewählten Zeitpunkt. Kantengewichte folgen M @ q, Knotenpräparationsgewichte q @ P. Öffne nach der Berechnung die vollständige Übergangsmatrix und Quantendichten."
+      },
+      "analysisMode": {
+        "title": "Eine unterstützte Reduktion wählen",
+        "body": "Wähle Offen, Trajektorie oder Knoten-Walk und prüfe die Eingaben. Eine Simulation für endliche Zeiten ist optional: Die Analyse verwendet dein Experiment direkt."
+      },
+      "stationaryRun": {
+        "title": "Die Übergangsstruktur analysieren",
+        "body": "Drücke Langzeitdynamik analysieren. Prüfe Trägerschwelle und entfernte Masse: Winzige echte Übergangsraten können unendliche Zeitgrenzen ändern. Numerische Residuen allein bestätigen keine asymptotische Genauigkeit."
+      },
+      "classes": {
+        "title": "Klassen und ihre Gewichte lesen",
+        "body": "Prüfe geschlossene kommunizierende Klassen und Perioden aus dem Übergangsträger. Stationäre Gesetze gehören zu einzelnen Klassen; die Absorption des Anfangszustands bestimmt Mischungsgewichte. Eindeutigkeit allein garantiert keine gewöhnliche Konvergenz."
+      },
+      "cesaro": {
+        "title": "Grenzwerte und Mittel unterscheiden",
+        "body": "Vergleiche in den Ergebnissen Gesetze bei endlicher Zeit und Ensemble-Cesàro-Mittel. Periodische Klassen können oszillieren. Unterscheide stationäre Labelmaße, Quantenbaryzentren und empirische Einzelpfadmittel."
+      },
+      "statistics": {
+        "title": "Schwankungen innerhalb einer Klasse untersuchen",
+        "body": "Wähle eine reelle Observable und untersuche klassenweise Poisson-Mittelwerte und Varianzen. Irreduzibilität innerhalb einer geschlossenen Klasse ist nötig, Aperiodizität nicht. ZGWS-Intervalle sind asymptotisch und enthalten keine transiente Verzerrung."
+      }
+    },
+    "graphPreview": "Quantenzustand auf dem Graphen",
+    "selectVertex": "Knoten {{vertex}} wählen, Wahrscheinlichkeit {{probability}}",
+    "graphPreviewHint": "Knotenfarben zeigen aktuelle Born-Wahrscheinlichkeiten. Ein ausgewählter Knoten bleibt auch im Matrixinspektor ausgewählt.",
+    "seedDraft": "Seed-Entwurf noch nicht übernommen. Übernimm ihn unter Simulation, um abhängige Werkzeuge zu nutzen.",
+    "applySeed": "Seed übernehmen",
+    "dependentTools": "Werkzeuge für das aktuelle Experiment"
   }
 }

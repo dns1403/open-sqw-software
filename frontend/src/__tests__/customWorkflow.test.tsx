@@ -1,3 +1,4 @@
+import { visit, reveal } from './workspaceActions';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
@@ -26,14 +27,14 @@ function graph(spec:any,scattering?:Record<string,Matrix>):GraphData {
   return {vertices,edges,neighbors,directed_edges,dimension:directed_edges.length,scattering:scattering??Object.fromEntries(vertices.map(x=>[x,identity(neighbors[x].length)]))};
 }
 const field=(id:string)=>document.getElementById(id) as HTMLInputElement;
-const change=(id:string,value:string)=>fireEvent.change(field(id),{target:{value}});
-const click=(name:string)=>fireEvent.click(screen.getByRole('button',{name}));
+const change=(id:string,value:string)=>{reveal(field(id));fireEvent.change(field(id),{target:{value}});};
+const click=(name:string)=>{const target=screen.getByRole('button',{name,hidden:true});reveal(target);fireEvent.click(screen.getByRole('button',{name}));};
 const run=()=>document.querySelector('.run-button') as HTMLButtonElement;
 async function ready(){await waitFor(()=>expect(run()).toBeEnabled());}
-async function launch(){render(<App/>);await ready();}
+async function launch(){render(<App/>);await ready();visit('graph');}
 async function choosePreset(id:number,preset:string){change('selected-node',String(id));change('node-preset',preset);await waitFor(()=>expect(field('node-preset')).toBeEnabled());}
 function connect(a:number,b:number){fireEvent.change(screen.getByLabelText('First endpoint'),{target:{value:String(a)}});fireEvent.change(screen.getByLabelText('Second endpoint'),{target:{value:String(b)}});click('Connect vertices');}
-function upload(file:File){fireEvent.change(screen.getByLabelText('Experiment JSON file'),{target:{files:[file]}});}
+function upload(file:File){reveal(screen.getByLabelText('Experiment JSON file'));fireEvent.change(screen.getByLabelText('Experiment JSON file'),{target:{files:[file]}});}
 function fileFor(value:unknown){const file=new File(['payload'],'experiment.json',{type:'application/json'});Object.defineProperty(file,'text',{value:async()=>JSON.stringify(value)});return file;}
 
 beforeEach(async()=>{
@@ -71,14 +72,14 @@ describe('custom graph workflow',()=>{
     click('Validate & apply matrix');await waitFor(()=>expect(field('matrix-json')).toBeNull());
     change('initial-kind','uniform');await ready();
     for(const mode of ['unitary','open','trajectory','vertex']){
-      fireEvent.click(document.querySelectorAll('.mode')[['unitary','open','trajectory','vertex'].indexOf(mode)]);
+      visit('simulation');fireEvent.click(document.querySelectorAll('.mode')[['unitary','open','trajectory','vertex'].indexOf(mode)]);
       if(mode==='vertex')change('initial-kind','uniform');
-      await ready();fireEvent.click(run());await ready();
+      await ready();visit('simulation');fireEvent.click(run());await ready();
       const req=requests.at(-1)!.body as SimulationRequest;
       expect(req.mode).toBe(mode);expect(req.graph.neighbors).toEqual({'0':[1],'1':[0,2],'2':[1]});
       expect(req.scattering['0']).toEqual([[[0,1]]]);expect(req.scattering['1'][1][1][0]).toBe(-Math.SQRT1_2);
     }
-    click('Select / Move');const before=requests.length;
+    visit('graph');click('Select / Move');const before=requests.length;
     act(()=>canvas.current.handlers['dragfree/node']({target:{id:()=> '0',position:()=>({x:177,y:91})}}));
     fireEvent.change(screen.getByLabelText('Display label · stable ID 0'),{target:{value:'Alpha'}});click('Rename');
     expect(requests).toHaveLength(before);expect(canvas.current.options.elements.find((e:any)=>e.data.id==='0')).toBeDefined();
@@ -89,7 +90,7 @@ describe('custom graph workflow',()=>{
 
   it('retains incompatible matrices and custom drafts while preserving reusable presets',async()=>{
     await launch();change('graph-size','3');await ready();click('Customize this graph');await ready();
-    fireEvent.change(screen.getByLabelText('Selected undirected edge'),{target:{value:'[0,1]'}});click('Delete selected edge');
+    visit('graph');fireEvent.change(screen.getByLabelText('Selected undirected edge'),{target:{value:'[0,1]'}});click('Delete selected edge');
     expect(run()).toBeDisabled();expect(screen.getByText('Retained matrix · previous ports [1, 2]')).toBeInTheDocument();
     change('selected-node','2');expect(screen.getAllByTitle('1 + (0)i')).toHaveLength(2);
     await choosePreset(0,'identity');await choosePreset(1,'identity');expect(run()).toBeDisabled();
@@ -100,10 +101,10 @@ describe('custom graph workflow',()=>{
   });
 
   it('retains unapplied vertex parameter drafts across model changes and blocks vertex runs until validation',async()=>{
-    await launch();click('Customize this graph');fireEvent.click(document.querySelectorAll('.mode')[3]);change('initial-kind','uniform');await ready();
-    const omega=document.querySelectorAll('.research-columns textarea')[0] as HTMLTextAreaElement;
+    await launch();click('Customize this graph');visit('simulation');fireEvent.click(document.querySelectorAll('.mode')[3]);change('initial-kind','uniform');await ready();
+    const omega=document.querySelectorAll('.research-columns textarea')[0] as HTMLTextAreaElement;reveal(omega);
     fireEvent.change(omega,{target:{value:'{"unfinished":'}});expect(run()).toBeDisabled();
-    fireEvent.click(document.querySelectorAll('.mode')[0]);await ready();fireEvent.click(document.querySelectorAll('.mode')[3]);
+    visit('simulation');fireEvent.click(document.querySelectorAll('.mode')[0]);await ready();visit('simulation');fireEvent.click(document.querySelectorAll('.mode')[3]);
     expect((document.querySelectorAll('.research-columns textarea')[0] as HTMLTextAreaElement).value).toBe('{"unfinished":');expect(run()).toBeDisabled();
   });
 
@@ -113,7 +114,7 @@ describe('custom graph workflow',()=>{
       change('initial-kind',kind);expect(run()).toBeDisabled();click('Replace draft with valid template');click('Validate & use initial state');await ready();
       const req=requests.at(-1)!.body;expect(req.initial.kind).toBe(kind);expect((kind==='pure'?req.initial.vector:req.initial.density).length).toBe(6);
     }
-    fireEvent.change(screen.getByLabelText('Selected undirected edge'),{target:{value:'[0,1]'}});click('Delete selected edge');
+    visit('graph');fireEvent.change(screen.getByLabelText('Selected undirected edge'),{target:{value:'[0,1]'}});click('Delete selected edge');
     await choosePreset(0,'identity');await choosePreset(1,'identity');expect(run()).toBeDisabled();
     expect(JSON.parse(field('initial-json').value)).toHaveLength(6);expect(screen.getByText(/Dimension 4\./)).toBeInTheDocument();
     click('Replace draft with valid template');click('Validate & use initial state');await ready();expect(requests.at(-1)!.body.initial.density).toHaveLength(4);
@@ -134,7 +135,7 @@ describe('custom graph workflow',()=>{
     await screen.findByText('Experiment imported and validated.');await ready();
     expect((field('selected-node') as unknown as HTMLSelectElement).options).toHaveLength(2);
     expect(screen.getByTitle('0 + (1)i')).toBeInTheDocument();expect(field('seed').value).toBe('4294967295');
-    fireEvent.blur(field('seed'));fireEvent.click(run());await ready();expect(requests.at(-1)!.body.seed).toBe(4294967295);
+    fireEvent.blur(field('seed'));visit('simulation');fireEvent.click(run());await ready();expect(requests.at(-1)!.body.seed).toBe(4294967295);
   });
 
   it('rejects malformed imports without replacing the current custom experiment',async()=>{
