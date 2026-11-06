@@ -9,9 +9,27 @@ The mathematical reference is Alain Joye,
 **Convention: `|xy⟩` denotes an edge from `y` to `x`.** Vertex plots in the
 edge-walk modes show the incoming vertex marginal, not an induced vertex walk.
 
-![English interface with a simulated quantum trajectory](docs/screenshots/lab-en.jpg)
+![Overview with workflow and feature entry points](docs/screenshots/ui-overview.png)
 
-[View the same experiment in German](docs/screenshots/lab-de.jpg).
+[View the German mobile interface](docs/screenshots/ui-mobile-de.png).
+
+## Workspaces and guided help
+
+Start in **Overview**, with direct workflow entry points and a complete feature
+directory. **Graph & Matrices** contains presets, custom editing, local matrices,
+advanced ω/β preparation and experiment files. **Simulation** groups initial
+preparation, all four models, execution, graph probabilities and playback.
+**Quantum Trajectories** separates the measurement record, conditional state
+and independent ensemble comparison. **Analysis** has dedicated inspector,
+long-time and statistics tabs. **Learn & Help** provides concept explanations
+and four optional interactive tours.
+
+Navigation retains the experiment, unapplied drafts, computed results and
+analysis selections. A live summary and five-step workflow report actual
+readiness. Start, skip or restart tours without automatic scientific changes;
+language changes also preserve the current tour step. A practice example opens
+in a separate tab. Export/import remains the explicit way to save an experiment.
+See the [feature inventory and browser validation](docs/ui_ux_redesign.md).
 
 ## Languages
 

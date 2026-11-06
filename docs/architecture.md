@@ -285,3 +285,39 @@ stationary/Poisson eligibility, support policy, memory budgets or time indexing.
 See [custom graphs](custom_graphs.md) for schema, migration policy and persistence
 scope. JSON v1 intentionally rejects noncanonical port permutations. Session
 state and secondary analysis controls are not a new server-side storage model.
+
+## Workspaces and onboarding
+
+`App.tsx` owns one scientific experiment and a separate presentation-only
+destination. `Workspace.tsx` defines six sections and the complete feature
+directory. Analysis keeps its last subtab. Section switches use native `hidden`
+containers rather than unmounting the editor or research panels. ResearchPanels
+exposes separate visibility props for trajectory/ensemble and inspector content;
+its requests, results and selections keep their original lifetime. Mathematical
+input changes still invalidate the same serialized experiment keys. Navigation
+and translation never change those keys or send scientific requests.
+
+The existing Cytoscape editor remains authoritative for custom layout and port
+bindings. `StateGraph.tsx` is a read-only SVG probability view in Simulation;
+selection is shared with the matrix inspector. It displays existing Born laws
+and does not compute an alternative walk. Preparation supports basis, uniform,
+maximally mixed, arbitrary pure and density-matrix inputs.
+
+An uncommitted seed survives navigation/language/tour changes. Until explicitly
+applied (or committed by an ordinary field blur), new runs, exports and dependent
+analysis actions are blocked. Existing results remain mounted. No draft is
+automatically persisted.
+
+`onboarding.ts` adapts Driver.js to React destinations using stable `data-tour`
+anchors. Tours are opt-in; main introduction plus first-walk, trajectory and
+long-time tutorials have next/back/skip/restart. A language change rebuilds the
+current step without navigating. The adapter reveals ancestor disclosures,
+handles missing targets with a prerequisite explanation, refreshes target size,
+restores focus, and includes number/range inputs and summaries in keyboard
+navigation. Input arrow keys are not interpreted as tour navigation.
+
+Only introduction-seen metadata (`sqw-onboarding-v1`) is stored, alongside the
+existing explicit language choice. `?example=first-walk` initializes an
+independent three-vertex Fourier cycle in a new tab; the original tab retains
+all drafts and results. Reload still requires explicit JSON import to restore
+an experiment. See [UI audit and verification](ui_ux_redesign.md).
