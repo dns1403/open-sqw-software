@@ -47,7 +47,7 @@ export default function StatisticsPanel({ experiment, graph }: { experiment: Sim
   const scalar = (label:string,value:number) => <div><dt>{t(label)}</dt><dd>{number(value)}</dd></div>;
   return <section id="trajectory-statistics" className="panel research-panel statistics-panel" aria-labelledby="statistics-title">
     <div className="eyebrow">{t('eyebrow')}</div><h2 id="statistics-title">{t('title')}</h2><p className="muted small">{t('intro')}</p>
-    <div className="statistics-controls" data-tour="statistics">
+    <div data-tour="statistics"><div className="statistics-controls">
       <label>{t('observable')}<select value={kind} disabled={busy} onChange={e => { setKind(e.target.value as ObservableKind); invalidate(); }}>{kinds.map(k => <option key={k} value={k}>{t(`presets.${k}`)}</option>)}</select></label>
       {(kind==='label_indicator' || coherence) && <label>{t(coherence?'basisIndex':'atom')}<select value={index} disabled={busy} onChange={e => { setIndex(Number(e.target.value)); invalidate(); }}>{labels.map((label,i)=><option key={i} value={i}>{label}</option>)}</select></label>}
       {coherence && <label>{t('secondIndex')}<select value={second} disabled={busy} onChange={e => { setSecond(Number(e.target.value)); invalidate(); }}>{labels.map((label,i)=><option key={i} value={i}>{label}</option>)}</select></label>}
@@ -63,6 +63,7 @@ export default function StatisticsPanel({ experiment, graph }: { experiment: Sim
     <button className="secondary-button" disabled={busy || !valid} onClick={()=>void run()}>{t(busy?'running':'run')}</button>
     {!valid && <p className="field-error" role="alert">{t('invalid')}</p>}
     {error!==null && <p className="field-error" role="alert">{formatError(error,t)}</p>}
+    </div>
     {result && c && p && u && path && <>
       <div className="stationary-badges"><span className="pill">{t(result.irreducible?'irreducible':'reducible')}</span><span className="pill">{t('period',{period:p.period})}</span><span className="pill">{t('class',{id:c.class_id+1})}</span></div>
       <div className="stationary-interpretation"><p>{t(result.analysis.global_clt_available?'singleClass':'conditional')}</p><p>{t('periodic')}</p></div>

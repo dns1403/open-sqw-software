@@ -116,7 +116,7 @@ export function useOnboarding(navigate: Navigate) {
         .filter(element => !element.closest('[hidden]') && element.getClientRects().length > 0);
       if (!candidates.length) return;
       const current = candidates.indexOf(document.activeElement as HTMLElement);
-      const next = (current + (event.shiftKey ? -1 : 1) + candidates.length) % candidates.length;
+      const next = current < 0 ? (event.shiftKey ? candidates.length - 1 : 0) : (current + (event.shiftKey ? -1 : 1) + candidates.length) % candidates.length;
       event.preventDefault(); event.stopImmediatePropagation(); candidates[next].focus();
     };
     const preserveInputKeys = (event: KeyboardEvent) => {
